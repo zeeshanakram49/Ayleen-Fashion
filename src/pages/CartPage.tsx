@@ -4,7 +4,10 @@ import type { CartRow } from '../types/store';
 type CartPageProps = {
   rows: CartRow[];
   cartCount: number;
-  cartTotal: number;
+  cartSubtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
   onUpdateQty: (productId: string, size: string, qty: number) => void;
   onRemoveLine: (productId: string, size: string) => void;
 };
@@ -12,7 +15,10 @@ type CartPageProps = {
 export function CartPage({
   rows,
   cartCount,
-  cartTotal,
+  cartSubtotal,
+  shipping,
+  tax,
+  total,
   onUpdateQty,
   onRemoveLine,
 }: CartPageProps) {
@@ -90,21 +96,24 @@ export function CartPage({
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>{money(cartTotal)}</span>
+                <span>{money(cartSubtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{cartTotal > 6000 ? 'Free' : money(250)}</span>
+                <span>{shipping === 0 ? 'Free' : money(shipping)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax</span>
-                <span>{money(Math.round(cartTotal * 0.03))}</span>
+                <span>{money(tax)}</span>
               </div>
               <div className="mt-3 flex justify-between border-t border-[var(--line)] pt-3 text-base font-semibold">
                 <span>Total</span>
-                <span>{money(Math.round(cartTotal * 1.03 + (cartTotal > 6000 ? 0 : 250)))}</span>
+                <span>{money(total)}</span>
               </div>
             </div>
+            <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+              Free delivery unlocks automatically above PKR 6,000 and checkout remains available with COD or card on delivery.
+            </p>
             <a
               href="#/checkout"
               className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"

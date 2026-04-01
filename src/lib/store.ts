@@ -2,6 +2,12 @@ import type { Route } from '../types/store';
 
 export const money = (amount: number) => `PKR ${amount.toLocaleString('en-PK')}`;
 
+export const shippingFee = (subtotal: number) => (subtotal > 6000 ? 0 : 250);
+
+export const taxAmount = (subtotal: number) => Math.round(subtotal * 0.03);
+
+export const orderTotal = (subtotal: number) => subtotal + shippingFee(subtotal) + taxAmount(subtotal);
+
 export function parseHash(): Route {
   const raw = window.location.hash.replace(/^#/, '');
   const path = raw || '/';

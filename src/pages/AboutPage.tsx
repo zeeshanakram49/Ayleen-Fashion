@@ -24,6 +24,27 @@ export function AboutPage() {
           </div>
         </div>
       </article>
+
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <article className="reveal-up soft-panel rounded-[1.8rem] border border-[var(--line)] p-6">
+          <h2 className="font-editorial text-3xl">Design First</h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            Our collections balance trend direction with timeless tailoring so each piece feels wearable beyond a single season.
+          </p>
+        </article>
+        <article className="reveal-up soft-panel rounded-[1.8rem] border border-[var(--line)] p-6">
+          <h2 className="font-editorial text-3xl">Quality Focus</h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            We prioritize fabric handle, finish quality, and fit consistency so online customers can shop with more confidence.
+          </p>
+        </article>
+        <article className="reveal-up soft-panel rounded-[1.8rem] border border-[var(--line)] p-6">
+          <h2 className="font-editorial text-3xl">Nationwide Reach</h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            Lahore to Karachi, Islamabad to Multan, our storefront is designed for a clean and reliable shopping journey across Pakistan.
+          </p>
+        </article>
+      </div>
     </section>
   );
 }

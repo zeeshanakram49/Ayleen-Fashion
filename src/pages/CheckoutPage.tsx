@@ -1,10 +1,13 @@
-import type { CheckoutState, CartRow } from '../types/store';
+import type { CartRow, CheckoutState } from '../types/store';
 import { money } from '../lib/store';
 
 type CheckoutPageProps = {
   checkout: CheckoutState;
   cartRows: CartRow[];
-  cartTotal: number;
+  cartSubtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
   placedOrder: string;
   onCheckoutChange: (field: keyof CheckoutState, value: string) => void;
   onPlaceOrder: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -13,7 +16,10 @@ type CheckoutPageProps = {
 export function CheckoutPage({
   checkout,
   cartRows,
-  cartTotal,
+  cartSubtotal,
+  shipping,
+  tax,
+  total,
   placedOrder,
   onCheckoutChange,
   onPlaceOrder,
@@ -31,7 +37,7 @@ export function CheckoutPage({
           <h2 className="font-editorial mt-3 text-4xl">Thank you for shopping with AYLEEN</h2>
           <p className="mt-3 text-sm text-[var(--muted)]">
             Your order ID is <span className="font-semibold text-[var(--ink)]">{placedOrder}</span>. Our team will
-            contact you shortly.
+            contact you shortly for confirmation.
           </p>
           <a
             href="#/shop"
@@ -81,7 +87,7 @@ export function CheckoutPage({
               />
               <select
                 value={checkout.payment}
-                onChange={(e) => onCheckoutChange('payment', e.target.value)}
+                onChange={(e) => onCheckoutChange('payment', e.target.value as CheckoutState['payment'])}
                 className="h-11 rounded-xl border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
               >
                 <option value="COD">Cash on Delivery</option>
@@ -98,7 +104,7 @@ export function CheckoutPage({
 
           <aside className="reveal-up delay-1 soft-panel rounded-3xl border border-[var(--line)] p-6">
             <h2 className="font-editorial text-3xl">Payment Summary</h2>
-            <div className="mt-4 space-y-2 text-sm">
+            <div className="mt-4 space-y-3 text-sm">
               {cartRows.map((row) => (
                 <div key={`${row.product.id}-${row.size}`} className="flex items-start justify-between gap-2">
                   <span className="text-[var(--muted)]">
@@ -108,9 +114,23 @@ export function CheckoutPage({
                 </div>
               ))}
             </div>
+            <div className="mt-5 space-y-3 border-t border-[var(--line)] pt-4 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>{money(cartSubtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>{shipping === 0 ? 'Free' : money(shipping)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tax</span>
+                <span>{money(tax)}</span>
+              </div>
+            </div>
             <div className="mt-4 flex justify-between border-t border-[var(--line)] pt-3 text-base font-semibold">
               <span>Total</span>
-              <span>{money(cartTotal)}</span>
+              <span>{money(total)}</span>
             </div>
             <button
               type="submit"

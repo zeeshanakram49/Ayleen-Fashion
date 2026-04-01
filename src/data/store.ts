@@ -228,6 +228,102 @@ export const products: Product[] = [
     rating: 4.7,
     reviews: 73,
   },
+  {
+    id: 'p9',
+    slug: 'pleated-lawn-shirt',
+    title: 'Pleated Lawn Shirt',
+    categoryId: 'women',
+    categoryLabel: 'Women',
+    price: 4390,
+    oldPrice: 5690,
+    badge: 'Summer Pick',
+    image:
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1400&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1495385794356-15371f348c31?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description: 'Airy lawn shirt finished with delicate pleat details.',
+    details:
+      'Easy straight fit with soft breathable fabric, tonal stitchwork, and a refined everyday silhouette.',
+    material: 'Premium Lawn',
+    stock: 28,
+    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    rating: 4.8,
+    reviews: 91,
+  },
+  {
+    id: 'p10',
+    slug: 'tailored-waistcoat-set',
+    title: 'Tailored Waistcoat Set',
+    categoryId: 'men',
+    categoryLabel: 'Men',
+    price: 13490,
+    oldPrice: 15490,
+    badge: 'Occasion Wear',
+    image:
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1400&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description: 'Sharp formal set cut for festive and evening dressing.',
+    details:
+      'A clean three-piece inspired profile with polished buttons, soft lining, and tailored structure.',
+    material: 'Tropical Blend',
+    stock: 11,
+    sizes: ['S', 'M', 'L', 'XL'],
+    rating: 4.9,
+    reviews: 57,
+  },
+  {
+    id: 'p11',
+    slug: 'weekend-canvas-backpack',
+    title: 'Weekend Canvas Backpack',
+    categoryId: 'accessories',
+    categoryLabel: 'Accessories',
+    price: 5190,
+    oldPrice: 6390,
+    badge: 'Travel Ready',
+    image:
+      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1400&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description: 'Utility canvas backpack with premium finishing touches.',
+    details:
+      'Spacious multi-pocket layout, padded straps, and durable canvas body for daily movement.',
+    material: 'Waxed Canvas',
+    stock: 34,
+    sizes: ['One Size'],
+    rating: 4.7,
+    reviews: 66,
+  },
+  {
+    id: 'p12',
+    slug: 'athleisure-track-set',
+    title: 'Athleisure Track Set',
+    categoryId: 'juniors',
+    categoryLabel: 'Juniors',
+    price: 5790,
+    oldPrice: 6990,
+    badge: 'Campus Edit',
+    image:
+      'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1400&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description: 'Relaxed matching set built for comfort and sharp casual styling.',
+    details:
+      'Soft brushed knit, ribbed hems, and easy movement fit designed for everyday campus wear.',
+    material: 'Cotton Fleece',
+    stock: 21,
+    sizes: ['XS', 'S', 'M', 'L'],
+    rating: 4.8,
+    reviews: 82,
+  },
 ];
 
 export const services: Service[] = [

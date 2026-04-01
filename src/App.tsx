@@ -9,7 +9,7 @@ import {
   services,
   testimonials,
 } from './data/store';
-import { parseHash } from './lib/store';
+import { orderTotal, parseHash, shippingFee, taxAmount } from './lib/store';
 import { AboutPage } from './pages/AboutPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -24,6 +24,7 @@ function App() {
   const [route, setRoute] = useState<Route>(() => parseHash());
   const [activeCategory, setActiveCategory] = useState('all');
   const [query, setQuery] = useState('');
+  const [sortBy, setSortBy] = useState('featured');
   const [selectedSize, setSelectedSize] = useState<Record<string, string>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -50,6 +51,20 @@ function App() {
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
+
+  useEffect(() => {
+    const titles: Record<Route['page'], string> = {
+      home: 'AYLEEN | Premium Fashion',
+      shop: 'Shop | AYLEEN',
+      product: 'Product | AYLEEN',
+      wishlist: 'Wishlist | AYLEEN',
+      cart: 'Cart | AYLEEN',
+      checkout: 'Checkout | AYLEEN',
+      about: 'About | AYLEEN',
+      contact: 'Contact | AYLEEN',
+    };
+    document.title = titles[route.page];
+  }, [route]);
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll<HTMLElement>('main section'));
@@ -95,27 +110,39 @@ function App() {
       .filter((line): line is CartRow => line !== null);
   }, [cart]);
 
-  const cartTotal = useMemo(
+  const cartSubtotal = useMemo(
     () => cartRows.reduce((acc, row) => acc + row.product.price * row.qty, 0),
     [cartRows],
   );
-
+  const shipping = useMemo(() => shippingFee(cartSubtotal), [cartSubtotal]);
+  const tax = useMemo(() => taxAmount(cartSubtotal), [cartSubtotal]);
+  const total = useMemo(() => orderTotal(cartSubtotal), [cartSubtotal]);
   const cartCount = useMemo(() => cart.reduce((acc, line) => acc + line.qty, 0), [cart]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    const q = query.trim().toLowerCase();
+    const visible = products.filter((product) => {
       const categoryMatch = activeCategory === 'all' || product.categoryId === activeCategory;
-      const q = query.trim().toLowerCase();
       const queryMatch =
         q.length === 0 ||
         product.title.toLowerCase().includes(q) ||
         product.description.toLowerCase().includes(q) ||
-        product.categoryLabel.toLowerCase().includes(q);
+        product.categoryLabel.toLowerCase().includes(q) ||
+        product.material.toLowerCase().includes(q) ||
+        product.badge.toLowerCase().includes(q);
       return categoryMatch && queryMatch;
     });
-  }, [activeCategory, query]);
 
-  const featuredProducts = useMemo(() => products.slice(0, 6), []);
+    if (sortBy === 'price-low') return [...visible].sort((a, b) => a.price - b.price);
+    if (sortBy === 'price-high') return [...visible].sort((a, b) => b.price - a.price);
+    if (sortBy === 'rating') return [...visible].sort((a, b) => b.rating - a.rating);
+    if (sortBy === 'newest') return [...visible].reverse();
+
+    return visible;
+  }, [activeCategory, query, sortBy]);
+
+  const featuredProducts = useMemo(() => products.slice(0, 8), []);
+  const justDroppedProducts = useMemo(() => products.slice(4, 8), []);
   const wishlistProducts = useMemo(
     () => products.filter((product) => wishlist.includes(product.id)),
     [wishlist],
@@ -124,6 +151,12 @@ function App() {
     () => (route.page === 'product' ? products.find((p) => p.slug === route.slug) ?? null : null),
     [route],
   );
+  const relatedProducts = useMemo(() => {
+    if (!productRoute) return [];
+    return products
+      .filter((item) => item.categoryId === productRoute.categoryId && item.id !== productRoute.id)
+      .slice(0, 4);
+  }, [productRoute]);
 
   function toggleWishlist(productId: string) {
     setWishlist((prev) =>
@@ -150,11 +183,13 @@ function App() {
   }
 
   function updateCartQty(productId: string, size: string, qty: number) {
+    const product = products.find((item) => item.id === productId);
+    const maxStock = product?.stock ?? 10;
     setCart((prev) =>
       prev
         .map((line) =>
           line.productId === productId && line.size === size
-            ? { ...line, qty: Math.max(1, Math.min(qty, 10)) }
+            ? { ...line, qty: Math.max(1, Math.min(qty, maxStock)) }
             : line,
         )
         .filter((line) => line.qty > 0),
@@ -167,6 +202,13 @@ function App() {
 
   function openProduct(slug: string) {
     window.location.hash = `/product/${slug}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function navigateToShop(categoryId = 'all') {
+    setActiveCategory(categoryId);
+    setQuery('');
+    window.location.hash = '/shop';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -196,19 +238,26 @@ function App() {
 
   return (
     <div className="premium-scene min-h-screen text-[var(--ink)]">
-      <Header navLinks={navLinks} route={route} wishlistCount={wishlist.length} cartCount={cartCount} />
+      <Header
+        navLinks={navLinks}
+        route={route}
+        wishlistCount={wishlist.length}
+        cartCount={cartCount}
+      />
 
       <main>
         {route.page === 'home' && (
           <HomePage
             categories={categories}
             featuredProducts={featuredProducts}
+            justDroppedProducts={justDroppedProducts}
             services={services}
             testimonials={testimonials}
             wishlist={wishlist}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
+            onShopCategory={navigateToShop}
           />
         )}
 
@@ -218,9 +267,11 @@ function App() {
             products={filteredProducts}
             activeCategory={activeCategory}
             query={query}
+            sortBy={sortBy}
             wishlist={wishlist}
             onCategoryChange={setActiveCategory}
             onQueryChange={setQuery}
+            onSortChange={setSortBy}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
@@ -230,11 +281,16 @@ function App() {
         {route.page === 'product' && productRoute && (
           <ProductPage
             product={productRoute}
+            relatedProducts={relatedProducts}
             pickedSize={selectedSize[productRoute.id] || productRoute.sizes[0]}
             liked={wishlist.includes(productRoute.id)}
+            wishlist={wishlist}
             onPickSize={(size) => setSelectedSize((prev) => ({ ...prev, [productRoute.id]: size }))}
             onAddToCart={() => addToCart(productRoute.id)}
             onToggleWishlist={() => toggleWishlist(productRoute.id)}
+            onOpenProduct={openProduct}
+            onCardAddToCart={addToCart}
+            onCardToggleWishlist={toggleWishlist}
           />
         )}
 
@@ -266,7 +322,10 @@ function App() {
           <CartPage
             rows={cartRows}
             cartCount={cartCount}
-            cartTotal={cartTotal}
+            cartSubtotal={cartSubtotal}
+            shipping={shipping}
+            tax={tax}
+            total={total}
             onUpdateQty={updateCartQty}
             onRemoveLine={removeCartLine}
           />
@@ -276,7 +335,10 @@ function App() {
           <CheckoutPage
             checkout={checkout}
             cartRows={cartRows}
-            cartTotal={cartTotal}
+            cartSubtotal={cartSubtotal}
+            shipping={shipping}
+            tax={tax}
+            total={total}
             placedOrder={placedOrder}
             onCheckoutChange={onCheckoutChange}
             onPlaceOrder={placeOrder}

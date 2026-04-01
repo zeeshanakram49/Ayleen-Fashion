@@ -1,22 +1,33 @@
+import { ProductCard } from '../components/ProductCard';
 import { money } from '../lib/store';
 import type { Product } from '../types/store';
 
 type ProductPageProps = {
   product: Product;
+  relatedProducts: Product[];
   pickedSize: string;
   liked: boolean;
+  wishlist: string[];
   onPickSize: (size: string) => void;
   onAddToCart: () => void;
   onToggleWishlist: () => void;
+  onOpenProduct: (slug: string) => void;
+  onCardAddToCart: (productId: string) => void;
+  onCardToggleWishlist: (productId: string) => void;
 };
 
 export function ProductPage({
   product,
+  relatedProducts,
   pickedSize,
   liked,
+  wishlist,
   onPickSize,
   onAddToCart,
   onToggleWishlist,
+  onOpenProduct,
+  onCardAddToCart,
+  onCardToggleWishlist,
 }: ProductPageProps) {
   return (
     <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
@@ -27,7 +38,7 @@ export function ProductPage({
         BACK TO SHOP
       </a>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_1fr]">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="reveal-up grid gap-4 sm:grid-cols-2">
           {product.gallery.map((image) => (
             <img
@@ -43,12 +54,19 @@ export function ProductPage({
           <p className="text-xs tracking-[0.22em] text-[var(--gold-deep)]">{product.categoryLabel.toUpperCase()}</p>
           <h1 className="font-editorial mt-3 text-5xl leading-[0.95]">{product.title}</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">{product.description}</p>
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="text-xl font-semibold">{money(product.price)}</span>
             <span className="text-sm text-[var(--muted)] line-through">{money(product.oldPrice)}</span>
             <span className="ml-2 text-xs text-[var(--gold-deep)]">
               {product.rating} ({product.reviews} reviews)
             </span>
+          </div>
+
+          <div className="mt-6 grid gap-3 rounded-2xl border border-[var(--line)] bg-white/60 p-4 text-sm text-[var(--muted)]">
+            <p>Premium fabric: {product.material}</p>
+            <p>Ready stock: {product.stock} units</p>
+            <p>Delivery: 2 to 5 working days nationwide</p>
+            <p>Exchange window: 7 days from delivery date</p>
           </div>
 
           <div className="mt-5">
@@ -67,13 +85,7 @@ export function ProductPage({
             </div>
           </div>
 
-          <p className="mt-5 text-sm text-[var(--muted)]">{product.details}</p>
-          <p className="mt-3 text-sm">
-            <span className="font-semibold">Material:</span> {product.material}
-          </p>
-          <p className="mt-1 text-sm">
-            <span className="font-semibold">Stock:</span> {product.stock} units
-          </p>
+          <p className="mt-5 text-sm leading-7 text-[var(--muted)]">{product.details}</p>
 
           <div className="mt-7 flex flex-wrap gap-3">
             <button
@@ -93,6 +105,30 @@ export function ProductPage({
           </div>
         </article>
       </div>
+
+      {relatedProducts.length > 0 && (
+        <div className="mt-16">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">YOU MAY ALSO LIKE</p>
+              <h2 className="font-editorial mt-3 text-4xl">Related Picks</h2>
+            </div>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            {relatedProducts.map((item, index) => (
+              <ProductCard
+                key={item.id}
+                product={item}
+                index={index}
+                liked={wishlist.includes(item.id)}
+                onToggleWishlist={onCardToggleWishlist}
+                onAddToCart={onCardAddToCart}
+                onOpenProduct={onOpenProduct}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
