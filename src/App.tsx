@@ -1,0 +1,295 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Footer } from './components/Footer';
+import { Header } from './components/Header';
+import {
+  categories,
+  initialCheckout,
+  navLinks,
+  products,
+  services,
+  testimonials,
+} from './data/store';
+import { parseHash } from './lib/store';
+import { AboutPage } from './pages/AboutPage';
+import { CartPage } from './pages/CartPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { ContactPage } from './pages/ContactPage';
+import { HomePage } from './pages/HomePage';
+import { ProductPage } from './pages/ProductPage';
+import { ShopPage } from './pages/ShopPage';
+import { WishlistPage } from './pages/WishlistPage';
+import type { CartItem, CartRow, CheckoutState, Route } from './types/store';
+
+function App() {
+  const [route, setRoute] = useState<Route>(() => parseHash());
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [query, setQuery] = useState('');
+  const [selectedSize, setSelectedSize] = useState<Record<string, string>>({});
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [checkout, setCheckout] = useState<CheckoutState>(initialCheckout);
+  const [placedOrder, setPlacedOrder] = useState('');
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem('ayleen_cart_v1');
+    const storedWishlist = localStorage.getItem('ayleen_wishlist_v1');
+    if (storedCart) setCart(JSON.parse(storedCart) as CartItem[]);
+    if (storedWishlist) setWishlist(JSON.parse(storedWishlist) as string[]);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('ayleen_cart_v1', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('ayleen_wishlist_v1', JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  useEffect(() => {
+    const onHash = () => setRoute(parseHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll<HTMLElement>('main section'));
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      sections.forEach((section) => {
+        const targets = section.querySelectorAll<HTMLElement>('.reveal-up, .reveal-scale');
+        targets.forEach((target) => target.classList.add('is-visible'));
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const section = entry.target as HTMLElement;
+          const targets = section.querySelectorAll<HTMLElement>('.reveal-up, .reveal-scale');
+          targets.forEach((target, index) => {
+            target.style.setProperty('--section-stagger', `${Math.min(index * 70, 420)}ms`);
+            target.classList.add('is-visible');
+          });
+
+          observer.unobserve(section);
+        });
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -12% 0px' },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [route]);
+
+  const cartRows = useMemo<CartRow[]>(() => {
+    return cart
+      .map((line) => {
+        const product = products.find((item) => item.id === line.productId);
+        if (!product) return null;
+        return { ...line, product };
+      })
+      .filter((line): line is CartRow => line !== null);
+  }, [cart]);
+
+  const cartTotal = useMemo(
+    () => cartRows.reduce((acc, row) => acc + row.product.price * row.qty, 0),
+    [cartRows],
+  );
+
+  const cartCount = useMemo(() => cart.reduce((acc, line) => acc + line.qty, 0), [cart]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const categoryMatch = activeCategory === 'all' || product.categoryId === activeCategory;
+      const q = query.trim().toLowerCase();
+      const queryMatch =
+        q.length === 0 ||
+        product.title.toLowerCase().includes(q) ||
+        product.description.toLowerCase().includes(q) ||
+        product.categoryLabel.toLowerCase().includes(q);
+      return categoryMatch && queryMatch;
+    });
+  }, [activeCategory, query]);
+
+  const featuredProducts = useMemo(() => products.slice(0, 6), []);
+  const wishlistProducts = useMemo(
+    () => products.filter((product) => wishlist.includes(product.id)),
+    [wishlist],
+  );
+  const productRoute = useMemo(
+    () => (route.page === 'product' ? products.find((p) => p.slug === route.slug) ?? null : null),
+    [route],
+  );
+
+  function toggleWishlist(productId: string) {
+    setWishlist((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId],
+    );
+  }
+
+  function addToCart(productId: string, fallbackSize?: string) {
+    const product = products.find((item) => item.id === productId);
+    if (!product) return;
+
+    const size = selectedSize[productId] || fallbackSize || product.sizes[0] || 'One Size';
+    setCart((prev) => {
+      const existing = prev.find((line) => line.productId === productId && line.size === size);
+      if (existing) {
+        return prev.map((line) =>
+          line.productId === productId && line.size === size
+            ? { ...line, qty: Math.min(line.qty + 1, product.stock) }
+            : line,
+        );
+      }
+      return [...prev, { productId, size, qty: 1 }];
+    });
+  }
+
+  function updateCartQty(productId: string, size: string, qty: number) {
+    setCart((prev) =>
+      prev
+        .map((line) =>
+          line.productId === productId && line.size === size
+            ? { ...line, qty: Math.max(1, Math.min(qty, 10)) }
+            : line,
+        )
+        .filter((line) => line.qty > 0),
+    );
+  }
+
+  function removeCartLine(productId: string, size: string) {
+    setCart((prev) => prev.filter((line) => !(line.productId === productId && line.size === size)));
+  }
+
+  function openProduct(slug: string) {
+    window.location.hash = `/product/${slug}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function onCheckoutChange(field: keyof CheckoutState, value: string) {
+    setCheckout((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function placeOrder(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!checkout.fullName || !checkout.phone || !checkout.address || !checkout.city) {
+      alert('Please fill required checkout details.');
+      return;
+    }
+
+    if (cartRows.length === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+
+    const orderId = `AY-${Math.floor(100000 + Math.random() * 900000)}`;
+    setPlacedOrder(orderId);
+    setCart([]);
+    setCheckout(initialCheckout);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  return (
+    <div className="premium-scene min-h-screen text-[var(--ink)]">
+      <Header navLinks={navLinks} route={route} wishlistCount={wishlist.length} cartCount={cartCount} />
+
+      <main>
+        {route.page === 'home' && (
+          <HomePage
+            categories={categories}
+            featuredProducts={featuredProducts}
+            services={services}
+            testimonials={testimonials}
+            wishlist={wishlist}
+            onToggleWishlist={toggleWishlist}
+            onAddToCart={addToCart}
+            onOpenProduct={openProduct}
+          />
+        )}
+
+        {route.page === 'shop' && (
+          <ShopPage
+            categories={categories}
+            products={filteredProducts}
+            activeCategory={activeCategory}
+            query={query}
+            wishlist={wishlist}
+            onCategoryChange={setActiveCategory}
+            onQueryChange={setQuery}
+            onToggleWishlist={toggleWishlist}
+            onAddToCart={addToCart}
+            onOpenProduct={openProduct}
+          />
+        )}
+
+        {route.page === 'product' && productRoute && (
+          <ProductPage
+            product={productRoute}
+            pickedSize={selectedSize[productRoute.id] || productRoute.sizes[0]}
+            liked={wishlist.includes(productRoute.id)}
+            onPickSize={(size) => setSelectedSize((prev) => ({ ...prev, [productRoute.id]: size }))}
+            onAddToCart={() => addToCart(productRoute.id)}
+            onToggleWishlist={() => toggleWishlist(productRoute.id)}
+          />
+        )}
+
+        {route.page === 'product' && !productRoute && (
+          <section className="mx-auto max-w-7xl px-6 py-16">
+            <article className="rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+              <h1 className="font-editorial text-4xl">Product not found</h1>
+              <a
+                href="#/shop"
+                className="mt-5 inline-flex rounded-full border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.18em]"
+              >
+                BACK TO SHOP
+              </a>
+            </article>
+          </section>
+        )}
+
+        {route.page === 'wishlist' && (
+          <WishlistPage
+            products={wishlistProducts}
+            wishlist={wishlist}
+            onToggleWishlist={toggleWishlist}
+            onAddToCart={addToCart}
+            onOpenProduct={openProduct}
+          />
+        )}
+
+        {route.page === 'cart' && (
+          <CartPage
+            rows={cartRows}
+            cartCount={cartCount}
+            cartTotal={cartTotal}
+            onUpdateQty={updateCartQty}
+            onRemoveLine={removeCartLine}
+          />
+        )}
+
+        {route.page === 'checkout' && (
+          <CheckoutPage
+            checkout={checkout}
+            cartRows={cartRows}
+            cartTotal={cartTotal}
+            placedOrder={placedOrder}
+            onCheckoutChange={onCheckoutChange}
+            onPlaceOrder={placeOrder}
+          />
+        )}
+
+        {route.page === 'about' && <AboutPage />}
+        {route.page === 'contact' && <ContactPage />}
+      </main>
+
+      <Footer categories={categories} />
+    </div>
+  );
+}
+
+export default App;
