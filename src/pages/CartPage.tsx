@@ -1,4 +1,4 @@
-import { money } from '../lib/store';
+import { installmentAmount, money } from '../lib/store';
 import type { CartRow } from '../types/store';
 
 type CartPageProps = {
@@ -57,8 +57,13 @@ export function CartPage({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="font-editorial text-3xl leading-tight">{row.product.title}</h3>
-                      <p className="text-xs tracking-[0.16em] text-[var(--muted)]">SIZE {row.size}</p>
+                      <p className="text-xs tracking-[0.16em] text-[var(--muted)]">
+                        {row.product.fit} | SIZE {row.size}
+                      </p>
                       <p className="mt-1 text-sm font-semibold">{money(row.product.price)}</p>
+                      <p className="mt-1 text-xs text-[var(--muted)]">
+                        3 installments of {money(installmentAmount(row.product.price))}
+                      </p>
                     </div>
                     <button
                       type="button"

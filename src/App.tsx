@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { CartDrawer } from './components/CartDrawer';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import {
@@ -18,7 +19,7 @@ import { HomePage } from './pages/HomePage';
 import { ProductPage } from './pages/ProductPage';
 import { ShopPage } from './pages/ShopPage';
 import { WishlistPage } from './pages/WishlistPage';
-import type { CartItem, CartRow, CheckoutState, Route } from './types/store';
+import type { CartItem, CartRow, CheckoutState, Notice, Route } from './types/store';
 
 function App() {
   const [route, setRoute] = useState<Route>(() => parseHash());
@@ -30,6 +31,11 @@ function App() {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [checkout, setCheckout] = useState<CheckoutState>(initialCheckout);
   const [placedOrder, setPlacedOrder] = useState('');
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
+  const [latestCartLine, setLatestCartLine] = useState<{ productId: string; size: string } | null>(
+    null,
+  );
+  const [notice, setNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
     const storedCart = localStorage.getItem('ayleen_cart_v1');
@@ -45,6 +51,12 @@ function App() {
   useEffect(() => {
     localStorage.setItem('ayleen_wishlist_v1', JSON.stringify(wishlist));
   }, [wishlist]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 2200);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   useEffect(() => {
     const onHash = () => setRoute(parseHash());
@@ -128,8 +140,10 @@ function App() {
         product.title.toLowerCase().includes(q) ||
         product.description.toLowerCase().includes(q) ||
         product.categoryLabel.toLowerCase().includes(q) ||
+        product.fit.toLowerCase().includes(q) ||
         product.material.toLowerCase().includes(q) ||
-        product.badge.toLowerCase().includes(q);
+        product.badge.toLowerCase().includes(q) ||
+        product.colors.some((color) => color.toLowerCase().includes(q));
       return categoryMatch && queryMatch;
     });
 
@@ -157,6 +171,14 @@ function App() {
       .filter((item) => item.categoryId === productRoute.categoryId && item.id !== productRoute.id)
       .slice(0, 4);
   }, [productRoute]);
+  const latestCartRow = useMemo(() => {
+    if (!latestCartLine) return null;
+    return (
+      cartRows.find(
+        (row) => row.productId === latestCartLine.productId && row.size === latestCartLine.size,
+      ) ?? null
+    );
+  }, [cartRows, latestCartLine]);
 
   function toggleWishlist(productId: string) {
     setWishlist((prev) =>
@@ -164,22 +186,41 @@ function App() {
     );
   }
 
-  function addToCart(productId: string, fallbackSize?: string) {
+  function pickSize(productId: string, size: string) {
+    setSelectedSize((prev) => ({ ...prev, [productId]: size }));
+    const product = products.find((item) => item.id === productId);
+    if (product) {
+      setNotice({ kind: 'info', message: `${product.title} size ${size} selected.` });
+    }
+  }
+
+  function addToCart(productId: string, fallbackSize?: string, requireSelection = false) {
     const product = products.find((item) => item.id === productId);
     if (!product) return;
 
-    const size = selectedSize[productId] || fallbackSize || product.sizes[0] || 'One Size';
+    const size = selectedSize[productId] || fallbackSize;
+    if (requireSelection && !size && product.sizes.length > 1) {
+      setNotice({ kind: 'info', message: `Please select a size for ${product.title}.` });
+      return;
+    }
+
+    const finalSize = size || product.sizes[0] || 'One Size';
+
     setCart((prev) => {
-      const existing = prev.find((line) => line.productId === productId && line.size === size);
+      const existing = prev.find((line) => line.productId === productId && line.size === finalSize);
       if (existing) {
         return prev.map((line) =>
-          line.productId === productId && line.size === size
+          line.productId === productId && line.size === finalSize
             ? { ...line, qty: Math.min(line.qty + 1, product.stock) }
             : line,
         );
       }
-      return [...prev, { productId, size, qty: 1 }];
+      return [...prev, { productId, size: finalSize, qty: 1 }];
     });
+
+    setLatestCartLine({ productId, size: finalSize });
+    setNotice({ kind: 'success', message: `${product.title} added to your bag.` });
+    setCartDrawerOpen(true);
   }
 
   function updateCartQty(productId: string, size: string, qty: number) {
@@ -220,12 +261,12 @@ function App() {
     e.preventDefault();
 
     if (!checkout.fullName || !checkout.phone || !checkout.address || !checkout.city) {
-      alert('Please fill required checkout details.');
+      setNotice({ kind: 'info', message: 'Please fill the required checkout details.' });
       return;
     }
 
     if (cartRows.length === 0) {
-      alert('Your cart is empty.');
+      setNotice({ kind: 'info', message: 'Your cart is empty.' });
       return;
     }
 
@@ -233,6 +274,9 @@ function App() {
     setPlacedOrder(orderId);
     setCart([]);
     setCheckout(initialCheckout);
+    setCartDrawerOpen(false);
+    setLatestCartLine(null);
+    setNotice({ kind: 'success', message: `Order ${orderId} placed successfully.` });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -243,7 +287,14 @@ function App() {
         route={route}
         wishlistCount={wishlist.length}
         cartCount={cartCount}
+        onOpenCart={() => setCartDrawerOpen(true)}
       />
+
+      {notice && (
+        <div className="fixed right-4 top-24 z-[60] max-w-sm rounded-2xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm shadow-xl">
+          <p className="font-medium">{notice.message}</p>
+        </div>
+      )}
 
       <main>
         {route.page === 'home' && (
@@ -254,6 +305,8 @@ function App() {
             services={services}
             testimonials={testimonials}
             wishlist={wishlist}
+            selectedSize={selectedSize}
+            onPickSize={pickSize}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
@@ -269,9 +322,11 @@ function App() {
             query={query}
             sortBy={sortBy}
             wishlist={wishlist}
+            selectedSize={selectedSize}
             onCategoryChange={setActiveCategory}
             onQueryChange={setQuery}
             onSortChange={setSortBy}
+            onPickSize={pickSize}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
@@ -285,11 +340,13 @@ function App() {
             pickedSize={selectedSize[productRoute.id] || productRoute.sizes[0]}
             liked={wishlist.includes(productRoute.id)}
             wishlist={wishlist}
-            onPickSize={(size) => setSelectedSize((prev) => ({ ...prev, [productRoute.id]: size }))}
+            selectedSize={selectedSize}
+            onPickSize={(size) => pickSize(productRoute.id, size)}
             onAddToCart={() => addToCart(productRoute.id)}
             onToggleWishlist={() => toggleWishlist(productRoute.id)}
             onOpenProduct={openProduct}
             onCardAddToCart={addToCart}
+            onCardPickSize={pickSize}
             onCardToggleWishlist={toggleWishlist}
           />
         )}
@@ -312,6 +369,8 @@ function App() {
           <WishlistPage
             products={wishlistProducts}
             wishlist={wishlist}
+            selectedSize={selectedSize}
+            onPickSize={pickSize}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
@@ -350,6 +409,14 @@ function App() {
       </main>
 
       <Footer categories={categories} />
+
+      <CartDrawer
+        open={cartDrawerOpen}
+        latestItem={latestCartRow}
+        cartCount={cartCount}
+        subtotal={cartSubtotal}
+        onClose={() => setCartDrawerOpen(false)}
+      />
     </div>
   );
 }

@@ -6,9 +6,10 @@ type HeaderProps = {
   route: Route;
   wishlistCount: number;
   cartCount: number;
+  onOpenCart: () => void;
 };
 
-export function Header({ navLinks, route, wishlistCount, cartCount }: HeaderProps) {
+export function Header({ navLinks, route, wishlistCount, cartCount, onOpenCart }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   function isActive(href: string) {
@@ -52,12 +53,13 @@ export function Header({ navLinks, route, wishlistCount, cartCount }: HeaderProp
           >
             WISHLIST ({wishlistCount})
           </a>
-          <a
-            href="#/cart"
+          <button
+            type="button"
+            onClick={onOpenCart}
             className="rounded-full border border-[var(--line-strong)] px-3 py-2 hover:border-[var(--gold-deep)]"
           >
             CART ({cartCount})
-          </a>
+          </button>
           <a href="#/checkout" className="rounded-full bg-[var(--ink)] px-4 py-2 text-[var(--champagne)]">
             CHECKOUT
           </a>
@@ -104,13 +106,16 @@ export function Header({ navLinks, route, wishlistCount, cartCount }: HeaderProp
             >
               WISHLIST ({wishlistCount})
             </a>
-            <a
-              href="#/cart"
-              onClick={closeMenu}
+            <button
+              type="button"
+              onClick={() => {
+                closeMenu();
+                onOpenCart();
+              }}
               className="rounded-full border border-[var(--line-strong)] px-4 py-3 text-center"
             >
               CART ({cartCount})
-            </a>
+            </button>
             <a
               href="#/checkout"
               onClick={closeMenu}

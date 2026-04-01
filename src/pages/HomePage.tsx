@@ -8,8 +8,10 @@ type HomePageProps = {
   services: Service[];
   testimonials: Testimonial[];
   wishlist: string[];
+  selectedSize: Record<string, string>;
+  onPickSize: (productId: string, size: string) => void;
   onToggleWishlist: (productId: string) => void;
-  onAddToCart: (productId: string) => void;
+  onAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean) => void;
   onOpenProduct: (slug: string) => void;
   onShopCategory: (categoryId: string) => void;
 };
@@ -21,6 +23,8 @@ export function HomePage({
   services,
   testimonials,
   wishlist,
+  selectedSize,
+  onPickSize,
   onToggleWishlist,
   onAddToCart,
   onOpenProduct,
@@ -150,6 +154,8 @@ export function HomePage({
                 product={product}
                 index={index}
                 liked={wishlist.includes(product.id)}
+                pickedSize={selectedSize[product.id]}
+                onPickSize={onPickSize}
                 onToggleWishlist={onToggleWishlist}
                 onAddToCart={onAddToCart}
                 onOpenProduct={onOpenProduct}

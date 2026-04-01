@@ -1,5 +1,5 @@
 import { ProductCard } from '../components/ProductCard';
-import { money } from '../lib/store';
+import { discountPercent, installmentAmount, money } from '../lib/store';
 import type { Product } from '../types/store';
 
 type ProductPageProps = {
@@ -8,11 +8,13 @@ type ProductPageProps = {
   pickedSize: string;
   liked: boolean;
   wishlist: string[];
+  selectedSize: Record<string, string>;
   onPickSize: (size: string) => void;
   onAddToCart: () => void;
   onToggleWishlist: () => void;
   onOpenProduct: (slug: string) => void;
-  onCardAddToCart: (productId: string) => void;
+  onCardAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean) => void;
+  onCardPickSize: (productId: string, size: string) => void;
   onCardToggleWishlist: (productId: string) => void;
 };
 
@@ -22,13 +24,17 @@ export function ProductPage({
   pickedSize,
   liked,
   wishlist,
+  selectedSize,
   onPickSize,
   onAddToCart,
   onToggleWishlist,
   onOpenProduct,
   onCardAddToCart,
+  onCardPickSize,
   onCardToggleWishlist,
 }: ProductPageProps) {
+  const salePercent = discountPercent(product.price, product.oldPrice);
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
       <a
@@ -54,19 +60,42 @@ export function ProductPage({
           <p className="text-xs tracking-[0.22em] text-[var(--gold-deep)]">{product.categoryLabel.toUpperCase()}</p>
           <h1 className="font-editorial mt-3 text-5xl leading-[0.95]">{product.title}</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">{product.description}</p>
+          <p className="mt-2 text-xs tracking-[0.18em] text-[var(--muted)]">{product.fit}</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="text-xl font-semibold">{money(product.price)}</span>
             <span className="text-sm text-[var(--muted)] line-through">{money(product.oldPrice)}</span>
+            {salePercent > 0 && (
+              <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-[10px] tracking-[0.15em] text-[var(--champagne)]">
+                SAVE {salePercent}%
+              </span>
+            )}
             <span className="ml-2 text-xs text-[var(--gold-deep)]">
               {product.rating} ({product.reviews} reviews)
             </span>
           </div>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Pay in 3 installments of {money(installmentAmount(product.price))}
+          </p>
 
           <div className="mt-6 grid gap-3 rounded-2xl border border-[var(--line)] bg-white/60 p-4 text-sm text-[var(--muted)]">
             <p>Premium fabric: {product.material}</p>
             <p>Ready stock: {product.stock} units</p>
             <p>Delivery: 2 to 5 working days nationwide</p>
             <p>Exchange window: 7 days from delivery date</p>
+          </div>
+
+          <div className="mt-5">
+            <p className="text-xs tracking-[0.18em]">COLORS</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {product.colors.map((color) => (
+                <span
+                  key={color}
+                  className="rounded-full border border-[var(--line-strong)] px-4 py-2 text-xs tracking-[0.15em]"
+                >
+                  {color}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="mt-5">
@@ -121,6 +150,9 @@ export function ProductPage({
                 product={item}
                 index={index}
                 liked={wishlist.includes(item.id)}
+                pickedSize={selectedSize[item.id]}
+                compact
+                onPickSize={onCardPickSize}
                 onToggleWishlist={onCardToggleWishlist}
                 onAddToCart={onCardAddToCart}
                 onOpenProduct={onOpenProduct}

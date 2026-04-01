@@ -109,6 +109,7 @@ export function CheckoutPage({
                 <div key={`${row.product.id}-${row.size}`} className="flex items-start justify-between gap-2">
                   <span className="text-[var(--muted)]">
                     {row.product.title} x{row.qty}
+                    <span className="block text-[11px] tracking-[0.12em]">SIZE {row.size}</span>
                   </span>
                   <span>{money(row.product.price * row.qty)}</span>
                 </div>

@@ -4,14 +4,18 @@ import type { Product } from '../types/store';
 type WishlistPageProps = {
   products: Product[];
   wishlist: string[];
+  selectedSize: Record<string, string>;
+  onPickSize: (productId: string, size: string) => void;
   onToggleWishlist: (productId: string) => void;
-  onAddToCart: (productId: string) => void;
+  onAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean) => void;
   onOpenProduct: (slug: string) => void;
 };
 
 export function WishlistPage({
   products,
   wishlist,
+  selectedSize,
+  onPickSize,
   onToggleWishlist,
   onAddToCart,
   onOpenProduct,
@@ -44,6 +48,8 @@ export function WishlistPage({
               product={product}
               index={index}
               liked={wishlist.includes(product.id)}
+              pickedSize={selectedSize[product.id]}
+              onPickSize={onPickSize}
               onToggleWishlist={onToggleWishlist}
               onAddToCart={onAddToCart}
               onOpenProduct={onOpenProduct}

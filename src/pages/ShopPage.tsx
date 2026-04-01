@@ -8,11 +8,13 @@ type ShopPageProps = {
   query: string;
   sortBy: string;
   wishlist: string[];
+  selectedSize: Record<string, string>;
   onCategoryChange: (category: string) => void;
   onQueryChange: (query: string) => void;
   onSortChange: (sortBy: string) => void;
+  onPickSize: (productId: string, size: string) => void;
   onToggleWishlist: (productId: string) => void;
-  onAddToCart: (productId: string) => void;
+  onAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean) => void;
   onOpenProduct: (slug: string) => void;
 };
 
@@ -23,9 +25,11 @@ export function ShopPage({
   query,
   sortBy,
   wishlist,
+  selectedSize,
   onCategoryChange,
   onQueryChange,
   onSortChange,
+  onPickSize,
   onToggleWishlist,
   onAddToCart,
   onOpenProduct,
@@ -109,6 +113,8 @@ export function ShopPage({
               product={product}
               index={index}
               liked={wishlist.includes(product.id)}
+              pickedSize={selectedSize[product.id]}
+              onPickSize={onPickSize}
               onToggleWishlist={onToggleWishlist}
               onAddToCart={onAddToCart}
               onOpenProduct={onOpenProduct}

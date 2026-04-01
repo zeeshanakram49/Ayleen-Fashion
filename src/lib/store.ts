@@ -1,6 +1,9 @@
 import type { Route } from '../types/store';
 
 export const money = (amount: number) => `PKR ${amount.toLocaleString('en-PK')}`;
+export const discountPercent = (price: number, oldPrice: number) =>
+  Math.max(0, Math.round(((oldPrice - price) / oldPrice) * 100));
+export const installmentAmount = (amount: number) => Math.round(amount / 3);
 
 export const shippingFee = (subtotal: number) => (subtotal > 6000 ? 0 : 250);
 

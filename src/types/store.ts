@@ -12,11 +12,13 @@ export type Product = {
   title: string;
   categoryId: string;
   categoryLabel: string;
+  fit: string;
   price: number;
   oldPrice: number;
   badge: string;
   image: string;
   gallery: string[];
+  colors: string[];
   description: string;
   details: string;
   material: string;
@@ -64,3 +66,8 @@ export type Route =
   | { page: 'contact' };
 
 export type CartRow = CartItem & { product: Product };
+
+export type Notice = {
+  kind: 'success' | 'info';
+  message: string;
+};
