@@ -1,3 +1,4 @@
+import { ImageWithFallback } from './ImageWithFallback';
 import type { Product } from '../types/store';
 import { discountPercent, installmentAmount, money } from '../lib/store';
 
@@ -32,7 +33,7 @@ export function ProductCard({
       style={{ animationDelay: `${80 + index * 90}ms` }}
     >
       <div className="relative overflow-hidden rounded-2xl">
-        <img
+        <ImageWithFallback
           src={product.image}
           alt={product.title}
           className="media-zoom h-[340px] w-full object-cover transition duration-700 group-hover:scale-105"

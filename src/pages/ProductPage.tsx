@@ -1,3 +1,4 @@
+import { ImageWithFallback } from '../components/ImageWithFallback';
 import { ProductCard } from '../components/ProductCard';
 import { discountPercent, installmentAmount, money } from '../lib/store';
 import type { Product } from '../types/store';
@@ -47,7 +48,7 @@ export function ProductPage({
       <div className="mt-6 grid gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="reveal-up grid gap-4 sm:grid-cols-2">
           {product.gallery.map((image) => (
-            <img
+            <ImageWithFallback
               key={image}
               src={image}
               alt={product.title}

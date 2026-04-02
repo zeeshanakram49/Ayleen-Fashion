@@ -1,3 +1,4 @@
+import { ImageWithFallback } from '../components/ImageWithFallback';
 import { ProductCard } from '../components/ProductCard';
 import type { Category, Product, Service, Testimonial } from '../types/store';
 
@@ -193,7 +194,11 @@ export function HomePage({
                 className="reveal-up group overflow-hidden rounded-[1.8rem] border border-[var(--line)] bg-[var(--panel)] text-left"
                 style={{ animationDelay: `${90 * index}ms` }}
               >
-                <img src={product.image} alt={product.title} className="media-zoom h-64 w-full object-cover" />
+                <ImageWithFallback
+                  src={product.image}
+                  alt={product.title}
+                  className="media-zoom h-64 w-full object-cover"
+                />
                 <div className="p-5">
                   <p className="text-[10px] tracking-[0.24em] text-[var(--gold-deep)]">{product.badge}</p>
                   <h3 className="font-editorial mt-2 text-3xl">{product.title}</h3>

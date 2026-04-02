@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import type { Category, Product } from '../types/store';
 
@@ -34,8 +35,20 @@ export function ShopPage({
   onAddToCart,
   onOpenProduct,
 }: ShopPageProps) {
+  const pageRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const cards = pageRef.current?.querySelectorAll<HTMLElement>('.product-card.reveal-up, .product-card.reveal-scale');
+    if (!cards?.length) return;
+
+    cards.forEach((card, index) => {
+      card.style.setProperty('--section-stagger', `${Math.min(index * 70, 420)}ms`);
+      card.classList.add('is-visible');
+    });
+  }, [products]);
+
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+    <section ref={pageRef} className="mx-auto max-w-7xl px-6 py-14 md:py-20">
       <div className="reveal-up overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-8 md:p-10">
         <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">FULL CATALOG</p>
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">

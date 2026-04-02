@@ -1,0 +1,18 @@
+<svg width="1200" height="1500" viewBox="0 0 1200 1500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1500" fill="#F6F0E6"/>
+  <rect x="72" y="72" width="1056" height="1356" rx="56" fill="#EFE5D7"/>
+  <path d="M360 470C360 337.452 467.452 230 600 230C732.548 230 840 337.452 840 470V542H360V470Z" fill="#2B241F"/>
+  <path d="M456 328C456 296.706 481.706 271 513 271H687C718.294 271 744 296.706 744 328V386H456V328Z" fill="#2B241F"/>
+  <path d="M309 560H891L808.72 1180H391.28L309 560Z" fill="#C8A97E"/>
+  <path d="M430 648H770" stroke="#2B241F" stroke-width="20" stroke-linecap="round"/>
+  <path d="M430 742H770" stroke="#2B241F" stroke-opacity="0.65" stroke-width="12" stroke-linecap="round"/>
+  <path d="M430 816H674" stroke="#2B241F" stroke-opacity="0.45" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="600" cy="916" r="108" fill="#2B241F" fill-opacity="0.08"/>
+  <path d="M559 912L590 943L647 886" stroke="#2B241F" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="600" y="1262" text-anchor="middle" fill="#2B241F" font-family="Georgia, 'Times New Roman', serif" font-size="76" letter-spacing="8">
+    AYLEEN
+  </text>
+  <text x="600" y="1334" text-anchor="middle" fill="#6F6154" font-family="Arial, sans-serif" font-size="30" letter-spacing="10">
+    IMAGE AVAILABLE SOON
+  </text>
+</svg>
