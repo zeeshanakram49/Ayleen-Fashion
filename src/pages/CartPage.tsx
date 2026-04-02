@@ -33,7 +33,7 @@ export function CartPage({
       </div>
 
       {rows.length === 0 ? (
-        <article className="reveal-up rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
           <h2 className="font-editorial text-3xl">Your cart is empty</h2>
           <p className="mt-3 text-sm text-[var(--muted)]">Add products to continue checkout.</p>
           <a

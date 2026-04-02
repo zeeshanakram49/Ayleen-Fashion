@@ -32,7 +32,7 @@ export function CheckoutPage({
       </div>
 
       {placedOrder ? (
-        <article className="reveal-up rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
           <p className="text-xs tracking-[0.24em] text-[var(--gold-deep)]">ORDER CONFIRMED</p>
           <h2 className="font-editorial mt-3 text-4xl">Thank you for shopping with AYLEEN</h2>
           <p className="mt-3 text-sm text-[var(--muted)]">

@@ -31,7 +31,7 @@ export function WishlistPage({
       </div>
 
       {products.length === 0 ? (
-        <article className="reveal-up rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
           <h2 className="font-editorial text-3xl">No saved items yet</h2>
           <a
             href="#/shop"

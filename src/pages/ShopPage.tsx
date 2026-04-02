@@ -103,7 +103,7 @@ export function ShopPage({
       </div>
 
       {products.length === 0 ? (
-        <article className="reveal-up mt-8 rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible mt-8 rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
           <h2 className="font-editorial text-3xl">No products found</h2>
           <p className="mt-3 text-sm text-[var(--muted)]">Try changing category, sort, or clearing search.</p>
           <button
