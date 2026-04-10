@@ -7,7 +7,7 @@ type WishlistPageProps = {
   selectedSize: Record<string, string>;
   onPickSize: (productId: string, size: string) => void;
   onToggleWishlist: (productId: string) => void;
-  onAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean) => void;
+  onAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean, qty?: number) => void;
   onOpenProduct: (slug: string) => void;
 };
 

@@ -12,6 +12,7 @@ export type Product = {
   title: string;
   categoryId: string;
   categoryLabel: string;
+  tags: string[];
   fit: string;
   price: number;
   oldPrice: number;

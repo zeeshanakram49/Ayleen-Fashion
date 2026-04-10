@@ -14,7 +14,7 @@ type ProductPageProps = {
   onAddToCart: () => void;
   onToggleWishlist: () => void;
   onOpenProduct: (slug: string) => void;
-  onCardAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean) => void;
+  onCardAddToCart: (productId: string, fallbackSize?: string, requireSelection?: boolean, qty?: number) => void;
   onCardPickSize: (productId: string, size: string) => void;
   onCardToggleWishlist: (productId: string) => void;
 };

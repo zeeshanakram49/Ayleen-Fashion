@@ -165,7 +165,8 @@ function App() {
         product.fit.toLowerCase().includes(q) ||
         product.material.toLowerCase().includes(q) ||
         product.badge.toLowerCase().includes(q) ||
-        product.colors.some((color) => color.toLowerCase().includes(q));
+        product.colors.some((color) => color.toLowerCase().includes(q)) ||
+        product.tags.some((tag) => tag.toLowerCase().includes(q));
       return categoryMatch && queryMatch;
     });
 
@@ -180,8 +181,6 @@ function App() {
     return visible;
   }, [activeCategory, query, sortBy]);
 
-  const featuredProducts = useMemo(() => products.slice(0, 8), []);
-  const justDroppedProducts = useMemo(() => products.slice(4, 8), []);
   const wishlistProducts = useMemo(
     () => products.filter((product) => wishlist.includes(product.id)),
     [wishlist],
@@ -237,6 +236,7 @@ function App() {
     productId: string,
     fallbackSize?: string,
     requireSelection = false,
+    qty = 1,
   ) {
     const product = products.find((item) => item.id === productId);
     if (!product) return;
@@ -259,11 +259,11 @@ function App() {
       if (existing) {
         return prev.map((line) =>
           line.productId === productId && line.size === finalSize
-            ? { ...line, qty: Math.min(line.qty + 1, product.stock) }
+            ? { ...line, qty: Math.min(line.qty + qty, product.stock) }
             : line,
         );
       }
-      return [...prev, { productId, size: finalSize, qty: 1 }];
+      return [...prev, { productId, size: finalSize, qty: Math.min(qty, product.stock) }];
     });
 
     setLatestCartLine({ productId, size: finalSize });
@@ -301,9 +301,10 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function navigateToShop(categoryId = "all") {
+  function navigateToShop(categoryId = "all", nextQuery = "") {
     setActiveCategory(categoryId);
-    setQuery("");
+    setQuery(nextQuery);
+    setSortBy("featured");
     window.location.hash = "/shop";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -351,9 +352,12 @@ function App() {
       <Header
         navLinks={navLinks}
         route={route}
+        activeCategory={activeCategory}
+        activeQuery={query}
         wishlistCount={wishlist.length}
         cartCount={cartCount}
         onOpenCart={() => setCartDrawerOpen(true)}
+        onShopCategory={navigateToShop}
       />
 
       {notice && (
@@ -365,9 +369,7 @@ function App() {
       <main>
         {route.page === "home" && (
           <HomePage
-            categories={categories}
-            featuredProducts={featuredProducts}
-            justDroppedProducts={justDroppedProducts}
+            products={products}
             services={services}
             testimonials={testimonials}
             wishlist={wishlist}
