@@ -27,20 +27,25 @@ export function QuickViewModal({
   onToggleWishlist,
   onAddToCart,
 }: QuickViewModalProps) {
-  const [activeImage, setActiveImage] = useState(product.gallery[0] ?? product.image);
-  const [qty, setQty] = useState(1);
+  const [activeImage, setActiveImage] = useState<{
+    productId: string;
+    image: string;
+  } | null>(null);
+  const [pickedQty, setPickedQty] = useState<{
+    productId: string;
+    qty: number;
+  } | null>(null);
   const gallery = useMemo(
     () => Array.from(new Set([product.image, ...product.gallery])),
     [product],
   );
+  const defaultImage = product.gallery[0] ?? product.image;
+  const currentImage =
+    activeImage?.productId === product.id ? activeImage.image : defaultImage;
+  const qty = pickedQty?.productId === product.id ? pickedQty.qty : 1;
   const salePercent = discountPercent(product.price, product.oldPrice);
   const finalSize = pickedSize || product.sizes[0];
   const needsExplicitSize = product.sizes.length > 1 && !pickedSize;
-
-  useEffect(() => {
-    setActiveImage(product.gallery[0] ?? product.image);
-    setQty(1);
-  }, [product]);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
@@ -75,6 +80,13 @@ export function QuickViewModal({
     onClose();
   }
 
+  function updateQty(nextQty: number) {
+    setPickedQty({
+      productId: product.id,
+      qty: Math.max(1, Math.min(product.stock, nextQty)),
+    });
+  }
+
   return (
     <div
       className="quickview-backdrop"
@@ -103,9 +115,9 @@ export function QuickViewModal({
               <button
                 key={image}
                 type="button"
-                onClick={() => setActiveImage(image)}
+                onClick={() => setActiveImage({ productId: product.id, image })}
                 className={`quickview-thumb ${
-                  activeImage === image ? "is-active" : ""
+                  currentImage === image ? "is-active" : ""
                 }`}
               >
                 <ImageWithFallback
@@ -119,7 +131,7 @@ export function QuickViewModal({
 
           <div className="quickview-main-image">
             <ImageWithFallback
-              src={activeImage}
+              src={currentImage}
               alt={product.title}
               className="h-full w-full object-cover"
             />
@@ -194,16 +206,14 @@ export function QuickViewModal({
               <div className="quickview-qty mt-3">
                 <button
                   type="button"
-                  onClick={() => setQty((prev) => Math.max(1, prev - 1))}
+                  onClick={() => updateQty(qty - 1)}
                 >
                   −
                 </button>
                 <span>{qty}</span>
                 <button
                   type="button"
-                  onClick={() =>
-                    setQty((prev) => Math.min(product.stock, prev + 1))
-                  }
+                  onClick={() => updateQty(qty + 1)}
                 >
                   +
                 </button>

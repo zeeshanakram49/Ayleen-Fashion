@@ -894,6 +894,408 @@ textarea {
   }
 }
 
+.coming-soon-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
+  align-items: center;
+  gap: clamp(1.2rem, 3vw, 3rem);
+  padding: clamp(1.2rem, 2vw, 2rem);
+  color: #fffaf2;
+  background: #111;
+}
+
+.coming-soon-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(12, 8, 5, 0.9) 0%, rgba(12, 8, 5, 0.66) 48%, rgba(12, 8, 5, 0.22) 100%),
+    linear-gradient(180deg, rgba(13, 9, 6, 0.14), rgba(13, 9, 6, 0.74)),
+    url("https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1800&auto=format&fit=crop") center / cover;
+  transform: scale(1.03);
+  animation: coming-soon-zoom 14s var(--ease-premium) infinite alternate;
+}
+
+.coming-soon-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.28;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(90deg, black, transparent 78%);
+}
+
+.coming-soon-page::after {
+  content: "";
+  position: absolute;
+  inset: 11% 6% 13% auto;
+  width: min(34vw, 460px);
+  border: 1px solid rgba(255, 240, 207, 0.16);
+  background:
+    linear-gradient(140deg, rgba(255, 250, 242, 0.12), rgba(255, 250, 242, 0.02)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 22px);
+  transform: skewX(-7deg);
+  pointer-events: none;
+}
+
+.coming-soon-stitches {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.coming-soon-stitches span {
+  position: absolute;
+  left: -12vw;
+  width: 124vw;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(215, 179, 123, 0.86), transparent);
+  transform: rotate(-13deg);
+  animation: stitch-drift 8s linear infinite;
+}
+
+.coming-soon-stitches span:nth-child(1) {
+  top: 18%;
+}
+
+.coming-soon-stitches span:nth-child(2) {
+  top: 52%;
+  animation-delay: -2.4s;
+}
+
+.coming-soon-stitches span:nth-child(3) {
+  top: 81%;
+  animation-delay: -5.1s;
+}
+
+.coming-soon-hero {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 980px);
+  margin-right: auto;
+  padding: clamp(5.2rem, 10vw, 8rem) clamp(0.5rem, 4vw, 4rem);
+  animation: coming-soon-rise 900ms var(--ease-premium) both;
+}
+
+.coming-soon-topbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 3;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 240, 207, 0.16);
+  background: rgba(10, 7, 5, 0.58);
+  backdrop-filter: blur(18px);
+}
+
+.coming-soon-topbar div {
+  display: flex;
+  width: max-content;
+  animation: coming-soon-marquee 18s linear infinite reverse;
+}
+
+.coming-soon-topbar span {
+  padding: 1rem 1.5rem;
+  color: rgba(255, 250, 242, 0.76);
+  font-size: 0.74rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.coming-soon-kicker {
+  margin: 0 0 1rem;
+  font-size: clamp(0.74rem, 1.1vw, 0.9rem);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #e7c995;
+}
+
+.coming-soon-hero h1 {
+  max-width: 11ch;
+  margin: 0;
+  font-size: clamp(4.8rem, 12vw, 10.5rem);
+  font-weight: 400;
+  line-height: 0.86;
+  text-wrap: balance;
+  text-shadow: 0 24px 54px rgba(0, 0, 0, 0.36);
+}
+
+.coming-soon-copy {
+  max-width: 610px;
+  margin: clamp(1.6rem, 3vw, 2.3rem) 0 0;
+  color: rgba(255, 250, 242, 0.78);
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  line-height: 1.8;
+}
+
+.coming-soon-progress {
+  width: min(100%, 520px);
+  height: 4px;
+  margin-top: clamp(2rem, 4vw, 3.2rem);
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.coming-soon-progress span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #c7944d, #fff0cf, #d7b37b);
+  animation: launch-loading 2.6s var(--ease-premium) infinite;
+}
+
+.coming-soon-preview {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  justify-self: end;
+  width: min(100%, 410px);
+  padding: 1rem;
+  animation: coming-soon-rise 1s 140ms var(--ease-premium) both;
+}
+
+.coming-soon-shirt-card {
+  position: relative;
+  min-height: 460px;
+  border: 1px solid rgba(255, 240, 207, 0.24);
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)),
+    rgba(16, 12, 9, 0.36);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 32px 80px -48px rgba(0, 0, 0, 0.72);
+  overflow: hidden;
+}
+
+.coming-soon-shirt-card::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 4.2rem;
+  width: 68%;
+  height: 70%;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 240, 207, 0.38);
+  border-radius: 1.4rem 1.4rem 0.35rem 0.35rem;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(255, 240, 207, 0.42) 49% 51%, transparent 51%),
+    repeating-linear-gradient(0deg, rgba(255, 250, 242, 0.2) 0 1px, transparent 1px 18px),
+    linear-gradient(160deg, rgba(255, 250, 242, 0.32), rgba(209, 165, 95, 0.12));
+}
+
+.coming-soon-shirt-card::after {
+  content: "AYLEEN";
+  position: absolute;
+  left: 50%;
+  bottom: 3.1rem;
+  transform: translateX(-50%);
+  color: rgba(255, 250, 242, 0.62);
+  font-size: 0.72rem;
+  letter-spacing: 0.46em;
+}
+
+.shirt-collar,
+.shirt-placket,
+.shirt-pocket {
+  position: absolute;
+  z-index: 2;
+  display: block;
+}
+
+.shirt-collar {
+  left: 50%;
+  top: 4.3rem;
+  width: 8rem;
+  height: 4.8rem;
+  transform: translateX(-50%);
+  border-right: 1px solid rgba(255, 240, 207, 0.48);
+  border-bottom: 1px solid rgba(255, 240, 207, 0.48);
+  border-left: 1px solid rgba(255, 240, 207, 0.48);
+  clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
+}
+
+.shirt-placket {
+  left: 50%;
+  top: 9rem;
+  width: 1px;
+  height: 13rem;
+  background: rgba(255, 240, 207, 0.42);
+}
+
+.shirt-pocket {
+  right: 28%;
+  top: 13.6rem;
+  width: 3.6rem;
+  height: 4rem;
+  border: 1px solid rgba(255, 240, 207, 0.36);
+  border-top: 0;
+}
+
+.coming-soon-card-stack {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.coming-soon-card-stack article {
+  border: 1px solid rgba(255, 240, 207, 0.2);
+  padding: 0.92rem 0.75rem;
+  background: rgba(12, 8, 5, 0.46);
+  backdrop-filter: blur(14px);
+}
+
+.coming-soon-card-stack span {
+  color: #e7c995;
+  font-size: 0.78rem;
+}
+
+.coming-soon-card-stack p {
+  margin: 0.32rem 0 0;
+  color: rgba(255, 250, 242, 0.78);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.coming-soon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.6rem;
+}
+
+.coming-soon-actions a {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 240, 207, 0.34);
+  padding: 0.82rem 1.2rem;
+  color: #fffaf2;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  font-size: 0.76rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition:
+    transform 260ms var(--ease-premium),
+    border-color 260ms var(--ease-premium),
+    background 260ms var(--ease-premium);
+}
+
+.coming-soon-actions a:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 240, 207, 0.74);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.coming-soon-panel {
+  position: absolute;
+  right: clamp(1rem, 3vw, 3rem);
+  top: clamp(1rem, 3vw, 3rem);
+  z-index: 2;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 520px;
+}
+
+.coming-soon-panel span {
+  border: 1px solid rgba(255, 240, 207, 0.24);
+  padding: 0.58rem 0.78rem;
+  color: rgba(255, 250, 242, 0.78);
+  background: rgba(15, 10, 7, 0.34);
+  backdrop-filter: blur(14px);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.coming-soon-marquee {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 240, 207, 0.16);
+  background: rgba(10, 7, 5, 0.64);
+  backdrop-filter: blur(18px);
+}
+
+.coming-soon-marquee div {
+  display: flex;
+  width: max-content;
+  animation: coming-soon-marquee 18s linear infinite;
+}
+
+.coming-soon-marquee span {
+  padding: 1rem 1.5rem;
+  color: rgba(255, 250, 242, 0.72);
+  font-size: 0.74rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@keyframes coming-soon-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes coming-soon-zoom {
+  from {
+    transform: scale(1.03) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.4%, -1%, 0);
+  }
+}
+
+@keyframes stitch-drift {
+  from {
+    transform: translateX(-18%) rotate(-13deg);
+  }
+  to {
+    transform: translateX(18%) rotate(-13deg);
+  }
+}
+
+@keyframes launch-loading {
+  0% {
+    transform: translateX(-110%);
+  }
+  55%,
+  100% {
+    transform: translateX(245%);
+  }
+}
+
+@keyframes coming-soon-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (max-width: 1024px) {
   .site-announcement-bar {
     font-size: 0.68rem;
@@ -949,6 +1351,55 @@ textarea {
   .site-mobile-icon svg {
     width: 1.58rem;
     height: 1.58rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .coming-soon-page {
+    grid-template-columns: 1fr;
+    align-items: end;
+    padding: 4.2rem 1rem 4.25rem;
+  }
+
+  .coming-soon-backdrop {
+    background:
+      linear-gradient(180deg, rgba(12, 8, 5, 0.18) 0%, rgba(12, 8, 5, 0.9) 66%, rgba(12, 8, 5, 0.96) 100%),
+      url("https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1400&auto=format&fit=crop") center / cover;
+  }
+
+  .coming-soon-page::after {
+    display: none;
+  }
+
+  .coming-soon-grain {
+    mask-image: linear-gradient(180deg, transparent 6%, black 55%);
+  }
+
+  .coming-soon-hero {
+    padding: 0 0 2rem;
+  }
+
+  .coming-soon-hero h1 {
+    font-size: clamp(4.2rem, 22vw, 6.6rem);
+  }
+
+  .coming-soon-copy {
+    line-height: 1.65;
+  }
+
+  .coming-soon-actions a {
+    flex: 1 1 100%;
+  }
+
+  .coming-soon-panel {
+    left: 1rem;
+    right: 1rem;
+    justify-content: flex-start;
+    top: 3.8rem;
+  }
+
+  .coming-soon-preview {
+    display: none;
   }
 }
 
