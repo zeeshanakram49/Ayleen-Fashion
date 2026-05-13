@@ -50,7 +50,8 @@ function App() {
 
         <div className="coming-soon-actions">
           <a href="mailto:hello@ayleenfashion.com">Get notified</a>
-          <a href="tel:+923000000000">Contact us</a>
+          <a href="tel:+923004616865">0300 4616865</a>
+          <a href="tel:+923034965359">0303 4965359</a>
         </div>
 
         <div className="coming-soon-details" aria-label="Collection details">

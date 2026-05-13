@@ -24,7 +24,10 @@ export function ContactPage() {
           </p>
           <div className="mt-7 space-y-3 text-sm">
             <p>
-              <span className="font-semibold">Phone:</span> +92 303 4965359
+              <span className="font-semibold">Phone 1:</span> 0300 4616865
+            </p>
+            <p>
+              <span className="font-semibold">Phone 2:</span> 0303 4965359
             </p>
             <p>
               <span className="font-semibold">Email:</span> support@ayleen.pk

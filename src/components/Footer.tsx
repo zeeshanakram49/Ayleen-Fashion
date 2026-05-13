@@ -114,9 +114,14 @@ export function Footer({ categories }: FooterProps) {
                   <a href="mailto:support@ayleen.pk">support@ayleen.pk</a>
                 </p>
                 <p>
-                  WhatsApp:
+                  WhatsApp 1:
                   {" "}
-                  <a href="tel:+923034965359">+92 303 4965359</a>
+                  <a href="tel:+923004616865">0300 4616865</a>
+                </p>
+                <p>
+                  WhatsApp 2:
+                  {" "}
+                  <a href="tel:+923034965359">0303 4965359</a>
                 </p>
                 <p>09:00 AM to 09:00 PM (PST)</p>
                 <p>Monday to Saturday</p>
