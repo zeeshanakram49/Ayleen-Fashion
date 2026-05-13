@@ -896,23 +896,26 @@ textarea {
 
 .coming-soon-page {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
+  grid-template-columns: minmax(0, 1.04fr) minmax(340px, 0.64fr);
   align-items: center;
-  gap: clamp(1.2rem, 3vw, 3rem);
-  padding: clamp(1.2rem, 2vw, 2rem);
+  gap: 2.5rem;
+  padding: 2rem;
   color: #fffaf2;
-  background: #111;
+  background:
+    radial-gradient(circle at 16% 16%, rgba(175, 66, 81, 0.24), transparent 26%),
+    radial-gradient(circle at 78% 20%, rgba(118, 144, 116, 0.2), transparent 24%),
+    #11100e;
 }
 
 .coming-soon-backdrop {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(12, 8, 5, 0.9) 0%, rgba(12, 8, 5, 0.66) 48%, rgba(12, 8, 5, 0.22) 100%),
-    linear-gradient(180deg, rgba(13, 9, 6, 0.14), rgba(13, 9, 6, 0.74)),
+    linear-gradient(90deg, rgba(12, 10, 9, 0.92) 0%, rgba(12, 10, 9, 0.7) 46%, rgba(12, 10, 9, 0.28) 100%),
+    linear-gradient(180deg, rgba(13, 9, 6, 0.05), rgba(13, 9, 6, 0.78)),
     url("https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1800&auto=format&fit=crop") center / cover;
   transform: scale(1.03);
   animation: coming-soon-zoom 14s var(--ease-premium) infinite alternate;
@@ -933,12 +936,13 @@ textarea {
 .coming-soon-page::after {
   content: "";
   position: absolute;
-  inset: 11% 6% 13% auto;
-  width: min(34vw, 460px);
-  border: 1px solid rgba(255, 240, 207, 0.16);
+  inset: 10% 5% 12% auto;
+  width: 430px;
+  max-width: 34vw;
+  border: 1px solid rgba(255, 240, 207, 0.18);
   background:
-    linear-gradient(140deg, rgba(255, 250, 242, 0.12), rgba(255, 250, 242, 0.02)),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 22px);
+    linear-gradient(140deg, rgba(255, 250, 242, 0.14), rgba(118, 144, 116, 0.06)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 24px);
   transform: skewX(-7deg);
   pointer-events: none;
 }
@@ -976,9 +980,9 @@ textarea {
 .coming-soon-hero {
   position: relative;
   z-index: 2;
-  width: min(100%, 980px);
+  width: min(100%, 860px);
   margin-right: auto;
-  padding: clamp(5.2rem, 10vw, 8rem) clamp(0.5rem, 4vw, 4rem);
+  padding: 7rem 4rem 6.5rem 3rem;
   animation: coming-soon-rise 900ms var(--ease-premium) both;
 }
 
@@ -1004,53 +1008,99 @@ textarea {
   padding: 1rem 1.5rem;
   color: rgba(255, 250, 242, 0.76);
   font-size: 0.74rem;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
+.coming-soon-brand {
+  width: max-content;
+  margin: 0 0 1.05rem;
+  border: 1px solid rgba(255, 240, 207, 0.2);
+  padding: 0.68rem 0.88rem;
+  color: #fffaf2;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  line-height: 1;
+}
+
 .coming-soon-kicker {
   margin: 0 0 1rem;
-  font-size: clamp(0.74rem, 1.1vw, 0.9rem);
-  letter-spacing: 0.42em;
+  font-size: 0.84rem;
+  letter-spacing: 0.34em;
   text-transform: uppercase;
   color: #e7c995;
 }
 
 .coming-soon-hero h1 {
-  max-width: 11ch;
+  max-width: 10ch;
   margin: 0;
-  font-size: clamp(4.8rem, 12vw, 10.5rem);
+  font-size: 9rem;
   font-weight: 400;
-  line-height: 0.86;
+  line-height: 0.88;
   text-wrap: balance;
   text-shadow: 0 24px 54px rgba(0, 0, 0, 0.36);
 }
 
 .coming-soon-copy {
   max-width: 610px;
-  margin: clamp(1.6rem, 3vw, 2.3rem) 0 0;
-  color: rgba(255, 250, 242, 0.78);
-  font-size: clamp(1rem, 1.8vw, 1.35rem);
-  line-height: 1.8;
+  margin: 2rem 0 0;
+  color: rgba(255, 250, 242, 0.82);
+  font-size: 1.18rem;
+  line-height: 1.75;
+}
+
+.coming-soon-status {
+  display: flex;
+  width: min(100%, 520px);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.65rem;
+  color: rgba(255, 250, 242, 0.8);
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 .coming-soon-progress {
   width: min(100%, 520px);
-  height: 4px;
-  margin-top: clamp(2rem, 4vw, 3.2rem);
+  height: 5px;
+  margin-top: 0.78rem;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .coming-soon-progress span {
   display: block;
-  width: 42%;
+  width: 76%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #c7944d, #fff0cf, #d7b37b);
+  background: linear-gradient(90deg, #af4251, #fff0cf, #769074);
   animation: launch-loading 2.6s var(--ease-premium) infinite;
+}
+
+.coming-soon-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  max-width: 620px;
+  margin-top: 1.35rem;
+}
+
+.coming-soon-details span {
+  border: 1px solid rgba(255, 240, 207, 0.18);
+  padding: 0.62rem 0.78rem;
+  color: rgba(255, 250, 242, 0.78);
+  background: rgba(15, 10, 7, 0.28);
+  backdrop-filter: blur(14px);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .coming-soon-preview {
@@ -1058,19 +1108,44 @@ textarea {
   z-index: 2;
   align-self: center;
   justify-self: end;
-  width: min(100%, 410px);
+  width: min(100%, 430px);
   padding: 1rem;
   animation: coming-soon-rise 1s 140ms var(--ease-premium) both;
 }
 
+.coming-soon-preview-label {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  color: rgba(255, 250, 242, 0.82);
+}
+
+.coming-soon-preview-label span {
+  color: #e7c995;
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.coming-soon-preview-label strong {
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .coming-soon-shirt-card {
   position: relative;
-  min-height: 460px;
+  min-height: 488px;
   border: 1px solid rgba(255, 240, 207, 0.24);
+  border-radius: 8px;
   background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)),
-    rgba(16, 12, 9, 0.36);
-  backdrop-filter: blur(18px);
+    radial-gradient(circle at 18% 14%, rgba(255, 250, 242, 0.18), transparent 22%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.2), rgba(118, 144, 116, 0.08)),
+    rgba(16, 12, 9, 0.44);
+  backdrop-filter: blur(20px);
   box-shadow: 0 32px 80px -48px rgba(0, 0, 0, 0.72);
   overflow: hidden;
 }
@@ -1079,16 +1154,16 @@ textarea {
   content: "";
   position: absolute;
   left: 50%;
-  top: 4.2rem;
+  top: 4.75rem;
   width: 68%;
   height: 70%;
   transform: translateX(-50%);
   border: 1px solid rgba(255, 240, 207, 0.38);
-  border-radius: 1.4rem 1.4rem 0.35rem 0.35rem;
+  border-radius: 1rem 1rem 0.35rem 0.35rem;
   background:
     linear-gradient(90deg, transparent 49%, rgba(255, 240, 207, 0.42) 49% 51%, transparent 51%),
-    repeating-linear-gradient(0deg, rgba(255, 250, 242, 0.2) 0 1px, transparent 1px 18px),
-    linear-gradient(160deg, rgba(255, 250, 242, 0.32), rgba(209, 165, 95, 0.12));
+    repeating-linear-gradient(0deg, rgba(255, 250, 242, 0.2) 0 1px, transparent 1px 20px),
+    linear-gradient(160deg, rgba(255, 250, 242, 0.34), rgba(118, 144, 116, 0.16));
 }
 
 .coming-soon-shirt-card::after {
@@ -1104,7 +1179,9 @@ textarea {
 
 .shirt-collar,
 .shirt-placket,
-.shirt-pocket {
+.shirt-pocket,
+.perfume-bottle,
+.trouser-fold {
   position: absolute;
   z-index: 2;
   display: block;
@@ -1112,7 +1189,7 @@ textarea {
 
 .shirt-collar {
   left: 50%;
-  top: 4.3rem;
+  top: 4.82rem;
   width: 8rem;
   height: 4.8rem;
   transform: translateX(-50%);
@@ -1124,7 +1201,7 @@ textarea {
 
 .shirt-placket {
   left: 50%;
-  top: 9rem;
+  top: 9.55rem;
   width: 1px;
   height: 13rem;
   background: rgba(255, 240, 207, 0.42);
@@ -1132,11 +1209,79 @@ textarea {
 
 .shirt-pocket {
   right: 28%;
-  top: 13.6rem;
+  top: 14.15rem;
   width: 3.6rem;
   height: 4rem;
   border: 1px solid rgba(255, 240, 207, 0.36);
   border-top: 0;
+}
+
+.perfume-bottle {
+  left: 2rem;
+  bottom: 2.2rem;
+  width: 4.35rem;
+  height: 7rem;
+  border: 1px solid rgba(255, 240, 207, 0.38);
+  border-radius: 0.7rem 0.7rem 0.4rem 0.4rem;
+  background:
+    linear-gradient(180deg, rgba(255, 240, 207, 0.22), rgba(175, 66, 81, 0.14)),
+    rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 250, 242, 0.08);
+}
+
+.perfume-bottle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -1.45rem;
+  width: 1.75rem;
+  height: 1.45rem;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 240, 207, 0.34);
+  border-bottom: 0;
+  border-radius: 0.35rem 0.35rem 0 0;
+  background: rgba(255, 240, 207, 0.12);
+}
+
+.perfume-bottle::after {
+  content: "SCENT";
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 250, 242, 0.56);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+}
+
+.trouser-fold {
+  right: 1.65rem;
+  bottom: 2.05rem;
+  width: 5.2rem;
+  height: 9rem;
+  border: 1px solid rgba(255, 240, 207, 0.34);
+  border-radius: 0.55rem 0.55rem 0.25rem 0.25rem;
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(255, 240, 207, 0.3) 48% 52%, transparent 52%),
+    linear-gradient(165deg, rgba(118, 144, 116, 0.18), rgba(255, 250, 242, 0.08));
+}
+
+.trouser-fold::before,
+.trouser-fold::after {
+  content: "";
+  position: absolute;
+  top: 0.9rem;
+  bottom: 0.65rem;
+  width: 1px;
+  background: rgba(255, 240, 207, 0.22);
+}
+
+.trouser-fold::before {
+  left: 30%;
+}
+
+.trouser-fold::after {
+  right: 30%;
 }
 
 .coming-soon-card-stack {
@@ -1148,6 +1293,8 @@ textarea {
 
 .coming-soon-card-stack article {
   border: 1px solid rgba(255, 240, 207, 0.2);
+  border-radius: 8px;
+  min-height: 6.4rem;
   padding: 0.92rem 0.75rem;
   background: rgba(12, 8, 5, 0.46);
   backdrop-filter: blur(14px);
@@ -1161,8 +1308,9 @@ textarea {
 .coming-soon-card-stack p {
   margin: 0.32rem 0 0;
   color: rgba(255, 250, 242, 0.78);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  line-height: 1.45;
   text-transform: uppercase;
 }
 
@@ -1170,7 +1318,7 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
-  margin-top: 1.6rem;
+  margin-top: 1.55rem;
 }
 
 .coming-soon-actions a {
@@ -1179,6 +1327,7 @@ textarea {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 240, 207, 0.34);
+  border-radius: 8px;
   padding: 0.82rem 1.2rem;
   color: #fffaf2;
   background: rgba(255, 255, 255, 0.08);
@@ -1192,16 +1341,31 @@ textarea {
     background 260ms var(--ease-premium);
 }
 
+.coming-soon-actions a:first-child {
+  border-color: rgba(255, 240, 207, 0.58);
+  color: #17110c;
+  background: #fff0cf;
+}
+
 .coming-soon-actions a:hover {
   transform: translateY(-3px);
   border-color: rgba(255, 240, 207, 0.74);
   background: rgba(255, 255, 255, 0.14);
 }
 
+.coming-soon-actions a:first-child:hover {
+  background: #fff9f2;
+}
+
+.coming-soon-actions a:focus-visible {
+  outline: 2px solid #fff0cf;
+  outline-offset: 4px;
+}
+
 .coming-soon-panel {
   position: absolute;
-  right: clamp(1rem, 3vw, 3rem);
-  top: clamp(1rem, 3vw, 3rem);
+  right: 3rem;
+  top: 4.8rem;
   z-index: 2;
   display: flex;
   gap: 0.55rem;
@@ -1212,12 +1376,13 @@ textarea {
 
 .coming-soon-panel span {
   border: 1px solid rgba(255, 240, 207, 0.24);
+  border-radius: 999px;
   padding: 0.58rem 0.78rem;
   color: rgba(255, 250, 242, 0.78);
-  background: rgba(15, 10, 7, 0.34);
+  background: rgba(15, 10, 7, 0.42);
   backdrop-filter: blur(14px);
   font-size: 0.7rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -1243,7 +1408,7 @@ textarea {
   padding: 1rem 1.5rem;
   color: rgba(255, 250, 242, 0.72);
   font-size: 0.74rem;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1278,12 +1443,12 @@ textarea {
 }
 
 @keyframes launch-loading {
-  0% {
-    transform: translateX(-110%);
-  }
-  55%,
+  0%,
   100% {
-    transform: translateX(245%);
+    filter: brightness(0.95);
+  }
+  50% {
+    filter: brightness(1.2);
   }
 }
 
@@ -1340,6 +1505,28 @@ textarea {
     order: 3;
     padding: 0;
   }
+
+  .coming-soon-page {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: 1.4rem;
+    padding: 1.2rem;
+  }
+
+  .coming-soon-hero {
+    padding: 6.5rem 1rem 6rem;
+  }
+
+  .coming-soon-hero h1 {
+    font-size: 7.2rem;
+  }
+
+  .coming-soon-panel {
+    right: 1.2rem;
+  }
+
+  .coming-soon-shirt-card {
+    min-height: 430px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1376,18 +1563,32 @@ textarea {
   }
 
   .coming-soon-hero {
-    padding: 0 0 2rem;
+    padding: 3.4rem 0 2rem;
   }
 
   .coming-soon-hero h1 {
-    font-size: clamp(4.2rem, 22vw, 6.6rem);
+    font-size: 5.4rem;
   }
 
   .coming-soon-copy {
+    font-size: 1rem;
     line-height: 1.65;
   }
 
+  .coming-soon-brand {
+    margin-bottom: 0.85rem;
+  }
+
+  .coming-soon-kicker,
+  .coming-soon-status {
+    letter-spacing: 0.2em;
+  }
+
   .coming-soon-actions a {
+    flex: 1 1 100%;
+  }
+
+  .coming-soon-details span {
     flex: 1 1 100%;
   }
 
@@ -1400,6 +1601,23 @@ textarea {
 
   .coming-soon-preview {
     display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .coming-soon-hero h1 {
+    font-size: 4.35rem;
+  }
+
+  .coming-soon-topbar span,
+  .coming-soon-marquee span {
+    padding-inline: 1rem;
+  }
+
+  .coming-soon-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.42rem;
   }
 }
 

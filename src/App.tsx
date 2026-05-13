@@ -1,8 +1,8 @@
-const launchNotes = ["Shirts edit", "Premium cotton", "Launching soon"];
+const launchNotes = ["Shirts", "Perfumes", "Trousers"];
 const previewCards = [
-  { title: "Classic cuts", value: "01" },
-  { title: "Soft textures", value: "02" },
-  { title: "Daily luxury", value: "03" },
+  { title: "Premium shirts", value: "01" },
+  { title: "Signature perfumes", value: "02" },
+  { title: "Tailored trousers", value: "03" },
 ];
 
 function App() {
@@ -20,24 +20,31 @@ function App() {
         <div>
           <span>AYLEEN</span>
           <span>COMING SOON</span>
-          <span>SHIRTS COLLECTION</span>
+          <span>SHIRTS / PERFUMES / TROUSERS</span>
           <span>AYLEEN</span>
           <span>COMING SOON</span>
-          <span>SHIRTS COLLECTION</span>
+          <span>SHIRTS / PERFUMES / TROUSERS</span>
         </div>
       </header>
 
       <section className="coming-soon-hero" aria-labelledby="coming-soon-title">
-        <p className="coming-soon-kicker">Ayleen Shirts Collection</p>
+        <p className="coming-soon-brand">AYLEEN</p>
+        <p className="coming-soon-kicker">Ayleen Fashion & Fragrance</p>
         <h1 id="coming-soon-title" className="font-editorial">
           Coming Soon
         </h1>
         <p className="coming-soon-copy">
-          Hamari shirts collection tayyar ho rahi hai. Bohat jald AYLEEN ka
-          clean, premium aur everyday fashion experience live hoga.
+          Our shirts, perfumes, and trousers are being crafted with care.
+          AYLEEN's clean, premium everyday fashion experience will be live very
+          soon.
         </p>
 
-        <div className="coming-soon-progress" aria-label="Launch progress">
+        <div className="coming-soon-status" aria-label="Launch status">
+          <span>Launch preparation</span>
+          <span>76%</span>
+        </div>
+
+        <div className="coming-soon-progress" aria-hidden="true">
           <span />
         </div>
 
@@ -45,14 +52,16 @@ function App() {
           <a href="mailto:hello@ayleenfashion.com">Get notified</a>
           <a href="tel:+923000000000">Contact us</a>
         </div>
+
+        <div className="coming-soon-details" aria-label="Collection details">
+          <span>Clean shirts</span>
+          <span>Signature scents</span>
+          <span>Tailored trousers</span>
+          <span>Limited first release</span>
+        </div>
       </section>
 
       <section className="coming-soon-preview" aria-label="Collection preview">
-        <div className="coming-soon-shirt-card">
-          <span className="shirt-collar" />
-          <span className="shirt-placket" />
-          <span className="shirt-pocket" />
-        </div>
         <div className="coming-soon-card-stack">
           {previewCards.map((card) => (
             <article key={card.title}>
@@ -73,10 +82,10 @@ function App() {
         <div>
           <span>AYLEEN</span>
           <span>COMING SOON</span>
-          <span>PREMIUM FASHION</span>
+          <span>FASHION & FRAGRANCE</span>
           <span>AYLEEN</span>
           <span>COMING SOON</span>
-          <span>PREMIUM FASHION</span>
+          <span>FASHION & FRAGRANCE</span>
         </div>
       </div>
     </main>
