@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { QuickViewModal } from "../components/QuickViewModal";
 import { money } from "../lib/store";
@@ -22,46 +22,108 @@ type HomePageProps = {
   onShopCategory: (categoryId: string, query?: string) => void;
 };
 
-const heroVideos = [
-  "https://cdn.shopify.com/videos/c/o/v/e3b8907c018f4e4dbfe20a1fffc010b4.mp4",
-  "https://cdn.shopify.com/videos/c/o/v/5dc415c78c4d4f39a6fe66a7d89f5cb8.mp4",
-];
-
-const collectionSections = [
+const categoryTiles = [
   {
-    key: "women",
-    title: "WOMAN",
-    eyebrow: "SUMMER STORIES",
-    banner:
-      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2000&auto=format&fit=crop",
+    label: "New In",
+    categoryId: "all",
+    query: "new-in",
+    image:
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1300&auto=format&fit=crop",
+  },
+  {
+    label: "Women",
     categoryId: "women",
     query: "",
+    image:
+      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1300&auto=format&fit=crop",
   },
   {
-    key: "men",
-    title: "MAN",
-    eyebrow: "SIGNATURE LOOKS",
-    banner: "/founder-outdoor.jpg",
+    label: "Men",
     categoryId: "men",
     query: "",
+    image:
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1300&auto=format&fit=crop",
   },
   {
-    key: "shoes",
-    title: "SHOES",
-    eyebrow: "WEARING NOW",
-    banner:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2000&auto=format&fit=crop",
+    label: "Shoes",
     categoryId: "accessories",
     query: "shoes",
+    image:
+      "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1300&auto=format&fit=crop",
   },
   {
-    key: "bags",
-    title: "BLACK LUXURY BAGS",
-    eyebrow: "EVERYDAY CARRY",
-    banner:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=2000&auto=format&fit=crop",
+    label: "Bags",
     categoryId: "accessories",
     query: "bags",
+    image:
+      "https://images.unsplash.com/photo-1591561954557-26941169b49e?q=80&w=1300&auto=format&fit=crop",
+  },
+] as const;
+
+const collectionBlocks = [
+  {
+    title: "Pause",
+    subtitle: "soft volume, everyday denim, clean layers",
+    categoryId: "women",
+    query: "",
+    image:
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
+  },
+  {
+    title: "Artisanal Collection",
+    subtitle: "crafted shirts, textured cotton, summer neutrals",
+    categoryId: "men",
+    query: "shirt",
+    image:
+      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=1600&auto=format&fit=crop",
+  },
+  {
+    title: "Summer Shirts Edit",
+    subtitle: "breathable cuts made for city heat",
+    categoryId: "all",
+    query: "shirt",
+    image:
+      "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1600&auto=format&fit=crop",
+  },
+] as const;
+
+const shopPills = [
+  { label: "View All", categoryId: "all", query: "" },
+  { label: "T-Shirts", categoryId: "all", query: "shirt" },
+  { label: "Dresses", categoryId: "women", query: "abaya" },
+  { label: "Denim", categoryId: "juniors", query: "denim" },
+  { label: "Footwear", categoryId: "accessories", query: "shoes" },
+  { label: "Accessories", categoryId: "accessories", query: "bags" },
+] as const;
+
+const heroSlides = [
+  {
+    title: "Pause",
+    categoryId: "men",
+    query: "",
+    image:
+      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=2200&auto=format&fit=crop",
+  },
+  {
+    title: "Summer Essentials",
+    categoryId: "women",
+    query: "",
+    image:
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2200&auto=format&fit=crop",
+  },
+  {
+    title: "Artisanal Collection",
+    categoryId: "men",
+    query: "shirt",
+    image:
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2200&auto=format&fit=crop",
+  },
+  {
+    title: "Denim Studio",
+    categoryId: "juniors",
+    query: "denim",
+    image:
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=2200&auto=format&fit=crop",
   },
 ] as const;
 
@@ -77,41 +139,62 @@ export function HomePage({
   onOpenProduct,
   onShopCategory,
 }: HomePageProps) {
-  const [muted, setMuted] = useState(true);
-  const [heroVideoIndex, setHeroVideoIndex] = useState(0);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
 
-  const sectionProducts: Record<string, Product[]> = {
-    women: products.filter((product) => product.categoryId === "women").slice(0, 4),
-    men: products.filter((product) => product.categoryId === "men").slice(0, 4),
-    shoes: products.filter((product) => product.tags.includes("shoes")).slice(0, 4),
-    bags: products.filter((product) => product.tags.includes("bags")).slice(0, 4),
-  };
+  const newInProducts = products
+    .filter((product) => product.tags.includes("new-in"))
+    .slice(0, 5);
+  const denimProducts = products
+    .filter((product) =>
+      [product.title, product.description, product.material, ...product.tags]
+        .join(" ")
+        .toLowerCase()
+        .includes("denim"),
+    )
+    .slice(0, 4);
+  const featuredProducts = products.slice(0, 8);
+  const railProducts = newInProducts.length >= 4 ? newInProducts : featuredProducts;
+  const storyProducts = denimProducts.length ? denimProducts : featuredProducts.slice(0, 4);
+  const activeSlide = heroSlides[activeHeroSlide];
 
-  function renderRail(items: Product[]) {
-    return items.map((product, index) => (
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveHeroSlide((current) => (current + 1) % heroSlides.length);
+    }, 5200);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  function renderProductTile(product: Product, index: number) {
+    return (
       <article
         key={product.id}
-        className="home-rail-card reveal-up"
-        style={{ animationDelay: `${70 + index * 80}ms` }}
+        className="group outfit-product-tile reveal-up"
+        style={{ animationDelay: `${70 + index * 70}ms` }}
       >
-        <div className="group relative overflow-hidden bg-[#f6f1ea]">
+        <div className="outfit-product-media">
           <button
             type="button"
             onClick={() => onOpenProduct(product.slug)}
-            className="block w-full"
+            className="block h-full w-full"
           >
             <ImageWithFallback
               src={product.image}
               alt={product.title}
-              className="home-rail-image w-full object-cover"
+              className="outfit-product-image w-full object-cover"
             />
           </button>
 
           <button
             type="button"
             onClick={() => onToggleWishlist(product.id)}
-            className="home-wishlist-btn"
+            className="outfit-heart-button"
+            aria-label={
+              wishlist.includes(product.id)
+                ? `Remove ${product.title} from wishlist`
+                : `Save ${product.title} to wishlist`
+            }
           >
             {wishlist.includes(product.id) ? "♥" : "♡"}
           </button>
@@ -119,187 +202,193 @@ export function HomePage({
           <button
             type="button"
             onClick={() => setQuickViewProduct(product)}
-            className="home-quick-view"
+            className="outfit-quick-button"
           >
             Quick view
           </button>
         </div>
 
-        <div className="px-2 pb-1 pt-4 text-center">
+        <div className="outfit-product-info">
           <button
             type="button"
             onClick={() => onOpenProduct(product.slug)}
-            className="home-rail-title"
+            className="outfit-product-name"
           >
             {product.title}
           </button>
-          <p className="mt-2 text-[0.92rem] text-[var(--ink)]/80">
-            {money(product.price).replace("PKR ", "Rs. ")}
-          </p>
+          <p>{money(product.price).replace("PKR ", "Rs. ")}</p>
         </div>
       </article>
-    ));
+    );
   }
 
   return (
     <>
-      <section className="border-b border-[var(--line)] bg-white">
-        <div className="lama-hero relative overflow-hidden">
-          <video
-            className="lama-hero-video"
-            key={heroVideos[heroVideoIndex]}
-            src={heroVideos[heroVideoIndex]}
-            autoPlay
-            loop
-            playsInline
-            muted={muted}
-            preload="auto"
-            poster="/founder-formal.jpg"
-            onError={() => {
-              setHeroVideoIndex((current) =>
-                current < heroVideos.length - 1 ? current + 1 : current,
-              );
-            }}
-          />
-          <div className="lama-hero-overlay" />
-
-          <button
-            type="button"
-            onClick={() => setMuted((prev) => !prev)}
-            className="lama-sound-btn"
-          >
-            {muted ? "Sound Off" : "Sound On"}
-          </button>
-
-          <div className="lama-hero-copy reveal-scale">
-            <h1 className="font-editorial text-4xl font-normal tracking-[0.05em] text-white sm:text-6xl">
-              MODERN LINES, QUIET LUXURY
-            </h1>
-            <p className="mt-2 text-lg italic text-white/90 sm:text-2xl">
-              premium edits for woman, man, shoes, and bags
-            </p>
-            <div className="mt-5 flex flex-wrap justify-center gap-6">
-              <button
-                type="button"
-                onClick={() => onShopCategory("women")}
-                className="lama-hero-link"
-              >
-                SHOP WOMAN
-              </button>
-              <button
-                type="button"
-                onClick={() => onShopCategory("men")}
-                className="lama-hero-link"
-              >
-                SHOP MAN
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {collectionSections.map((section) => (
-        <section
-          key={section.key}
-          className="mx-auto max-w-[1800px] bg-white px-6 py-10 md:px-10 md:py-14"
+      <section className="outfit-hero">
+        <button
+          type="button"
+          className="outfit-hero-slide-button"
+          onClick={() => onShopCategory(activeSlide.categoryId, activeSlide.query)}
         >
-          <div className="lama-banner reveal-scale relative overflow-hidden">
-            <img
-              src={section.banner}
-              alt={`${section.title} collection banner`}
-              className="h-[42vw] min-h-[320px] max-h-[720px] w-full object-cover"
-            />
-            <div className="lama-banner-overlay" />
-            <div className="lama-banner-copy">
-              <p className="mb-4 text-[0.72rem] tracking-[0.38em] text-white/80">
-                {section.eyebrow}
-              </p>
-              <h2 className="font-editorial text-4xl font-normal tracking-[0.08em] text-white sm:text-7xl">
-                {section.title}
-              </h2>
-              <div className="mt-5 flex flex-wrap justify-center gap-8">
-                <button
-                  type="button"
-                  onClick={() => onShopCategory(section.categoryId, section.query)}
-                  className="lama-hero-link"
-                >
-                  {section.title === "BLACK LUXURY BAGS"
-                    ? "SHOP BAGS"
-                    : `SHOP ${section.title}`}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onShopCategory(section.categoryId, section.query)}
-                  className="lama-hero-link"
-                >
-                  VIEW ALL
-                </button>
-              </div>
-            </div>
-          </div>
+          {heroSlides.map((slide, index) => (
+            <span
+              key={slide.title}
+              className={`outfit-hero-slide ${
+                index === activeHeroSlide ? "is-active" : ""
+              }`}
+              aria-hidden={index !== activeHeroSlide}
+            >
+              <ImageWithFallback
+                src={slide.image}
+                alt=""
+                className="outfit-hero-image"
+              />
+            </span>
+          ))}
+          <span className="outfit-hero-scrim" />
+          <span className="outfit-hero-copy">
+            <span>{activeSlide.title}</span>
+          </span>
+        </button>
 
-          <div className="mt-10 text-center">
-            <p className="font-editorial text-4xl tracking-[0.05em] text-[var(--ink)]">
-              {section.eyebrow}
-            </p>
+        <div className="outfit-hero-dots" aria-label="Hero slider controls">
+          {heroSlides.map((slide, index) => (
             <button
+              key={slide.title}
               type="button"
-              onClick={() => onShopCategory(section.categoryId, section.query)}
-              className="mt-3 text-[0.88rem] tracking-[0.42em] text-[var(--ink)]"
-            >
-              VIEW ALL
-            </button>
-          </div>
-
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            {renderRail(sectionProducts[section.key])}
-          </div>
-        </section>
-      ))}
-
-      <section className="border-t border-[var(--line)] bg-[var(--paper)]">
-        <div className="mx-auto grid max-w-7xl gap-6 px-6 py-14 md:grid-cols-4">
-          {services.map((service, index) => (
-            <article
-              key={service.title}
-              className="reveal-up rounded-[1.4rem] border border-[var(--line)] bg-white p-5"
-              style={{ animationDelay: `${70 * index}ms` }}
-            >
-              <p className="text-[0.72rem] tracking-[0.3em] text-[var(--gold-deep)]">
-                SERVICE
-              </p>
-              <h3 className="mt-3 text-base font-medium tracking-[0.08em] text-[var(--ink)]">
-                {service.title}
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                {service.detail}
-              </p>
-            </article>
+              onClick={() => setActiveHeroSlide(index)}
+              className={index === activeHeroSlide ? "is-active" : ""}
+              aria-label={`Show ${slide.title}`}
+            />
           ))}
         </div>
       </section>
 
-      <section className="bg-[var(--ink)] px-6 py-14 text-white">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8 text-center">
-            <p className="font-editorial text-4xl tracking-[0.05em]">
-              CUSTOMER NOTES
-            </p>
+      <section className="outfit-category-section">
+        <div className="outfit-section-heading reveal-up">
+          <p>Shop by Categories</p>
+          <h2>Fresh fits, fast picks</h2>
+        </div>
+
+        <div className="outfit-pill-row reveal-up">
+          {shopPills.map((pill) => (
+            <button
+              key={pill.label}
+              type="button"
+              onClick={() => onShopCategory(pill.categoryId, pill.query)}
+            >
+              {pill.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="outfit-category-grid">
+          {categoryTiles.map((category, index) => (
+            <button
+              key={category.label}
+              type="button"
+              onClick={() => onShopCategory(category.categoryId, category.query)}
+              className="outfit-category-tile reveal-up"
+              style={{ animationDelay: `${90 + index * 70}ms` }}
+            >
+              <img src={category.image} alt={category.label} />
+              <span>{category.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="outfit-product-section">
+        <div className="outfit-split-heading reveal-up">
+          <div>
+            <p>New In</p>
+            <h2>Just landed</h2>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((item, index) => (
-              <article
-                key={item.name}
-                className="reveal-up rounded-[1.6rem] border border-white/10 bg-white/5 p-6"
-                style={{ animationDelay: `${80 + index * 90}ms` }}
-              >
-                <p className="text-sm leading-7 text-white/80">"{item.quote}"</p>
-                <p className="mt-4 text-[0.75rem] tracking-[0.24em] text-[var(--gold)]">
-                  {item.name.toUpperCase()} / {item.city.toUpperCase()}
-                </p>
-              </article>
-            ))}
-          </div>
+          <button type="button" onClick={() => onShopCategory("all", "new-in")}>
+            View all
+          </button>
+        </div>
+
+        <div className="outfit-product-row">
+          {railProducts.map((product, index) => renderProductTile(product, index))}
+        </div>
+      </section>
+
+      <section className="outfit-collection-section">
+        <div className="outfit-section-heading reveal-up">
+          <p>Shop by Collection</p>
+          <h2>Campaign edits</h2>
+        </div>
+
+        <div className="outfit-collection-grid">
+          {collectionBlocks.map((collection, index) => (
+            <button
+              key={collection.title}
+              type="button"
+              onClick={() =>
+                onShopCategory(collection.categoryId, collection.query)
+              }
+              className="outfit-collection-card reveal-up"
+              style={{ animationDelay: `${80 + index * 80}ms` }}
+            >
+              <img src={collection.image} alt={collection.title} />
+              <span className="outfit-collection-label">
+                <strong>{collection.title}</strong>
+                <small>{collection.subtitle}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="outfit-denim-story">
+        <div className="outfit-denim-copy reveal-up">
+          <p>Denim Studio</p>
+          <h2>We know what makes denim, denim.</h2>
+          <span>
+            Crafted for everyday wear with clean washes, relaxed movement, and
+            pieces that hold their shape.
+          </span>
+          <button type="button" onClick={() => onShopCategory("juniors", "denim")}>
+            Shop denim
+          </button>
+        </div>
+        <div className="outfit-denim-grid">
+          {storyProducts.map((product, index) => renderProductTile(product, index))}
+        </div>
+      </section>
+
+      <section className="outfit-service-strip">
+        {services.map((service, index) => (
+          <article
+            key={service.title}
+            className="reveal-up"
+            style={{ animationDelay: `${70 * index}ms` }}
+          >
+            <h3>{service.title}</h3>
+            <p>{service.detail}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="outfit-notes-section">
+        <div className="outfit-section-heading reveal-up">
+          <p>Customer Notes</p>
+          <h2>What shoppers say</h2>
+        </div>
+        <div className="outfit-notes-grid">
+          {testimonials.map((item, index) => (
+            <article
+              key={item.name}
+              className="reveal-up"
+              style={{ animationDelay: `${80 + index * 80}ms` }}
+            >
+              <p>"{item.quote}"</p>
+              <span>
+                {item.name} / {item.city}
+              </span>
+            </article>
+          ))}
         </div>
       </section>
 

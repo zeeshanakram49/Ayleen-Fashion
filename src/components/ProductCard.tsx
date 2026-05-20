@@ -80,7 +80,7 @@ export function ProductCard({
           onClick={() => onToggleWishlist(product.id)}
           className={`absolute ${
             isCatalog
-              ? "bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/96 text-[1.3rem] text-[var(--ink)]"
+              ? "catalog-heart-button right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/96 text-[1.45rem] text-[var(--ink)] shadow-lg"
               : "right-3 top-3 rounded-full border border-white/70 bg-white/20 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur"
           }`}
         >

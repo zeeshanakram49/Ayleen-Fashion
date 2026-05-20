@@ -79,21 +79,24 @@ export function CartDrawer({ open, latestItem, cartCount, subtotal, onClose }: C
           <a
             href="#/cart"
             onClick={onClose}
-            className="rounded-full bg-[var(--ink)] px-5 py-3 text-center text-[var(--champagne)]"
+            style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
+            className="rounded-full px-5 py-3 text-center font-semibold"
           >
             VIEW CART
           </a>
           <a
             href="#/checkout"
             onClick={onClose}
-            className="rounded-full border border-[var(--line-strong)] px-5 py-3 text-center"
+            style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
+            className="rounded-full border border-[var(--ink)] px-5 py-3 text-center font-semibold"
           >
             CHECKOUT
           </a>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-transparent px-5 py-3 text-center text-[var(--muted)]"
+            style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
+            className="rounded-full border border-[var(--ink)] px-5 py-3 text-center font-semibold"
           >
             CONTINUE SHOPPING
           </button>

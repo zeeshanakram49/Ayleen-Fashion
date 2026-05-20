@@ -22,6 +22,7 @@ export function parseHash(): Route {
   if (base === 'wishlist') return { page: 'wishlist' };
   if (base === 'cart') return { page: 'cart' };
   if (base === 'checkout') return { page: 'checkout' };
+  if (base === 'account') return { page: 'account' };
   if (base === 'about') return { page: 'about' };
   if (base === 'contact') return { page: 'contact' };
   return { page: 'home' };

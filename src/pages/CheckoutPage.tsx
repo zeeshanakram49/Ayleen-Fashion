@@ -41,7 +41,8 @@ export function CheckoutPage({
           </p>
           <a
             href="#/shop"
-            className="mt-6 inline-flex rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"
+            style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
+            className="mt-6 inline-flex rounded-full px-6 py-3 text-xs font-semibold tracking-[0.2em]"
           >
             CONTINUE SHOPPING
           </a>

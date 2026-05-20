@@ -156,7 +156,11 @@ export function Header({
     desktopLinks.find((link) => link.id === activeMenu) ?? null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-black/8 bg-white/95 backdrop-blur-xl">
+    <header
+      className={`site-header sticky top-0 z-50 border-b border-black/8 bg-white/95 backdrop-blur-xl ${
+        route.page === "home" ? "site-header-home" : ""
+      }`}
+    >
       <div className="site-announcement-bar">
         FREE SHIPPING ON ORDERS ABOVE RS. 2500
       </div>
@@ -211,9 +215,9 @@ export function Header({
             )}
           </a>
           <a
-            href="#/about"
+            href="#/account"
             className="site-icon-link"
-            aria-label="About Ayleen"
+            aria-label="Account login and sign up"
           >
             <UserIcon />
           </a>
@@ -302,9 +306,9 @@ export function Header({
             className="site-mobile-icon"
           >
             <span className="space-y-1.5">
-              <span className="block h-0.5 w-5 bg-[var(--ink)]" />
-              <span className="block h-0.5 w-5 bg-[var(--ink)]" />
-              <span className="block h-0.5 w-5 bg-[var(--ink)]" />
+              <span className="site-menu-bar block h-0.5 w-5" />
+              <span className="site-menu-bar block h-0.5 w-5" />
+              <span className="site-menu-bar block h-0.5 w-5" />
             </span>
           </button>
         </div>
@@ -355,6 +359,13 @@ export function Header({
               className="rounded-full border border-black/10 bg-white px-4 py-3 text-center"
             >
               SEARCH PRODUCTS
+            </a>
+            <a
+              href="#/account"
+              onClick={closeMenu}
+              className="rounded-full border border-black/10 px-4 py-3 text-center"
+            >
+              LOGIN / SIGN UP
             </a>
             <a
               href="#/wishlist"

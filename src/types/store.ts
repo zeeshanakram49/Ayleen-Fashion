@@ -63,6 +63,7 @@ export type Route =
   | { page: 'wishlist' }
   | { page: 'cart' }
   | { page: 'checkout' }
+  | { page: 'account' }
   | { page: 'about' }
   | { page: 'contact' };
 

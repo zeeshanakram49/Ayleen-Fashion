@@ -1,15 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Tenor+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
-  --ink: #17110c;
-  --muted: #6d6257;
-  --paper: #fff9f2;
-  --panel: #f6efe5;
-  --line: #e7d8c5;
-  --line-strong: #cdb79a;
-  --gold: #d7b37b;
-  --gold-deep: #9a7344;
+  --ink: #111111;
+  --muted: #626262;
+  --paper: #ffffff;
+  --panel: #f5f5f3;
+  --line: #deded8;
+  --line-strong: #9d9d94;
+  --gold: #c4a064;
+  --gold-deep: #816236;
+  --champagne: #f7f0e4;
+  --signal: #c91f2d;
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -31,12 +33,10 @@ html {
 
 body {
   margin: 0;
-  font-family: "Outfit", sans-serif;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 12% 14%, rgba(215, 179, 123, 0.16), transparent 28%),
-    radial-gradient(circle at 88% 84%, rgba(23, 17, 12, 0.07), transparent 25%),
-    var(--paper);
+  background: var(--paper);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -53,8 +53,54 @@ textarea {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
+.account-field {
+  display: grid;
+  gap: 0.55rem;
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.account-field input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(23, 17, 12, 0.24);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.34rem 0 0.72rem;
+  color: var(--ink);
+  outline: none;
+  transition:
+    border-color 180ms var(--ease-premium),
+    box-shadow 180ms var(--ease-premium);
+}
+
+.account-field input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.account-submit {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  transition:
+    background-color 180ms var(--ease-premium),
+    color 180ms var(--ease-premium);
+}
+
+.account-submit:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
 .font-editorial {
-  font-family: "Tenor Sans", serif;
+  font-family: "League Spartan", sans-serif;
+  font-weight: 700;
 }
 
 .premium-scene {
@@ -63,15 +109,7 @@ textarea {
 }
 
 .premium-scene::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.38), transparent 18%),
-    radial-gradient(circle at 90% 76%, rgba(215, 179, 123, 0.14), transparent 20%);
-  z-index: -1;
-  animation: ambient-shift 18s ease-in-out infinite alternate;
+  content: none;
 }
 
 .glass-shift {
@@ -104,9 +142,10 @@ textarea {
 }
 
 .site-wordmark {
+  font-family: "League Spartan", sans-serif;
   font-size: clamp(1.95rem, 2.4vw, 2.7rem);
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
   color: #191919;
@@ -120,6 +159,40 @@ textarea {
   font-size: 0.84rem;
   letter-spacing: 0.34em;
   text-transform: uppercase;
+}
+
+.site-header-home {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-bottom-color: transparent;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent);
+  color: white;
+  backdrop-filter: none;
+}
+
+.site-header-home .site-announcement-bar {
+  display: none;
+}
+
+.site-header-home .site-wordmark,
+.site-header-home .site-nav-link-minimal,
+.site-header-home .site-icon-link,
+.site-header-home .site-mobile-icon {
+  color: white;
+}
+
+.site-header-home .site-mobile-icon {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.site-menu-bar {
+  background: var(--ink);
+}
+
+.site-header-home .site-menu-bar {
+  background: white;
 }
 
 .site-desktop-nav {
@@ -137,8 +210,8 @@ textarea {
   background: transparent;
   white-space: nowrap;
   font-size: 0.84rem;
-  font-weight: 400;
-  letter-spacing: 0.34em;
+  font-weight: 700;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: rgba(25, 25, 25, 0.96);
   transition:
@@ -202,6 +275,7 @@ textarea {
   background: transparent;
   padding: 0;
   font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(25, 25, 25, 0.95);
@@ -247,8 +321,9 @@ textarea {
 
 .site-mega-preview-label {
   margin: 0;
-  font-family: "Tenor Sans", serif;
+  font-family: "League Spartan", sans-serif;
   font-size: clamp(2.6rem, 4vw, 4.5rem);
+  font-weight: 700;
   letter-spacing: 0.08em;
 }
 
@@ -321,6 +396,527 @@ textarea {
   font-size: 0.56rem;
   font-weight: 600;
   line-height: 1;
+}
+
+.outfit-hero {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #111;
+  color: white;
+}
+
+.outfit-hero-slide-button {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: #111;
+  color: white;
+}
+
+.outfit-hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.025);
+  transition:
+    opacity 900ms var(--ease-premium),
+    transform 6200ms ease;
+}
+
+.outfit-hero-slide.is-active {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.outfit-hero-image {
+  display: block;
+  height: 100vh;
+  min-height: 620px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.outfit-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.72)),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 48%);
+}
+
+.outfit-hero-copy {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  z-index: 2;
+  width: min(92vw, 1200px);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.outfit-section-heading p,
+.outfit-split-heading p,
+.outfit-denim-copy p {
+  margin: 0;
+  color: var(--signal);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.outfit-hero-copy span {
+  display: block;
+  color: white;
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(3.6rem, 8vw, 8rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 14px 42px rgba(0, 0, 0, 0.52);
+}
+
+.outfit-hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 1.45rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.35rem;
+  transform: translateX(-50%);
+}
+
+.outfit-hero-dots button {
+  height: 0.78rem;
+  width: 0.78rem;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  padding: 0;
+  transition:
+    background-color 220ms var(--ease-premium),
+    transform 220ms var(--ease-premium);
+}
+
+.outfit-hero-dots button.is-active {
+  background: white;
+  transform: scale(1.04);
+}
+
+.outfit-pill-row button,
+.outfit-split-heading button,
+.outfit-denim-copy button {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  min-height: 44px;
+  padding: 0.85rem 1.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition:
+    background-color 220ms var(--ease-premium),
+    color 220ms var(--ease-premium),
+    transform 220ms var(--ease-premium);
+}
+
+.outfit-pill-row button:hover,
+.outfit-split-heading button:hover,
+.outfit-denim-copy button:hover {
+  transform: translateY(-2px);
+}
+
+.outfit-category-section,
+.outfit-product-section,
+.outfit-collection-section,
+.outfit-notes-section {
+  background: white;
+  padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 4vw, 4rem);
+}
+
+.outfit-section-heading,
+.outfit-split-heading {
+  margin: 0 auto clamp(1.8rem, 4vw, 3rem);
+  max-width: 1500px;
+}
+
+.outfit-section-heading {
+  text-align: center;
+}
+
+.outfit-section-heading h2,
+.outfit-split-heading h2,
+.outfit-denim-copy h2 {
+  margin: 0.45rem 0 0;
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(2.25rem, 5vw, 5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.outfit-split-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.outfit-split-heading button,
+.outfit-denim-copy button {
+  color: var(--ink);
+}
+
+.outfit-split-heading button:hover,
+.outfit-denim-copy button:hover {
+  background: var(--ink);
+  color: white;
+}
+
+.outfit-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0 auto clamp(1.8rem, 4vw, 3rem);
+  max-width: 1050px;
+}
+
+.outfit-pill-row button {
+  color: var(--ink);
+  border-color: rgba(17, 17, 17, 0.2);
+  border-radius: 999px;
+  padding-inline: 1.15rem;
+  letter-spacing: 0.16em;
+}
+
+.outfit-pill-row button:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: white;
+}
+
+.outfit-category-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 0 auto;
+  max-width: 1500px;
+}
+
+.outfit-category-tile,
+.outfit-collection-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  background: #efefef;
+  color: white;
+}
+
+.outfit-category-tile {
+  aspect-ratio: 4 / 5;
+}
+
+.outfit-category-tile img,
+.outfit-collection-card img {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transform: scale(1.01);
+  transition: transform 700ms var(--ease-premium);
+}
+
+.outfit-category-tile::after,
+.outfit-collection-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.62));
+}
+
+.outfit-category-tile:hover img,
+.outfit-collection-card:hover img {
+  transform: scale(1.08);
+}
+
+.outfit-category-tile span {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.outfit-product-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0 auto;
+  max-width: 1500px;
+}
+
+.outfit-product-tile {
+  min-width: 0;
+  background: white;
+}
+
+.outfit-product-media {
+  position: relative;
+  overflow: hidden;
+  background: #f2f2f2;
+}
+
+.outfit-product-image {
+  display: block;
+  height: clamp(20rem, 31vw, 34rem);
+  transition: transform 700ms var(--ease-premium);
+}
+
+.outfit-product-tile:hover .outfit-product-image {
+  transform: scale(1.06);
+}
+
+.outfit-heart-button {
+  position: absolute;
+  right: 0.85rem;
+  top: 0.85rem;
+  z-index: 4;
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111;
+  font-size: 1.65rem;
+  line-height: 1;
+  box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  transition:
+    background-color 180ms var(--ease-premium),
+    color 180ms var(--ease-premium),
+    transform 180ms var(--ease-premium);
+}
+
+.outfit-heart-button:hover {
+  background: #111;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.outfit-quick-button {
+  position: absolute;
+  left: 0.8rem;
+  right: 0.8rem;
+  bottom: 0.8rem;
+  z-index: 3;
+  opacity: 0;
+  border: none;
+  background: rgba(17, 17, 17, 0.96);
+  color: white;
+  padding: 0.9rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transform: translateY(8px);
+  transition:
+    opacity 220ms var(--ease-premium),
+    transform 220ms var(--ease-premium);
+}
+
+.outfit-product-tile:hover .outfit-quick-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.outfit-product-info {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 0.25rem 0;
+  text-align: center;
+}
+
+.outfit-product-name {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.outfit-product-info p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.outfit-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0 auto;
+  max-width: 1500px;
+}
+
+.outfit-collection-card {
+  min-height: clamp(26rem, 40vw, 42rem);
+}
+
+.outfit-collection-label {
+  position: absolute;
+  left: 1.2rem;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 2;
+  display: grid;
+  gap: 0.45rem;
+  text-align: left;
+}
+
+.outfit-collection-label strong {
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(1.8rem, 3vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.outfit-collection-label small {
+  max-width: 32ch;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.outfit-denim-story {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(1rem, 4vw, 3rem);
+  align-items: center;
+  background: #f3f3f0;
+  padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 4vw, 4rem);
+}
+
+.outfit-denim-copy {
+  max-width: 560px;
+}
+
+.outfit-denim-copy span {
+  display: block;
+  margin-top: 1.1rem;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.outfit-denim-copy button {
+  margin-top: 1.8rem;
+}
+
+.outfit-denim-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.outfit-denim-grid .outfit-product-image {
+  height: clamp(17rem, 24vw, 28rem);
+}
+
+.outfit-service-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: #111;
+  color: white;
+}
+
+.outfit-service-strip article {
+  min-height: 168px;
+  padding: 2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.outfit-service-strip article:last-child {
+  border-right: 0;
+}
+
+.outfit-service-strip h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.outfit-service-strip p {
+  margin: 0.85rem 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.outfit-notes-section {
+  background: white;
+}
+
+.outfit-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 auto;
+  max-width: 1320px;
+  background: var(--line);
+}
+
+.outfit-notes-grid article {
+  min-height: 230px;
+  background: white;
+  padding: clamp(1.4rem, 3vw, 2.4rem);
+}
+
+.outfit-notes-grid p {
+  margin: 0;
+  color: var(--ink);
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(1.25rem, 2vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.outfit-notes-grid span {
+  display: block;
+  margin-top: 1.3rem;
+  color: var(--signal);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .lama-hero {
@@ -468,6 +1064,21 @@ textarea {
 .catalog-product-card:hover .catalog-product-quickview {
   opacity: 1;
   transform: translateY(0);
+}
+
+.catalog-heart-button {
+  z-index: 4;
+  backdrop-filter: blur(12px);
+  transition:
+    background-color 180ms var(--ease-premium),
+    color 180ms var(--ease-premium),
+    transform 180ms var(--ease-premium);
+}
+
+.catalog-heart-button:hover {
+  background: #111;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .quickview-backdrop {
@@ -913,6 +1524,41 @@ textarea {
     height: 22rem;
   }
 
+  .outfit-hero,
+  .outfit-hero-image {
+    min-height: 640px;
+  }
+
+  .outfit-category-grid,
+  .outfit-product-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .outfit-category-tile:first-child {
+    grid-column: span 2;
+    aspect-ratio: 16 / 9;
+  }
+
+  .outfit-collection-grid,
+  .outfit-denim-story,
+  .outfit-service-strip,
+  .outfit-notes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .outfit-denim-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .outfit-service-strip article {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .outfit-service-strip article:last-child {
+    border-bottom: 0;
+  }
+
   .quickview-grid {
     grid-template-columns: 1fr;
     padding: 1.2rem;
@@ -949,6 +1595,55 @@ textarea {
   .site-mobile-icon svg {
     width: 1.58rem;
     height: 1.58rem;
+  }
+
+  .outfit-hero,
+  .outfit-hero-image {
+    min-height: 560px;
+  }
+
+  .outfit-hero-copy {
+    left: 50%;
+    right: auto;
+    top: 55%;
+    bottom: auto;
+    width: calc(100% - 2rem);
+  }
+
+  .outfit-pill-row button,
+  .outfit-split-heading button,
+  .outfit-denim-copy button {
+    min-height: 40px;
+    padding: 0.72rem 0.95rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+  }
+
+  .outfit-split-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .outfit-category-grid,
+  .outfit-product-row,
+  .outfit-denim-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .outfit-category-tile:first-child {
+    grid-column: span 1;
+    aspect-ratio: 4 / 5;
+  }
+
+  .outfit-product-image,
+  .outfit-denim-grid .outfit-product-image {
+    height: 28rem;
+    max-height: 72vh;
+  }
+
+  .outfit-service-strip article {
+    min-height: 136px;
+    padding: 1.4rem;
   }
 }
 

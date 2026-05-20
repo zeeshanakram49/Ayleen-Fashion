@@ -38,6 +38,7 @@ export function CartPage({
           <p className="mt-3 text-sm text-[var(--muted)]">Add products to continue checkout.</p>
           <a
             href="#/shop"
+                style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
             className="mt-5 inline-flex rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"
           >
             START SHOPPING
@@ -121,7 +122,8 @@ export function CartPage({
             </p>
             <a
               href="#/checkout"
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"
+              style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-xs font-semibold tracking-[0.2em]"
             >
               PROCEED CHECKOUT
             </a>

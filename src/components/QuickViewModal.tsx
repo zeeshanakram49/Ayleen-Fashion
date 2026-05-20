@@ -27,20 +27,20 @@ export function QuickViewModal({
   onToggleWishlist,
   onAddToCart,
 }: QuickViewModalProps) {
-  const [activeImage, setActiveImage] = useState(product.gallery[0] ?? product.image);
-  const [qty, setQty] = useState(1);
+  const [activeImageByProduct, setActiveImageByProduct] = useState<
+    Record<string, string>
+  >({});
+  const [qtyByProduct, setQtyByProduct] = useState<Record<string, number>>({});
   const gallery = useMemo(
     () => Array.from(new Set([product.image, ...product.gallery])),
     [product],
   );
+  const activeImage =
+    activeImageByProduct[product.id] ?? product.gallery[0] ?? product.image;
+  const qty = qtyByProduct[product.id] ?? 1;
   const salePercent = discountPercent(product.price, product.oldPrice);
   const finalSize = pickedSize || product.sizes[0];
   const needsExplicitSize = product.sizes.length > 1 && !pickedSize;
-
-  useEffect(() => {
-    setActiveImage(product.gallery[0] ?? product.image);
-    setQty(1);
-  }, [product]);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
@@ -103,7 +103,12 @@ export function QuickViewModal({
               <button
                 key={image}
                 type="button"
-                onClick={() => setActiveImage(image)}
+                onClick={() =>
+                  setActiveImageByProduct((prev) => ({
+                    ...prev,
+                    [product.id]: image,
+                  }))
+                }
                 className={`quickview-thumb ${
                   activeImage === image ? "is-active" : ""
                 }`}
@@ -194,7 +199,12 @@ export function QuickViewModal({
               <div className="quickview-qty mt-3">
                 <button
                   type="button"
-                  onClick={() => setQty((prev) => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setQtyByProduct((prev) => ({
+                      ...prev,
+                      [product.id]: Math.max(1, qty - 1),
+                    }))
+                  }
                 >
                   −
                 </button>
@@ -202,7 +212,10 @@ export function QuickViewModal({
                 <button
                   type="button"
                   onClick={() =>
-                    setQty((prev) => Math.min(product.stock, prev + 1))
+                    setQtyByProduct((prev) => ({
+                      ...prev,
+                      [product.id]: Math.min(product.stock, qty + 1),
+                    }))
                   }
                 >
                   +

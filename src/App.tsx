@@ -12,6 +12,7 @@ import {
 } from "./data/store";
 import { orderTotal, parseHash, shippingFee, taxAmount } from "./lib/store";
 import { AboutPage } from "./pages/AboutPage";
+import { AccountPage } from "./pages/AccountPage";
 import { CartPage } from "./pages/CartPage";
 import { CheckoutPage } from "./pages/CheckoutPage";
 import { ContactPage } from "./pages/ContactPage";
@@ -27,14 +28,32 @@ import type {
   Route,
 } from "./types/store";
 
+function readStoredCart() {
+  try {
+    const storedCart = localStorage.getItem("ayleen_cart_v1");
+    return storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readStoredWishlist() {
+  try {
+    const storedWishlist = localStorage.getItem("ayleen_wishlist_v1");
+    return storedWishlist ? (JSON.parse(storedWishlist) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 function App() {
   const [route, setRoute] = useState<Route>(() => parseHash());
   const [activeCategory, setActiveCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("featured");
   const [selectedSize, setSelectedSize] = useState<Record<string, string>>({});
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(readStoredCart);
+  const [wishlist, setWishlist] = useState<string[]>(readStoredWishlist);
   const [checkout, setCheckout] = useState<CheckoutState>(initialCheckout);
   const [placedOrder, setPlacedOrder] = useState("");
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
@@ -43,13 +62,6 @@ function App() {
     size: string;
   } | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem("ayleen_cart_v1");
-    const storedWishlist = localStorage.getItem("ayleen_wishlist_v1");
-    if (storedCart) setCart(JSON.parse(storedCart) as CartItem[]);
-    if (storedWishlist) setWishlist(JSON.parse(storedWishlist) as string[]);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem("ayleen_cart_v1", JSON.stringify(cart));
@@ -79,6 +91,7 @@ function App() {
       wishlist: "Wishlist | AYLEEN",
       cart: "Cart | AYLEEN",
       checkout: "Checkout | AYLEEN",
+      account: "Account | AYLEEN",
       about: "About | AYLEEN",
       contact: "Contact | AYLEEN",
     };
@@ -473,6 +486,7 @@ function App() {
         )}
 
         {route.page === "about" && <AboutPage />}
+        {route.page === "account" && <AccountPage />}
         {route.page === "contact" && <ContactPage />}
       </main>
 
