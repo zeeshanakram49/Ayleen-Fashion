@@ -56,6 +56,7 @@ function App() {
   const [wishlist, setWishlist] = useState<string[]>(readStoredWishlist);
   const [checkout, setCheckout] = useState<CheckoutState>(initialCheckout);
   const [placedOrder, setPlacedOrder] = useState("");
+  const [placedPayment, setPlacedPayment] = useState<CheckoutState["payment"] | "">("");
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [latestCartLine, setLatestCartLine] = useState<{
     productId: string;
@@ -349,6 +350,7 @@ function App() {
 
     const orderId = `AY-${Math.floor(100000 + Math.random() * 900000)}`;
     setPlacedOrder(orderId);
+    setPlacedPayment(checkout.payment);
     setCart([]);
     setCheckout(initialCheckout);
     setCartDrawerOpen(false);
@@ -480,6 +482,7 @@ function App() {
             tax={tax}
             total={total}
             placedOrder={placedOrder}
+            placedPayment={placedPayment}
             onCheckoutChange={onCheckoutChange}
             onPlaceOrder={placeOrder}
           />

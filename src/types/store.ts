@@ -52,7 +52,7 @@ export type CheckoutState = {
   phone: string;
   address: string;
   city: string;
-  payment: 'COD' | 'CARD';
+  payment: 'COD' | 'JAZZCASH' | 'EASYPAISA' | 'CARD';
   note: string;
 };
 

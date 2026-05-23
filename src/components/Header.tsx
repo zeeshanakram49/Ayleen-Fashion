@@ -302,7 +302,11 @@ export function Header({
       </div>
 
       <div className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-3 px-4 lg:hidden sm:px-6">
-        <a href="#/" className="site-wordmark text-[1.7rem] tracking-[0.16em]">
+        <a
+          href="#/"
+          className="site-wordmark text-[1.7rem] tracking-[0.16em]"
+          aria-label="Ayleen home"
+        >
           AYLEEN
         </a>
 

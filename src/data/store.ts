@@ -561,7 +561,7 @@ export const services: Service[] = [
   },
   {
     title: "Secure Checkout",
-    detail: "COD and card payments with encrypted checkout.",
+    detail: "COD, JazzCash, EasyPaisa, and card payment options.",
   },
   {
     title: "Style Assistance",

@@ -118,7 +118,7 @@ export function CartPage({
               </div>
             </div>
             <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
-              Free delivery unlocks automatically above PKR 6,000 and checkout remains available with COD or card on delivery.
+              Free delivery unlocks automatically above PKR 6,000. Checkout supports COD, JazzCash, EasyPaisa, and card payments.
             </p>
             <a
               href="#/checkout"

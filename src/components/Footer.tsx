@@ -173,7 +173,7 @@ export function Footer({ categories }: FooterProps) {
             <div className="mt-5 grid gap-3 text-sm leading-6 text-[var(--muted)] sm:grid-cols-2">
               <p>Nationwide express delivery on qualifying orders.</p>
               <p>7-day exchange support for unused articles.</p>
-              <p>Secure checkout with COD and card payment options.</p>
+              <p>Secure checkout with COD, JazzCash, EasyPaisa, and cards.</p>
               <p>Responsive support for sizing and gifting queries.</p>
             </div>
           </div>
