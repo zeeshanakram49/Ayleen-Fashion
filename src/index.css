@@ -1,7 +1,38 @@
-@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Tenor Sans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url("https://pk.lamaretail.com/cdn/fonts/tenor_sans/tenorsans_n4.966071a72c28462a9256039d3e3dc5b0cf314f65.woff2") format("woff2"),
+    url("https://pk.lamaretail.com/cdn/fonts/tenor_sans/tenorsans_n4.2282841d948f9649ba5c3cad6ea46df268141820.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url("https://pk.lamaretail.com/cdn/fonts/outfit/outfit_n3.8c97ae4c4fac7c2ea467a6dc784857f4de7e0e37.woff2") format("woff2"),
+    url("https://pk.lamaretail.com/cdn/fonts/outfit/outfit_n3.b50a189ccde91f9bceee88f207c18c09f0b62a7b.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url("https://pk.lamaretail.com/cdn/fonts/outfit/outfit_n6.dfcbaa80187851df2e8384061616a8eaa1702fdc.woff2") format("woff2"),
+    url("https://pk.lamaretail.com/cdn/fonts/outfit/outfit_n6.88384e9fc3e36038624caccb938f24ea8008a91d.woff") format("woff");
+}
+
 :root {
+  --font-sans: "Outfit", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Tenor Sans", "Outfit", sans-serif;
   --ink: #111111;
   --muted: #626262;
   --paper: #ffffff;
@@ -33,8 +64,8 @@ html {
 
 body {
   margin: 0;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-weight: 300;
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
@@ -99,8 +130,8 @@ button {
 }
 
 .font-editorial {
-  font-family: "League Spartan", sans-serif;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 .premium-scene {
@@ -142,10 +173,10 @@ button {
 }
 
 .site-wordmark {
-  font-family: "League Spartan", sans-serif;
-  font-size: clamp(1.95rem, 2.4vw, 2.7rem);
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 2.25vw, 2.65rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;
   color: #191919;
@@ -166,13 +197,23 @@ button {
   left: 0;
   right: 0;
   border-bottom-color: transparent;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent);
+  background: transparent;
   color: white;
   backdrop-filter: none;
 }
 
 .site-header-home .site-announcement-bar {
-  display: none;
+  display: block;
+  overflow: hidden;
+  background: rgba(168, 168, 168, 0.9);
+  color: white;
+  padding: 0.43rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .site-header-home .site-wordmark,
@@ -210,8 +251,8 @@ button {
   background: transparent;
   white-space: nowrap;
   font-size: 0.84rem;
-  font-weight: 700;
-  letter-spacing: 0.26em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(25, 25, 25, 0.96);
   transition:
@@ -275,8 +316,8 @@ button {
   background: transparent;
   padding: 0;
   font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(25, 25, 25, 0.95);
   transition: color 200ms var(--ease-premium);
@@ -321,10 +362,10 @@ button {
 
 .site-mega-preview-label {
   margin: 0;
-  font-family: "League Spartan", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(2.6rem, 4vw, 4.5rem);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .site-mega-preview-cta {
@@ -421,7 +462,7 @@ button {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transform: scale(1.025);
+  transform: scale(1.01);
   transition:
     opacity 900ms var(--ease-premium),
     transform 6200ms ease;
@@ -429,13 +470,13 @@ button {
 
 .outfit-hero-slide.is-active {
   opacity: 1;
-  transform: scale(1.08);
+  transform: scale(1.045);
 }
 
 .outfit-hero-image {
   display: block;
   height: 100vh;
-  min-height: 620px;
+  min-height: 650px;
   width: 100%;
   object-fit: cover;
 }
@@ -444,16 +485,21 @@ button {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.72)),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 48%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 18%, rgba(0, 0, 0, 0.58)),
+    radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.46) 70%);
 }
 
 .outfit-hero-copy {
   position: absolute;
   left: 50%;
-  top: 56%;
+  top: 58%;
   z-index: 2;
-  width: min(92vw, 1200px);
+  display: block;
+  width: auto;
+  max-width: calc(100% - 2rem);
+  border: 0;
+  background: transparent;
+  padding: 0;
   transform: translate(-50%, -50%);
   text-align: center;
 }
@@ -464,40 +510,40 @@ button {
   margin: 0;
   color: var(--signal);
   font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
 .outfit-hero-copy span {
   display: block;
   color: white;
-  font-family: "League Spartan", sans-serif;
-  font-size: clamp(3.6rem, 8vw, 8rem);
-  font-weight: 700;
+  font-family: var(--font-sans);
+  font-size: clamp(4rem, 6.8vw, 6.3rem);
+  font-weight: 300;
   line-height: 1;
   letter-spacing: 0;
-  text-shadow: 0 14px 42px rgba(0, 0, 0, 0.52);
+  text-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
 }
 
 .outfit-hero-dots {
   position: absolute;
   left: 50%;
-  bottom: 1.45rem;
+  bottom: 1.6rem;
   z-index: 5;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.35rem;
+  gap: 1.25rem;
   transform: translateX(-50%);
 }
 
 .outfit-hero-dots button {
-  height: 0.78rem;
-  width: 0.78rem;
-  border: 1px solid rgba(255, 255, 255, 0.76);
+  height: 0.86rem;
+  width: 0.86rem;
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.44);
   padding: 0;
   transition:
     background-color 220ms var(--ease-premium),
@@ -518,8 +564,8 @@ button {
   min-height: 44px;
   padding: 0.85rem 1.35rem;
   font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   transition:
     background-color 220ms var(--ease-premium),
@@ -534,11 +580,101 @@ button {
 }
 
 .outfit-category-section,
+.outfit-wardrobe-section,
 .outfit-product-section,
 .outfit-collection-section,
 .outfit-notes-section {
   background: white;
   padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 4vw, 4rem);
+}
+
+.outfit-wardrobe-section {
+  padding-top: clamp(2.2rem, 5vw, 4.5rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.outfit-wardrobe-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin: 0 auto clamp(1.4rem, 3vw, 2.4rem);
+  max-width: 1700px;
+}
+
+.outfit-wardrobe-head p {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.outfit-wardrobe-head h2 {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.9rem, 5vw, 5.8rem);
+  font-weight: 400;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.outfit-wardrobe-tools {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2.2rem);
+  padding-top: 0.8rem;
+}
+
+.outfit-wardrobe-tools a {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.35rem;
+  color: rgba(17, 17, 17, 0.78);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.outfit-wardrobe-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.1rem, 2.4vw, 2.8rem);
+  margin: 0 auto clamp(2rem, 4vw, 4rem);
+  max-width: 1700px;
+}
+
+.outfit-wardrobe-tabs button {
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 0 0 0.6rem;
+  color: rgba(17, 17, 17, 0.72);
+  font-size: clamp(0.86rem, 1.2vw, 1.12rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.outfit-wardrobe-tabs button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: #111;
+  transition: transform 220ms var(--ease-premium);
+}
+
+.outfit-wardrobe-tabs button:hover,
+.outfit-wardrobe-tabs button.is-active {
+  color: #111;
+}
+
+.outfit-wardrobe-tabs button:hover::after,
+.outfit-wardrobe-tabs button.is-active::after {
+  transform: scaleX(1);
 }
 
 .outfit-section-heading,
@@ -555,10 +691,10 @@ button {
 .outfit-split-heading h2,
 .outfit-denim-copy h2 {
   margin: 0.45rem 0 0;
-  font-family: "League Spartan", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(2.25rem, 5vw, 5rem);
-  font-weight: 700;
-  line-height: 1;
+  font-weight: 400;
+  line-height: 0.98;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -657,8 +793,8 @@ button {
   bottom: 1rem;
   z-index: 2;
   font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-align: left;
   text-transform: uppercase;
 }
@@ -671,6 +807,10 @@ button {
   max-width: 1500px;
 }
 
+.outfit-wardrobe-row {
+  max-width: 1700px;
+}
+
 .outfit-product-tile {
   min-width: 0;
   background: white;
@@ -679,7 +819,7 @@ button {
 .outfit-product-media {
   position: relative;
   overflow: hidden;
-  background: #f2f2f2;
+  background: linear-gradient(180deg, #f5f6f5, #e9ecec);
 }
 
 .outfit-product-image {
@@ -734,8 +874,8 @@ button {
   color: white;
   padding: 0.9rem 1rem;
   font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   transform: translateY(8px);
   transition:
@@ -750,26 +890,37 @@ button {
 
 .outfit-product-info {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.34rem;
   padding: 1rem 0.25rem 0;
-  text-align: center;
+  text-align: left;
 }
 
 .outfit-product-name {
   border: none;
   background: transparent;
   color: var(--ink);
-  font-size: 0.9rem;
+  padding: 0;
+  text-align: left;
+  font-size: 0.94rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.outfit-product-info span {
+  color: rgba(17, 17, 17, 0.58);
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.12em;
-  line-height: 1.35;
   text-transform: uppercase;
 }
 
 .outfit-product-info p {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .outfit-collection-grid {
@@ -796,10 +947,10 @@ button {
 }
 
 .outfit-collection-label strong {
-  font-family: "League Spartan", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 3vw, 3.25rem);
-  font-weight: 700;
-  line-height: 1;
+  font-weight: 400;
+  line-height: 1.04;
   text-transform: uppercase;
 }
 
@@ -807,8 +958,8 @@ button {
   max-width: 32ch;
   color: rgba(255, 255, 255, 0.86);
   font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -869,8 +1020,8 @@ button {
 .outfit-service-strip h3 {
   margin: 0;
   font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -903,9 +1054,9 @@ button {
 .outfit-notes-grid p {
   margin: 0;
   color: var(--ink);
-  font-family: "League Spartan", sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.25rem, 2vw, 1.9rem);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.35;
 }
 
@@ -914,8 +1065,8 @@ button {
   margin-top: 1.3rem;
   color: var(--signal);
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -1511,6 +1662,11 @@ button {
     letter-spacing: 0.22em;
   }
 
+  .site-header-home .site-announcement-bar {
+    font-size: 0.82rem;
+    letter-spacing: 0;
+  }
+
   .site-nav-link-minimal::after {
     display: none;
   }
@@ -1527,6 +1683,10 @@ button {
   .outfit-hero,
   .outfit-hero-image {
     min-height: 640px;
+  }
+
+  .outfit-wardrobe-head {
+    max-width: 100%;
   }
 
   .outfit-category-grid,
@@ -1605,9 +1765,44 @@ button {
   .outfit-hero-copy {
     left: 50%;
     right: auto;
-    top: 55%;
+    top: 56%;
     bottom: auto;
     width: calc(100% - 2rem);
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .outfit-hero-copy span {
+    font-size: clamp(3.2rem, 17vw, 5rem);
+  }
+
+  .outfit-hero-dots {
+    left: 50%;
+    right: auto;
+    bottom: 1.1rem;
+  }
+
+  .outfit-wardrobe-head {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .outfit-wardrobe-tools {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 0;
+  }
+
+  .outfit-wardrobe-tabs {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+  }
+
+  .outfit-wardrobe-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .outfit-pill-row button,

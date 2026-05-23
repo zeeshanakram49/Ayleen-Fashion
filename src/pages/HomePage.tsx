@@ -96,6 +96,14 @@ const shopPills = [
   { label: "Accessories", categoryId: "accessories", query: "bags" },
 ] as const;
 
+const wardrobeTabs = [
+  { label: "T-Shirts", categoryId: "all", query: "shirt" },
+  { label: "Denim", categoryId: "juniors", query: "denim" },
+  { label: "Footwear", categoryId: "accessories", query: "shoes" },
+  { label: "Trousers", categoryId: "men", query: "trouser" },
+  { label: "Bags", categoryId: "accessories", query: "bags" },
+] as const;
+
 const heroSlides = [
   {
     title: "Pause",
@@ -105,21 +113,21 @@ const heroSlides = [
       "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=2200&auto=format&fit=crop",
   },
   {
-    title: "Summer Essentials",
+    title: "Maytime",
     categoryId: "women",
     query: "",
     image:
       "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2200&auto=format&fit=crop",
   },
   {
-    title: "Artisanal Collection",
+    title: "Shoes",
     categoryId: "men",
     query: "shirt",
     image:
       "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2200&auto=format&fit=crop",
   },
   {
-    title: "Denim Studio",
+    title: "Banana Road",
     categoryId: "juniors",
     query: "denim",
     image:
@@ -156,6 +164,7 @@ export function HomePage({
   const featuredProducts = products.slice(0, 8);
   const railProducts = newInProducts.length >= 4 ? newInProducts : featuredProducts;
   const storyProducts = denimProducts.length ? denimProducts : featuredProducts.slice(0, 4);
+  const wardrobeProducts = featuredProducts.slice(0, 5);
   const activeSlide = heroSlides[activeHeroSlide];
 
   useEffect(() => {
@@ -216,6 +225,9 @@ export function HomePage({
           >
             {product.title}
           </button>
+          <span>
+            {product.fit} | {product.categoryLabel}
+          </span>
           <p>{money(product.price).replace("PKR ", "Rs. ")}</p>
         </div>
       </article>
@@ -225,10 +237,8 @@ export function HomePage({
   return (
     <>
       <section className="outfit-hero">
-        <button
-          type="button"
+        <div
           className="outfit-hero-slide-button"
-          onClick={() => onShopCategory(activeSlide.categoryId, activeSlide.query)}
         >
           {heroSlides.map((slide, index) => (
             <span
@@ -246,10 +256,14 @@ export function HomePage({
             </span>
           ))}
           <span className="outfit-hero-scrim" />
-          <span className="outfit-hero-copy">
+          <button
+            type="button"
+            className="outfit-hero-copy"
+            onClick={() => onShopCategory(activeSlide.categoryId, activeSlide.query)}
+          >
             <span>{activeSlide.title}</span>
-          </span>
-        </button>
+          </button>
+        </div>
 
         <div className="outfit-hero-dots" aria-label="Hero slider controls">
           {heroSlides.map((slide, index) => (
@@ -261,6 +275,42 @@ export function HomePage({
               aria-label={`Show ${slide.title}`}
             />
           ))}
+        </div>
+
+      </section>
+
+      <section className="outfit-wardrobe-section">
+        <div className="outfit-wardrobe-head reveal-up">
+          <div>
+            <p>AYLEEN</p>
+            <h2>Wardrobe</h2>
+          </div>
+
+          <div className="outfit-wardrobe-tools">
+            <a href="#/shop" aria-label="Search products">
+              Search
+            </a>
+            <a href="#/account" aria-label="Open account">
+              Account
+            </a>
+          </div>
+        </div>
+
+        <nav className="outfit-wardrobe-tabs reveal-up" aria-label="Featured wardrobe categories">
+          {wardrobeTabs.map((tab, index) => (
+            <button
+              key={tab.label}
+              type="button"
+              onClick={() => onShopCategory(tab.categoryId, tab.query)}
+              className={index === 0 ? "is-active" : ""}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="outfit-product-row outfit-wardrobe-row">
+          {wardrobeProducts.map((product, index) => renderProductTile(product, index))}
         </div>
       </section>
 
