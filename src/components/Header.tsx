@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type WheelEvent } from "react";
 import type { Route } from "../types/store";
 
 type HeaderProps = {
@@ -146,6 +146,24 @@ export function Header({
     setMenuOpen(false);
   }
 
+  function keepMegaMenuScroll(event: WheelEvent<HTMLDivElement>) {
+    const menu = event.currentTarget;
+    const canScroll = menu.scrollHeight > menu.clientHeight;
+
+    if (!canScroll) {
+      event.preventDefault();
+      return;
+    }
+
+    const isAtTop = menu.scrollTop <= 0;
+    const isAtBottom =
+      Math.ceil(menu.scrollTop + menu.clientHeight) >= menu.scrollHeight;
+
+    if ((event.deltaY < 0 && isAtTop) || (event.deltaY > 0 && isAtBottom)) {
+      event.preventDefault();
+    }
+  }
+
   function isDesktopLinkActive(categoryId: string, query?: string) {
     if (route.page !== "shop") return false;
     if (query) return activeCategory === categoryId && activeQuery === query;
@@ -179,6 +197,7 @@ export function Header({
               key={link.id}
               type="button"
               onMouseEnter={() => setActiveMenu(link.id)}
+              onMouseLeave={() => setActiveMenu(null)}
               onFocus={() => setActiveMenu(link.id)}
               onClick={() => onShopCategory(link.categoryId, link.query)}
               className={`site-nav-link-minimal ${
@@ -188,10 +207,18 @@ export function Header({
               {link.label}
             </button>
           ))}
-          <a href="#/about" className="site-nav-link-minimal">
+          <a
+            href="#/about"
+            onMouseEnter={() => setActiveMenu(null)}
+            className="site-nav-link-minimal"
+          >
             ABOUT
           </a>
-          <a href="#/contact" className="site-nav-link-minimal">
+          <a
+            href="#/contact"
+            onMouseEnter={() => setActiveMenu(null)}
+            className="site-nav-link-minimal"
+          >
             CONTACT
           </a>
         </nav>
@@ -233,7 +260,7 @@ export function Header({
         </div>
 
         {activeDesktopMenu && (
-          <div className="site-mega-menu">
+          <div className="site-mega-menu" onWheel={keepMegaMenuScroll}>
             <div className="site-mega-menu-grid">
               <div className="site-mega-list">
                 {activeDesktopMenu.items.map((item) => (
