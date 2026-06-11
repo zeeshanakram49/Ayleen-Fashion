@@ -438,6 +438,7 @@ button {
   min-height: 620px;
   width: 100%;
   object-fit: cover;
+  object-position: center top;
 }
 
 .outfit-hero-scrim {
@@ -541,10 +542,24 @@ button {
   padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 4vw, 4rem);
 }
 
+.outfit-category-section {
+  padding-top: clamp(2.2rem, 4vw, 3.6rem);
+  padding-bottom: clamp(0.75rem, 1.4vw, 1.25rem);
+}
+
+.outfit-product-section {
+  padding-top: clamp(1rem, 2vw, 1.75rem);
+}
+
 .outfit-section-heading,
 .outfit-split-heading {
   margin: 0 auto clamp(1.8rem, 4vw, 3rem);
   max-width: 1500px;
+}
+
+.outfit-category-section .outfit-section-heading,
+.outfit-product-section .outfit-split-heading {
+  margin-bottom: clamp(1rem, 2vw, 1.45rem);
 }
 
 .outfit-section-heading {
@@ -590,6 +605,10 @@ button {
   max-width: 1050px;
 }
 
+.outfit-category-section .outfit-pill-row {
+  margin-bottom: clamp(1rem, 2vw, 1.45rem);
+}
+
 .outfit-pill-row button {
   color: var(--ink);
   border-color: rgba(17, 17, 17, 0.2);
@@ -605,11 +624,13 @@ button {
 }
 
 .outfit-category-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin: 0 auto;
-  max-width: 1500px;
+  display: flex;
+  gap: 0.45rem;
+  margin-inline: calc(clamp(1rem, 4vw, 4rem) * -1);
+  overflow-x: auto;
+  padding: 0 clamp(1rem, 4vw, 4rem) 0.45rem;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
 }
 
 .outfit-category-tile,
@@ -625,6 +646,8 @@ button {
 
 .outfit-category-tile {
   aspect-ratio: 4 / 5;
+  flex: 0 0 clamp(15rem, 16vw, 22rem);
+  scroll-snap-align: start;
 }
 
 .outfit-category-tile img,
@@ -664,16 +687,20 @@ button {
 }
 
 .outfit-product-row {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 0 auto;
-  max-width: 1500px;
+  display: flex;
+  gap: 0.65rem;
+  margin-inline: calc(clamp(1rem, 4vw, 4rem) * -1);
+  overflow-x: auto;
+  padding: 0 clamp(1rem, 4vw, 4rem) 0.5rem;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
 }
 
 .outfit-product-tile {
+  flex: 0 0 clamp(16rem, 22vw, 27rem);
   min-width: 0;
   background: white;
+  scroll-snap-align: start;
 }
 
 .outfit-product-media {
@@ -1529,14 +1556,12 @@ button {
     min-height: 640px;
   }
 
-  .outfit-category-grid,
-  .outfit-product-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .outfit-category-tile {
+    flex-basis: clamp(13rem, 38vw, 20rem);
   }
 
-  .outfit-category-tile:first-child {
-    grid-column: span 2;
-    aspect-ratio: 16 / 9;
+  .outfit-product-tile {
+    flex-basis: clamp(15rem, 44vw, 24rem);
   }
 
   .outfit-collection-grid,
@@ -1624,15 +1649,16 @@ button {
     flex-direction: column;
   }
 
-  .outfit-category-grid,
-  .outfit-product-row,
   .outfit-denim-grid {
     grid-template-columns: 1fr;
   }
 
-  .outfit-category-tile:first-child {
-    grid-column: span 1;
-    aspect-ratio: 4 / 5;
+  .outfit-category-tile {
+    flex-basis: min(76vw, 18rem);
+  }
+
+  .outfit-product-tile {
+    flex-basis: min(78vw, 22rem);
   }
 
   .outfit-product-image,

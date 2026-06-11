@@ -42,13 +42,6 @@ export function ShopPage({
 }: ShopPageProps) {
   const pageRef = useRef<HTMLElement | null>(null);
   const collectionCopy = useMemo(() => {
-    if (query === "shoes") {
-      return {
-        title: "Shoes",
-        description: "Minimal sneakers, slides, and luxe footwear edits in one clean view.",
-      };
-    }
-
     if (query === "bags") {
       return {
         title: "Black Luxury Bags",
@@ -56,17 +49,17 @@ export function ShopPage({
       };
     }
 
-    if (activeCategory === "women") {
-      return {
-        title: "Woman",
-        description: "Soft tailoring, elevated separates, and occasion-ready silhouettes.",
-      };
-    }
-
     if (activeCategory === "men") {
       return {
         title: "Man",
-        description: "Refined casual layers, premium essentials, and sharp evening tailoring.",
+        description: "Textured knit polos, refined casual layers, and sharp evening tailoring.",
+      };
+    }
+
+    if (activeCategory === "accessories") {
+      return {
+        title: "Accessories",
+        description: "Structured bags and premium details that complete every look.",
       };
     }
 

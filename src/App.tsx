@@ -165,9 +165,18 @@ function App() {
     [cart],
   );
 
+  const storefrontProducts = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          product.categoryId !== "women" && !product.tags.includes("shoes"),
+      ),
+    [],
+  );
+
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const visible = products.filter((product) => {
+    const visible = storefrontProducts.filter((product) => {
       const categoryMatch =
         activeCategory === "all" || product.categoryId === activeCategory;
       const queryMatch =
@@ -192,29 +201,29 @@ function App() {
     if (sortBy === "newest") return [...visible].reverse();
 
     return visible;
-  }, [activeCategory, query, sortBy]);
+  }, [activeCategory, query, sortBy, storefrontProducts]);
 
   const wishlistProducts = useMemo(
-    () => products.filter((product) => wishlist.includes(product.id)),
-    [wishlist],
+    () => storefrontProducts.filter((product) => wishlist.includes(product.id)),
+    [storefrontProducts, wishlist],
   );
   const productRoute = useMemo(
     () =>
       route.page === "product"
-        ? (products.find((p) => p.slug === route.slug) ?? null)
+        ? (storefrontProducts.find((p) => p.slug === route.slug) ?? null)
         : null,
-    [route],
+    [route, storefrontProducts],
   );
   const relatedProducts = useMemo(() => {
     if (!productRoute) return [];
-    return products
+    return storefrontProducts
       .filter(
         (item) =>
           item.categoryId === productRoute.categoryId &&
           item.id !== productRoute.id,
       )
       .slice(0, 4);
-  }, [productRoute]);
+  }, [productRoute, storefrontProducts]);
   const latestCartRow = useMemo(() => {
     if (!latestCartLine) return null;
     return (
@@ -382,7 +391,7 @@ function App() {
       <main>
         {route.page === "home" && (
           <HomePage
-            products={products}
+            products={storefrontProducts}
             services={services}
             testimonials={testimonials}
             wishlist={wishlist}

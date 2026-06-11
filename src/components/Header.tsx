@@ -30,45 +30,18 @@ type DesktopLink = {
 
 const desktopLinks: DesktopLink[] = [
   {
-    id: "woman",
-    label: "WOMAN",
-    categoryId: "women",
-    hero: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1600&auto=format&fit=crop",
-    title: "WOMAN",
-    items: [
-      { label: "NEW IN", categoryId: "women" },
-      { label: "SPRING SUMMER '26", categoryId: "women" },
-      { label: "TOPS & BLOUSES", categoryId: "women", query: "shirt" },
-      { label: "DRESSES & SKIRTS", categoryId: "women", query: "abaya" },
-      { label: "BOTTOMS", categoryId: "women" },
-    ],
-  },
-  {
     id: "man",
     label: "MAN",
     categoryId: "men",
-    hero: "/founder-formal.jpg",
+    hero: "/men-knit-khaki-front.png",
     title: "MAN",
     items: [
       { label: "NEW IN", categoryId: "men" },
+      { label: "TEXTURED KNITS", categoryId: "men", query: "knit" },
+      { label: "POLO SHIRTS", categoryId: "men", query: "polo" },
+      { label: "HENLEYS", categoryId: "men", query: "henley" },
       { label: "SMART CASUAL", categoryId: "men", query: "linen" },
       { label: "TAILORING", categoryId: "men", query: "formal" },
-      { label: "WEEKEND LOOKS", categoryId: "men" },
-      { label: "FEATURED SHOOTS", categoryId: "men", query: "new-in" },
-    ],
-  },
-  {
-    id: "shoes",
-    label: "SHOES",
-    categoryId: "accessories",
-    query: "shoes",
-    hero: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1600&auto=format&fit=crop",
-    title: "SHOES",
-    items: [
-      { label: "SNEAKERS", categoryId: "accessories", query: "sneaker" },
-      { label: "SLIDES", categoryId: "accessories", query: "slides" },
-      { label: "PREMIUM LEATHER", categoryId: "accessories", query: "shoes" },
-      { label: "SUMMER EDIT", categoryId: "accessories", query: "shoes" },
     ],
   },
   {

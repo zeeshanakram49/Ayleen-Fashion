@@ -24,106 +24,111 @@ type HomePageProps = {
 
 const categoryTiles = [
   {
-    label: "New In",
-    categoryId: "all",
-    query: "new-in",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1300&auto=format&fit=crop",
-  },
-  {
-    label: "Women",
-    categoryId: "women",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1300&auto=format&fit=crop",
-  },
-  {
-    label: "Men",
+    label: "T-Shirts",
     categoryId: "men",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1300&auto=format&fit=crop",
+    query: "knit",
+    image: "/men-knit-grey-front.png",
   },
   {
-    label: "Shoes",
-    categoryId: "accessories",
-    query: "shoes",
-    image:
-      "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1300&auto=format&fit=crop",
+    label: "Polos",
+    categoryId: "men",
+    query: "polo",
+    image: "/men-knit-khaki-front.png",
   },
   {
-    label: "Bags",
-    categoryId: "accessories",
-    query: "bags",
-    image:
-      "https://images.unsplash.com/photo-1591561954557-26941169b49e?q=80&w=1300&auto=format&fit=crop",
+    label: "Shirts",
+    categoryId: "men",
+    query: "shirt",
+    image: "/men-knit-charcoal-front.png",
+  },
+  {
+    label: "Knitwear",
+    categoryId: "men",
+    query: "knit",
+    image: "/men-knit-khaki-side.png",
+  },
+  {
+    label: "Henleys",
+    categoryId: "men",
+    query: "henley",
+    image: "/men-knit-grey-side.png",
+  },
+  {
+    label: "Smart Casual",
+    categoryId: "men",
+    query: "formal",
+    image: "/men-knit-charcoal-side.png",
   },
 ] as const;
 
 const collectionBlocks = [
   {
-    title: "Pause",
-    subtitle: "soft volume, everyday denim, clean layers",
-    categoryId: "women",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    title: "Artisanal Collection",
-    subtitle: "crafted shirts, textured cotton, summer neutrals",
+    title: "Khaki Texture",
+    subtitle: "open knit polo, warm neutral, ribbed finish",
     categoryId: "men",
-    query: "shirt",
-    image:
-      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=1600&auto=format&fit=crop",
+    query: "khaki",
+    image: "/men-knit-khaki-side.png",
   },
   {
-    title: "Summer Shirts Edit",
-    subtitle: "breathable cuts made for city heat",
-    categoryId: "all",
-    query: "shirt",
-    image:
-      "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1600&auto=format&fit=crop",
+    title: "Cloud Grey Edit",
+    subtitle: "soft henley neckline, airy summer structure",
+    categoryId: "men",
+    query: "grey",
+    image: "/men-knit-grey-side.png",
+  },
+  {
+    title: "Charcoal Polo",
+    subtitle: "dark texture, clean collar, evening casual",
+    categoryId: "men",
+    query: "charcoal",
+    image: "/men-knit-charcoal-side.png",
   },
 ] as const;
 
 const shopPills = [
   { label: "View All", categoryId: "all", query: "" },
-  { label: "T-Shirts", categoryId: "all", query: "shirt" },
-  { label: "Dresses", categoryId: "women", query: "abaya" },
+  { label: "Knit Polos", categoryId: "men", query: "polo" },
+  { label: "Henleys", categoryId: "men", query: "henley" },
   { label: "Denim", categoryId: "juniors", query: "denim" },
-  { label: "Footwear", categoryId: "accessories", query: "shoes" },
   { label: "Accessories", categoryId: "accessories", query: "bags" },
 ] as const;
 
 const heroSlides = [
   {
-    title: "Pause",
+    title: "Khaki Front",
     categoryId: "men",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=2200&auto=format&fit=crop",
+    query: "khaki",
+    image: "/men-knit-khaki-front.png",
   },
   {
-    title: "Summer Essentials",
-    categoryId: "women",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2200&auto=format&fit=crop",
-  },
-  {
-    title: "Artisanal Collection",
+    title: "Khaki Side",
     categoryId: "men",
-    query: "shirt",
-    image:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2200&auto=format&fit=crop",
+    query: "khaki",
+    image: "/men-knit-khaki-side.png",
   },
   {
-    title: "Denim Studio",
-    categoryId: "juniors",
-    query: "denim",
-    image:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=2200&auto=format&fit=crop",
+    title: "Grey Front",
+    categoryId: "men",
+    query: "grey",
+    image: "/men-knit-grey-front.png",
+  },
+  {
+    title: "Grey Side",
+    categoryId: "men",
+    query: "grey",
+    image: "/men-knit-grey-side.png",
+  },
+  {
+    title: "Charcoal Front",
+    categoryId: "men",
+    query: "charcoal",
+    image: "/men-knit-charcoal-front.png",
+  },
+  {
+    title: "Charcoal Side",
+    categoryId: "men",
+    query: "charcoal",
+    image: "/men-knit-charcoal-side.png",
   },
 ] as const;
 
@@ -142,20 +147,30 @@ export function HomePage({
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
 
-  const newInProducts = products
-    .filter((product) => product.tags.includes("new-in"))
-    .slice(0, 5);
-  const denimProducts = products
+  const shirtProducts = products
+    .filter(
+      (product) =>
+        product.categoryId === "men" &&
+        [product.title, product.description, product.material, ...product.tags]
+          .join(" ")
+          .toLowerCase()
+          .match(/shirt|knit|polo|henley|formal/),
+    )
+    .slice(0, 8);
+  const knitProducts = products
     .filter((product) =>
+      product.categoryId === "men" &&
       [product.title, product.description, product.material, ...product.tags]
         .join(" ")
         .toLowerCase()
-        .includes("denim"),
+        .includes("knit"),
     )
     .slice(0, 4);
-  const featuredProducts = products.slice(0, 8);
-  const railProducts = newInProducts.length >= 4 ? newInProducts : featuredProducts;
-  const storyProducts = denimProducts.length ? denimProducts : featuredProducts.slice(0, 4);
+  const featuredProducts = products
+    .filter((product) => product.categoryId === "men")
+    .slice(0, 8);
+  const railProducts = shirtProducts.length ? shirtProducts : featuredProducts;
+  const storyProducts = knitProducts.length ? knitProducts : featuredProducts.slice(0, 4);
   const activeSlide = heroSlides[activeHeroSlide];
 
   useEffect(() => {
@@ -266,8 +281,8 @@ export function HomePage({
 
       <section className="outfit-category-section">
         <div className="outfit-section-heading reveal-up">
-          <p>Shop by Categories</p>
-          <h2>Fresh fits, fast picks</h2>
+          <p>Men Categories</p>
+          <h2>Categories in focus</h2>
         </div>
 
         <div className="outfit-pill-row reveal-up">
@@ -301,10 +316,10 @@ export function HomePage({
       <section className="outfit-product-section">
         <div className="outfit-split-heading reveal-up">
           <div>
-            <p>New In</p>
-            <h2>Just landed</h2>
+            <p>Shirts Outside</p>
+            <h2>All men shirts</h2>
           </div>
-          <button type="button" onClick={() => onShopCategory("all", "new-in")}>
+          <button type="button" onClick={() => onShopCategory("men", "shirt")}>
             View all
           </button>
         </div>
@@ -343,14 +358,14 @@ export function HomePage({
 
       <section className="outfit-denim-story">
         <div className="outfit-denim-copy reveal-up">
-          <p>Denim Studio</p>
-          <h2>We know what makes denim, denim.</h2>
+          <p>Knit Studio</p>
+          <h2>Texture made for warm days and clean evenings.</h2>
           <span>
-            Crafted for everyday wear with clean washes, relaxed movement, and
-            pieces that hold their shape.
+            Breathable knit polos and henleys with soft structure, refined
+            collars, and colors that style easily.
           </span>
-          <button type="button" onClick={() => onShopCategory("juniors", "denim")}>
-            Shop denim
+          <button type="button" onClick={() => onShopCategory("men", "knit")}>
+            Shop knitwear
           </button>
         </div>
         <div className="outfit-denim-grid">
