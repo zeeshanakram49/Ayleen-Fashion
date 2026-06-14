@@ -70,16 +70,16 @@ export function CheckoutPage({
   const selectedPayment = placedPayment || checkout.payment;
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+    <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 md:py-16 lg:py-20">
       <div className="reveal-up mb-8">
         <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">SECURE ORDER</p>
         <h1 className="font-editorial mt-3 text-4xl sm:text-5xl">Checkout</h1>
       </div>
 
       {placedOrder ? (
-        <article className="reveal-up is-visible rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-8 text-center sm:p-10">
           <p className="text-xs tracking-[0.24em] text-[var(--gold-deep)]">ORDER CONFIRMED</p>
-          <h2 className="font-editorial mt-3 text-4xl">Thank you for shopping with AYLEEN</h2>
+          <h2 className="font-editorial mt-3 text-4xl">Thank you for shopping with Aylee</h2>
           <p className="mt-3 text-sm text-[var(--muted)]">
             Your order ID is <span className="font-semibold text-[var(--ink)]">{placedOrder}</span>. Payment method:{' '}
             <span className="font-semibold text-[var(--ink)]">{paymentLabels[selectedPayment]}</span>.{' '}
@@ -88,14 +88,14 @@ export function CheckoutPage({
           <a
             href="#/shop"
             style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
-            className="mt-6 inline-flex rounded-full px-6 py-3 text-xs font-semibold tracking-[0.2em]"
+            className="mt-6 inline-flex rounded-[var(--radius-sm)] px-6 py-3 text-xs font-semibold tracking-[0.18em]"
           >
             CONTINUE SHOPPING
           </a>
         </article>
       ) : (
         <form className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]" onSubmit={onPlaceOrder}>
-          <article className="reveal-up soft-panel rounded-3xl border border-[var(--line)] p-6">
+          <article className="reveal-up soft-panel rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-6">
             <h2 className="font-editorial text-3xl">Delivery Details</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <input
@@ -103,34 +103,34 @@ export function CheckoutPage({
                 value={checkout.fullName}
                 onChange={(e) => onCheckoutChange('fullName', e.target.value)}
                 placeholder="Full Name"
-                className="h-11 rounded-xl border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
+                className="h-11 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
               />
               <input
                 required
                 value={checkout.phone}
                 onChange={(e) => onCheckoutChange('phone', e.target.value)}
                 placeholder="Phone Number"
-                className="h-11 rounded-xl border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
+                className="h-11 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
               />
               <input
                 value={checkout.email}
                 onChange={(e) => onCheckoutChange('email', e.target.value)}
                 placeholder="Email (optional)"
-                className="h-11 rounded-xl border border-[var(--line-strong)] bg-white px-4 text-sm outline-none sm:col-span-2"
+                className="h-11 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white px-4 text-sm outline-none sm:col-span-2"
               />
               <input
                 required
                 value={checkout.address}
                 onChange={(e) => onCheckoutChange('address', e.target.value)}
                 placeholder="Address"
-                className="h-11 rounded-xl border border-[var(--line-strong)] bg-white px-4 text-sm outline-none sm:col-span-2"
+                className="h-11 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white px-4 text-sm outline-none sm:col-span-2"
               />
               <input
                 required
                 value={checkout.city}
                 onChange={(e) => onCheckoutChange('city', e.target.value)}
                 placeholder="City"
-                className="h-11 rounded-xl border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
+                className="h-11 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white px-4 text-sm outline-none"
               />
               <div className="sm:col-span-2">
                 <p className="text-xs font-semibold tracking-[0.18em] text-[var(--gold-deep)]">PAYMENT METHOD</p>
@@ -141,7 +141,7 @@ export function CheckoutPage({
                     return (
                       <label
                         key={method.value}
-                        className={`min-h-24 cursor-pointer rounded-xl border bg-white p-4 transition ${
+                        className={`min-h-24 cursor-pointer rounded-[var(--radius-md)] border bg-white p-4 transition ${
                           selected
                             ? 'border-[var(--ink)] shadow-[0_18px_45px_-30px_rgba(22,17,12,0.75)]'
                             : 'border-[var(--line-strong)] hover:border-[var(--ink)]'
@@ -176,12 +176,12 @@ export function CheckoutPage({
                 value={checkout.note}
                 onChange={(e) => onCheckoutChange('note', e.target.value)}
                 placeholder="Order note (optional)"
-                className="min-h-24 rounded-xl border border-[var(--line-strong)] bg-white px-4 py-3 text-sm outline-none sm:col-span-2"
+                className="min-h-24 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-white px-4 py-3 text-sm outline-none sm:col-span-2"
               />
             </div>
           </article>
 
-          <aside className="reveal-up delay-1 soft-panel rounded-3xl border border-[var(--line)] p-6">
+          <aside className="reveal-up delay-1 soft-panel rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-6">
             <h2 className="font-editorial text-3xl">Payment Summary</h2>
             <div className="mt-4 space-y-3 text-sm">
               {cartRows.map((row) => (
@@ -212,13 +212,13 @@ export function CheckoutPage({
               <span>Total</span>
               <span>{money(total)}</span>
             </div>
-            <div className="mt-4 rounded-xl border border-[var(--line)] bg-white/70 p-4 text-sm">
+            <div className="mt-4 rounded-[var(--radius-md)] border border-[var(--line)] bg-white/70 p-4 text-sm">
               <span className="block text-xs tracking-[0.18em] text-[var(--gold-deep)]">SELECTED PAYMENT</span>
               <span className="mt-1 block font-semibold">{paymentLabels[checkout.payment]}</span>
             </div>
             <button
               type="submit"
-              className="mt-6 w-full rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"
+              className="mt-6 w-full rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.18em] text-[var(--champagne)]"
             >
               PLACE ORDER
             </button>

@@ -86,15 +86,15 @@ function App() {
 
   useEffect(() => {
     const titles: Record<Route["page"], string> = {
-      home: "AYLEEN | Premium Fashion",
-      shop: "Shop | AYLEEN",
-      product: "Product | AYLEEN",
-      wishlist: "Wishlist | AYLEEN",
-      cart: "Cart | AYLEEN",
-      checkout: "Checkout | AYLEEN",
-      account: "Account | AYLEEN",
-      about: "About | AYLEEN",
-      contact: "Contact | AYLEEN",
+      home: "Aylee | Official Online Store",
+      shop: "Shop | Aylee",
+      product: "Product | Aylee",
+      wishlist: "Wishlist | Aylee",
+      cart: "Cart | Aylee",
+      checkout: "Checkout | Aylee",
+      account: "Account | Aylee",
+      about: "Stores | Aylee",
+      contact: "Contact | Aylee",
     };
     document.title = titles[route.page];
   }, [route]);
@@ -376,7 +376,7 @@ function App() {
       />
 
       {notice && (
-        <div className="fixed right-4 top-24 z-[60] max-w-sm rounded-2xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm shadow-xl">
+        <div className="fixed right-4 top-24 z-[60] max-w-sm rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm shadow-[var(--shadow-lift)]">
           <p className="font-medium">{notice.message}</p>
         </div>
       )}
@@ -435,12 +435,12 @@ function App() {
         )}
 
         {route.page === "product" && !productRoute && (
-          <section className="mx-auto max-w-7xl px-6 py-16">
-            <article className="rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+          <section className="mx-auto max-w-7xl px-5 py-14 sm:px-6 md:py-16">
+            <article className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-8 text-center sm:p-10">
               <h1 className="font-editorial text-4xl">Product not found</h1>
               <a
                 href="#/shop"
-                className="mt-5 inline-flex rounded-full border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.18em]"
+                className="mt-5 inline-flex rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.16em]"
               >
                 BACK TO SHOP
               </a>

@@ -20,24 +20,24 @@ export function AccountPage() {
     event.preventDefault();
     setMessage(
       isLogin
-        ? "Welcome back. Your AYLEEN account is ready."
-        : "Your AYLEEN account has been created.",
+        ? "Welcome back. Your Aylee account is ready."
+        : "Your Aylee account has been created.",
     );
   }
 
   return (
-    <section className="bg-white px-5 py-8 md:px-8 md:py-12">
-      <div className="mx-auto grid max-w-[1500px] overflow-hidden border border-[var(--line)] bg-white lg:min-h-[760px] lg:grid-cols-[1.04fr_0.96fr]">
+    <section className="bg-white px-4 py-6 sm:px-5 md:px-8 md:py-12">
+      <div className="mx-auto grid max-w-[1500px] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white shadow-[var(--shadow-soft)] lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
         <div className="relative min-h-[420px] overflow-hidden bg-[#ede5da] lg:min-h-full">
           <img
             src={accountImage}
-            alt="AYLEEN fashion edit"
+            alt="Aylee fashion edit"
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-10">
             <p className="text-xs font-semibold tracking-[0.34em] text-white/75">
-              AYLEEN MEMBERS
+              AYLEE MEMBERS
             </p>
             <h1 className="font-editorial mt-4 max-w-xl text-4xl leading-tight sm:text-6xl">
               Your wardrobe, kept beautifully close.
@@ -45,7 +45,7 @@ export function AccountPage() {
           </div>
         </div>
 
-        <article className="flex items-center justify-center px-6 py-12 sm:px-10 lg:px-16">
+        <article className="flex items-center justify-center px-5 py-10 sm:px-10 lg:px-16">
           <div className="w-full max-w-xl">
             <div className="text-center">
               <p className="text-xs font-semibold tracking-[0.32em] text-[var(--gold-deep)]">
@@ -113,10 +113,10 @@ export function AccountPage() {
                   <input
                     required
                     type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-[var(--line-strong)] accent-[var(--ink)]"
+                  className="mt-1 h-4 w-4 rounded-[var(--radius-sm)] border-[var(--line-strong)] accent-[var(--ink)]"
                   />
                   <span>
-                    I agree to the AYLEEN Terms and Conditions and confirm that I
+                    I agree to the Aylee Terms and Conditions and confirm that I
                     have read the Privacy Policy.
                   </span>
                 </label>

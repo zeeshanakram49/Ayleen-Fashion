@@ -24,110 +24,95 @@ type HomePageProps = {
 
 const categoryTiles = [
   {
-    label: "New In",
-    categoryId: "all",
-    query: "new-in",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1300&auto=format&fit=crop",
-  },
-  {
-    label: "Women",
-    categoryId: "women",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1300&auto=format&fit=crop",
-  },
-  {
-    label: "Men",
-    categoryId: "men",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1300&auto=format&fit=crop",
-  },
-  {
-    label: "Shoes",
-    categoryId: "accessories",
-    query: "shoes",
-    image:
-      "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1300&auto=format&fit=crop",
-  },
-  {
-    label: "Bags",
-    categoryId: "accessories",
-    query: "bags",
-    image:
-      "https://images.unsplash.com/photo-1591561954557-26941169b49e?q=80&w=1300&auto=format&fit=crop",
-  },
-] as const;
-
-const collectionBlocks = [
-  {
-    title: "Pause",
-    subtitle: "soft volume, everyday denim, clean layers",
-    categoryId: "women",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    title: "Artisanal Collection",
-    subtitle: "crafted shirts, textured cotton, summer neutrals",
+    label: "T-Shirts",
     categoryId: "men",
     query: "shirt",
     image:
-      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop",
   },
   {
-    title: "Summer Shirts Edit",
-    subtitle: "breathable cuts made for city heat",
-    categoryId: "all",
+    label: "Polos",
+    categoryId: "men",
+    query: "polo",
+    image:
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    label: "Shirts",
+    categoryId: "men",
     query: "shirt",
     image:
-      "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    label: "Activewear",
+    categoryId: "men",
+    query: "activewear",
+    image:
+      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    label: "Denim",
+    categoryId: "juniors",
+    query: "denim",
+    image:
+      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    label: "Trousers",
+    categoryId: "men",
+    query: "trouser",
+    image:
+      "https://images.unsplash.com/photo-1506629905607-d9f297d2222b?q=80&w=1200&auto=format&fit=crop",
   },
 ] as const;
 
-const shopPills = [
-  { label: "View All", categoryId: "all", query: "" },
-  { label: "T-Shirts", categoryId: "all", query: "shirt" },
-  { label: "Dresses", categoryId: "women", query: "abaya" },
-  { label: "Denim", categoryId: "juniors", query: "denim" },
-  { label: "Footwear", categoryId: "accessories", query: "shoes" },
-  { label: "Accessories", categoryId: "accessories", query: "bags" },
+const focusLinks = [
+  { label: "Tees & Polos", categoryId: "men", query: "shirt" },
+  { label: "Shorts", categoryId: "men", query: "shorts" },
+  { label: "Shirts", categoryId: "men", query: "shirt" },
 ] as const;
 
-const wardrobeTabs = [
+const mustHaveTabs = [
   { label: "T-Shirts", categoryId: "all", query: "shirt" },
   { label: "Denim", categoryId: "juniors", query: "denim" },
   { label: "Footwear", categoryId: "accessories", query: "shoes" },
   { label: "Trousers", categoryId: "men", query: "trouser" },
-  { label: "Bags", categoryId: "accessories", query: "bags" },
+  { label: "Fragrances", categoryId: "accessories", query: "bags" },
 ] as const;
 
 const heroSlides = [
   {
-    title: "Pause",
-    categoryId: "men",
-    query: "",
+    kicker: "Winter Sale",
+    title: "Sale Edit",
+    subtitle: "Selected stock",
+    categoryId: "all",
+    query: "sale",
     image:
-      "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=2200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2200&auto=format&fit=crop",
   },
   {
-    title: "Maytime",
+    kicker: "New Arrivals",
+    title: "Going Out",
+    subtitle: "Polished fits",
     categoryId: "women",
     query: "",
     image:
       "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2200&auto=format&fit=crop",
   },
   {
-    title: "Shoes",
+    kicker: "Men",
+    title: "City Casual",
+    subtitle: "Everyday layers",
     categoryId: "men",
-    query: "shirt",
+    query: "",
     image:
       "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2200&auto=format&fit=crop",
   },
   {
-    title: "Banana Road",
+    kicker: "Kids",
+    title: "Denim Days",
+    subtitle: "Easy outfits",
     categoryId: "juniors",
     query: "denim",
     image:
@@ -153,18 +138,15 @@ export function HomePage({
   const newInProducts = products
     .filter((product) => product.tags.includes("new-in"))
     .slice(0, 5);
-  const denimProducts = products
-    .filter((product) =>
-      [product.title, product.description, product.material, ...product.tags]
-        .join(" ")
-        .toLowerCase()
-        .includes("denim"),
-    )
+  const saleProducts = products
+    .filter((product) => product.tags.includes("sale"))
     .slice(0, 4);
   const featuredProducts = products.slice(0, 8);
-  const railProducts = newInProducts.length >= 4 ? newInProducts : featuredProducts;
-  const storyProducts = denimProducts.length ? denimProducts : featuredProducts.slice(0, 4);
-  const wardrobeProducts = featuredProducts.slice(0, 5);
+  const focusProducts = products
+    .filter((product) => product.categoryId === "men" || product.tags.includes("shirt"))
+    .slice(0, 4);
+  const mustHaveProducts = newInProducts.length >= 5 ? newInProducts : featuredProducts.slice(0, 5);
+  const saleRailProducts = saleProducts.length ? saleProducts : featuredProducts.slice(0, 4);
   const activeSlide = heroSlides[activeHeroSlide];
 
   useEffect(() => {
@@ -261,7 +243,10 @@ export function HomePage({
             className="outfit-hero-copy"
             onClick={() => onShopCategory(activeSlide.categoryId, activeSlide.query)}
           >
+            <small>{activeSlide.kicker}</small>
             <span>{activeSlide.title}</span>
+            <p>{activeSlide.subtitle}</p>
+            <strong>Shop now</strong>
           </button>
         </div>
 
@@ -279,60 +264,8 @@ export function HomePage({
 
       </section>
 
-      <section className="outfit-wardrobe-section">
-        <div className="outfit-wardrobe-head reveal-up">
-          <div>
-            <p>AYLEEN</p>
-            <h2>Wardrobe</h2>
-          </div>
-
-          <div className="outfit-wardrobe-tools">
-            <a href="#/shop" aria-label="Search products">
-              Search
-            </a>
-            <a href="#/account" aria-label="Open account">
-              Account
-            </a>
-          </div>
-        </div>
-
-        <nav className="outfit-wardrobe-tabs reveal-up" aria-label="Featured wardrobe categories">
-          {wardrobeTabs.map((tab, index) => (
-            <button
-              key={tab.label}
-              type="button"
-              onClick={() => onShopCategory(tab.categoryId, tab.query)}
-              className={index === 0 ? "is-active" : ""}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="outfit-product-row outfit-wardrobe-row">
-          {wardrobeProducts.map((product, index) => renderProductTile(product, index))}
-        </div>
-      </section>
-
-      <section className="outfit-category-section">
-        <div className="outfit-section-heading reveal-up">
-          <p>Shop by Categories</p>
-          <h2>Fresh fits, fast picks</h2>
-        </div>
-
-        <div className="outfit-pill-row reveal-up">
-          {shopPills.map((pill) => (
-            <button
-              key={pill.label}
-              type="button"
-              onClick={() => onShopCategory(pill.categoryId, pill.query)}
-            >
-              {pill.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="outfit-category-grid">
+      <section className="outfit-home-category-strip">
+        <div className="outfit-home-category-scroll">
           {categoryTiles.map((category, index) => (
             <button
               key={category.label}
@@ -348,63 +281,74 @@ export function HomePage({
         </div>
       </section>
 
-      <section className="outfit-product-section">
+      <section className="outfit-focus-section">
+        <div className="outfit-focus-image reveal-up">
+          <img
+            src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1400&auto=format&fit=crop"
+            alt="Men category feature"
+          />
+        </div>
+        <div className="outfit-focus-content">
+          <div className="outfit-focus-copy reveal-up">
+            <h2>Categories in Focus</h2>
+            <nav aria-label="Categories in focus">
+              {focusLinks.map((link, index) => (
+                <button
+                  key={link.label}
+                  type="button"
+                  onClick={() => onShopCategory(link.categoryId, link.query)}
+                  className={index === 0 ? "is-active" : ""}
+                >
+                  {link.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+          <div className="outfit-focus-products">
+            {focusProducts.map((product, index) => renderProductTile(product, index))}
+          </div>
+        </div>
+      </section>
+
+      <section className="outfit-must-section">
+        <div className="outfit-must-copy reveal-up">
+          <h2>Must-Haves</h2>
+          <p>
+            Thoughtfully designed everyday styles that combine comfort,
+            versatility, and effortless appeal. Reliable go-to pieces made to fit
+            seamlessly into your daily wardrobe.
+          </p>
+          <nav aria-label="Must-have categories">
+            {mustHaveTabs.map((tab, index) => (
+              <button
+                key={tab.label}
+                type="button"
+                onClick={() => onShopCategory(tab.categoryId, tab.query)}
+                className={index === 0 ? "is-active" : ""}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+        <div className="outfit-must-products">
+          {mustHaveProducts.map((product, index) => renderProductTile(product, index))}
+        </div>
+      </section>
+
+      <section className="outfit-sale-rail">
         <div className="outfit-split-heading reveal-up">
           <div>
-            <p>New In</p>
-            <h2>Just landed</h2>
+            <p>Selected Stock</p>
+            <h2>Sale essentials</h2>
           </div>
-          <button type="button" onClick={() => onShopCategory("all", "new-in")}>
+          <button type="button" onClick={() => onShopCategory("all", "sale")}>
             View all
           </button>
         </div>
 
         <div className="outfit-product-row">
-          {railProducts.map((product, index) => renderProductTile(product, index))}
-        </div>
-      </section>
-
-      <section className="outfit-collection-section">
-        <div className="outfit-section-heading reveal-up">
-          <p>Shop by Collection</p>
-          <h2>Campaign edits</h2>
-        </div>
-
-        <div className="outfit-collection-grid">
-          {collectionBlocks.map((collection, index) => (
-            <button
-              key={collection.title}
-              type="button"
-              onClick={() =>
-                onShopCategory(collection.categoryId, collection.query)
-              }
-              className="outfit-collection-card reveal-up"
-              style={{ animationDelay: `${80 + index * 80}ms` }}
-            >
-              <img src={collection.image} alt={collection.title} />
-              <span className="outfit-collection-label">
-                <strong>{collection.title}</strong>
-                <small>{collection.subtitle}</small>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="outfit-denim-story">
-        <div className="outfit-denim-copy reveal-up">
-          <p>Denim Studio</p>
-          <h2>We know what makes denim, denim.</h2>
-          <span>
-            Crafted for everyday wear with clean washes, relaxed movement, and
-            pieces that hold their shape.
-          </span>
-          <button type="button" onClick={() => onShopCategory("juniors", "denim")}>
-            Shop denim
-          </button>
-        </div>
-        <div className="outfit-denim-grid">
-          {storyProducts.map((product, index) => renderProductTile(product, index))}
+          {saleRailProducts.map((product, index) => renderProductTile(product, index))}
         </div>
       </section>
 

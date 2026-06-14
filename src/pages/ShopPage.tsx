@@ -24,12 +24,23 @@ type ShopPageProps = {
   onOpenProduct: (slug: string) => void;
 };
 
+const collectionTabs = [
+  { label: "All", query: "" },
+  { label: "Basics", query: "basic" },
+  { label: "Textured", query: "textured" },
+  { label: "Printed", query: "printed" },
+  { label: "Checks", query: "checks" },
+  { label: "Striped", query: "striped" },
+  { label: "Embroidered", query: "embroidered" },
+  { label: "Knit", query: "knit" },
+  { label: "Jacquard", query: "jacquard" },
+  { label: "Denim", query: "denim" },
+] as const;
+
 export function ShopPage({
-  categories,
   products,
   activeCategory,
   query,
-  sortBy,
   wishlist,
   selectedSize,
   onCategoryChange,
@@ -42,37 +53,66 @@ export function ShopPage({
 }: ShopPageProps) {
   const pageRef = useRef<HTMLElement | null>(null);
   const collectionCopy = useMemo(() => {
+    if (activeCategory === "men" && (query === "shirt" || query === "")) {
+      return {
+        title: query === "shirt" ? "Men - Shirts" : "Men",
+        breadcrumb: query === "shirt" ? ["Home", "Men", "Men - Shirts"] : ["Home", "Men"],
+        description: "",
+      };
+    }
+
     if (query === "shoes") {
       return {
         title: "Shoes",
+        breadcrumb: ["Home", "Accessories", "Shoes"],
         description: "Minimal sneakers, slides, and luxe footwear edits in one clean view.",
       };
     }
 
     if (query === "bags") {
       return {
-        title: "Black Luxury Bags",
-        description: "Structured totes, backpacks, and carryalls designed for everyday polish.",
+        title: "Bags",
+        breadcrumb: ["Home", "Accessories", "Bags"],
+        description: "Structured totes, backpacks, and carryalls for everyday polish.",
+      };
+    }
+
+    if (query === "sale") {
+      return {
+        title: "Sale",
+        breadcrumb: ["Home", "Sale"],
+        description: "Selected stock markdowns across women, men, kids, shoes, and accessories.",
       };
     }
 
     if (activeCategory === "women") {
       return {
-        title: "Woman",
-        description: "Soft tailoring, elevated separates, and occasion-ready silhouettes.",
+        title: "Women",
+        breadcrumb: ["Home", "Women"],
+        description: "Soft tailoring, elevated separates, denim, and going-out silhouettes.",
       };
     }
 
     if (activeCategory === "men") {
       return {
-        title: "Man",
+        title: "Men",
+        breadcrumb: ["Home", "Men"],
         description: "Refined casual layers, premium essentials, and sharp evening tailoring.",
+      };
+    }
+
+    if (activeCategory === "juniors") {
+      return {
+        title: "Kids",
+        breadcrumb: ["Home", "Kids"],
+        description: "Comfort-first denim, casual sets, and everyday outfits for movement.",
       };
     }
 
     return {
       title: "All Collections",
-      description: "Search, filter, and sort across the full Ayleen storefront.",
+      breadcrumb: ["Home", "All Collections"],
+      description: "Search, filter, and sort across the full Aylee storefront.",
     };
   }, [activeCategory, query]);
 
@@ -89,68 +129,51 @@ export function ShopPage({
   }, [products]);
 
   return (
-    <section ref={pageRef} className="mx-auto max-w-[1800px] px-6 py-12 md:px-10 md:py-16">
-      <div className="reveal-up border-b border-[var(--line)] pb-8">
-        <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">COLLECTION VIEW</p>
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-editorial text-4xl sm:text-5xl">{collectionCopy.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              {collectionCopy.description}
-            </p>
-          </div>
-          <p className="text-sm text-[var(--muted)]">{products.length} products visible</p>
-        </div>
-      </div>
-
-      <div className="reveal-up mt-8 grid gap-3 lg:grid-cols-[auto_1fr_auto]">
-        <div className="flex flex-wrap gap-2 text-[11px] font-semibold tracking-[0.15em]">
-          <button
-            type="button"
-            onClick={() => onCategoryChange("all")}
-            className={`rounded-[0.2rem] border px-5 py-3 ${
-              activeCategory === "all"
-                ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
-                : "border-[var(--line)] bg-white"
-            }`}
-          >
-            FILTER
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => onCategoryChange(cat.id)}
-              className={`rounded-[0.2rem] border px-5 py-3 ${
-                activeCategory === cat.id
-                  ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
-                  : "border-[var(--line)] bg-white"
-              }`}
-            >
-              {cat.name.toUpperCase()}
-            </button>
+    <section ref={pageRef} className="collection-page">
+      <div className="collection-topbar reveal-up">
+        <div className="collection-breadcrumb">
+          {collectionCopy.breadcrumb.map((item, index) => (
+            <span key={item}>
+              {index > 0 && "/ "}
+              <strong className={index === collectionCopy.breadcrumb.length - 1 ? "is-current" : ""}>
+                {item}
+              </strong>
+            </span>
           ))}
         </div>
 
-        <input
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Search by product, category, style, or material"
-          className="min-w-0 rounded-[0.2rem] border border-[var(--line)] bg-white px-5 py-3 text-sm outline-none"
-        />
-
-        <select
-          value={sortBy}
-          onChange={(e) => onSortChange(e.target.value)}
-          className="rounded-[0.2rem] border border-[var(--line)] bg-white px-5 py-3 text-sm outline-none"
-        >
-          <option value="featured">Featured</option>
-          <option value="newest">Newest</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="rating">Top Rated</option>
-        </select>
+        <div className="collection-tools" aria-label="Collection display tools">
+          <button type="button" aria-label="Single column view" />
+          <button type="button" aria-label="Two column view" className="is-active" />
+          <button type="button" aria-label="Four column view" />
+          <button type="button" aria-label="Filters">
+            <span />
+          </button>
+        </div>
       </div>
+
+      {collectionCopy.description && (
+        <p className="collection-description reveal-up">{collectionCopy.description}</p>
+      )}
+
+      <nav className="collection-tabs reveal-up" aria-label="Collection filters">
+        {collectionTabs.map((tab) => {
+          const active = tab.query ? query === tab.query : !query || query === "shirt";
+          return (
+            <button
+              key={tab.label}
+              type="button"
+              onClick={() => {
+                if (activeCategory === "all") onCategoryChange("men");
+                onQueryChange(tab.query || "shirt");
+              }}
+              className={active ? "is-active" : ""}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </nav>
 
       {products.length === 0 ? (
         <article className="reveal-up is-visible mt-8 rounded-[0.3rem] border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
@@ -165,13 +188,13 @@ export function ShopPage({
               onCategoryChange("all");
               onSortChange("featured");
             }}
-            className="mt-5 rounded-full border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.18em]"
+            className="mt-5 rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.16em]"
           >
             RESET FILTERS
           </button>
         </article>
       ) : (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="collection-product-grid">
           {products.map((product, index) => (
             <ProductCard
               key={product.id}

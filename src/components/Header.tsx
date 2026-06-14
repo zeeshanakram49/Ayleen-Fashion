@@ -30,31 +30,46 @@ type DesktopLink = {
 
 const desktopLinks: DesktopLink[] = [
   {
-    id: "woman",
-    label: "WOMAN",
+    id: "women",
+    label: "WOMEN",
     categoryId: "women",
     hero: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1600&auto=format&fit=crop",
-    title: "WOMAN",
+    title: "WOMEN",
     items: [
       { label: "NEW IN", categoryId: "women" },
-      { label: "SPRING SUMMER '26", categoryId: "women" },
-      { label: "TOPS & BLOUSES", categoryId: "women", query: "shirt" },
-      { label: "DRESSES & SKIRTS", categoryId: "women", query: "abaya" },
+      { label: "SUMMER '26", categoryId: "women" },
+      { label: "T-SHIRTS", categoryId: "women", query: "shirt" },
+      { label: "DRESSES", categoryId: "women", query: "dress" },
       { label: "BOTTOMS", categoryId: "women" },
     ],
   },
   {
-    id: "man",
-    label: "MAN",
+    id: "men",
+    label: "MEN",
     categoryId: "men",
     hero: "/founder-formal.jpg",
-    title: "MAN",
+    title: "MEN",
     items: [
       { label: "NEW IN", categoryId: "men" },
-      { label: "SMART CASUAL", categoryId: "men", query: "linen" },
-      { label: "TAILORING", categoryId: "men", query: "formal" },
-      { label: "WEEKEND LOOKS", categoryId: "men" },
-      { label: "FEATURED SHOOTS", categoryId: "men", query: "new-in" },
+      { label: "T-SHIRTS", categoryId: "men", query: "shirt" },
+      { label: "SHIRTS", categoryId: "men", query: "linen" },
+      { label: "TROUSERS", categoryId: "men", query: "trouser" },
+      { label: "WINTER LAYERS", categoryId: "men", query: "new-in" },
+    ],
+  },
+  {
+    id: "kids",
+    label: "KIDS",
+    categoryId: "juniors",
+    query: "denim",
+    hero: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1600&auto=format&fit=crop",
+    title: "KIDS",
+    items: [
+      { label: "NEW IN", categoryId: "juniors" },
+      { label: "BOYS", categoryId: "juniors", query: "denim" },
+      { label: "GIRLS", categoryId: "juniors", query: "track" },
+      { label: "DENIM", categoryId: "juniors", query: "denim" },
+      { label: "CASUAL SETS", categoryId: "juniors", query: "track" },
     ],
   },
   {
@@ -67,7 +82,7 @@ const desktopLinks: DesktopLink[] = [
     items: [
       { label: "SNEAKERS", categoryId: "accessories", query: "sneaker" },
       { label: "SLIDES", categoryId: "accessories", query: "slides" },
-      { label: "PREMIUM LEATHER", categoryId: "accessories", query: "shoes" },
+      { label: "LOAFERS", categoryId: "accessories", query: "loafers" },
       { label: "SUMMER EDIT", categoryId: "accessories", query: "shoes" },
     ],
   },
@@ -79,10 +94,25 @@ const desktopLinks: DesktopLink[] = [
     hero: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1600&auto=format&fit=crop",
     title: "ACCESSORIES",
     items: [
-      { label: "BLACK LUXURY BAGS", categoryId: "accessories", query: "bags" },
+      { label: "BAGS", categoryId: "accessories", query: "bags" },
       { label: "TOTES", categoryId: "accessories", query: "tote" },
       { label: "BACKPACKS", categoryId: "accessories", query: "backpack" },
       { label: "GIFT EDIT", categoryId: "accessories", query: "bags" },
+    ],
+  },
+  {
+    id: "sale",
+    label: "SALE",
+    categoryId: "all",
+    query: "sale",
+    hero: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1600&auto=format&fit=crop",
+    title: "SALE",
+    items: [
+      { label: "UP TO 50% OFF", categoryId: "all", query: "sale" },
+      { label: "WOMEN SALE", categoryId: "women", query: "sale" },
+      { label: "MEN SALE", categoryId: "men", query: "sale" },
+      { label: "KIDS SALE", categoryId: "juniors", query: "sale" },
+      { label: "ACCESSORIES SALE", categoryId: "accessories", query: "sale" },
     ],
   },
 ];
@@ -180,15 +210,15 @@ export function Header({
       }`}
     >
       <div className="site-announcement-bar">
-        FREE SHIPPING ON ORDERS ABOVE RS. 2500
+        FREE SHIPPING ON ORDERS ABOVE RS. 2,500
       </div>
 
       <div
-        className="relative mx-auto hidden min-h-[92px] max-w-[1700px] items-center gap-10 px-8 lg:flex xl:px-12"
+        className="relative mx-auto hidden min-h-[84px] max-w-[1700px] items-center gap-8 px-8 lg:flex xl:px-12"
         onMouseLeave={() => setActiveMenu(null)}
       >
         <a href="#/" className="site-wordmark shrink-0">
-          AYLEEN
+          Aylee
         </a>
 
         <nav className="site-desktop-nav" aria-label="Primary navigation">
@@ -212,7 +242,7 @@ export function Header({
             onMouseEnter={() => setActiveMenu(null)}
             className="site-nav-link-minimal"
           >
-            ABOUT
+            STORES
           </a>
           <a
             href="#/contact"
@@ -301,13 +331,13 @@ export function Header({
         )}
       </div>
 
-      <div className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-3 px-4 lg:hidden sm:px-6">
+      <div className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-3 px-4 lg:hidden sm:px-6">
         <a
           href="#/"
-          className="site-wordmark text-[1.7rem] tracking-[0.16em]"
-          aria-label="Ayleen home"
+          className="site-wordmark text-[1.55rem]"
+          aria-label="Aylee home"
         >
-          AYLEEN
+          Aylee
         </a>
 
         <div className="flex items-center gap-1.5">
@@ -346,8 +376,8 @@ export function Header({
       </div>
 
       {menuOpen && (
-        <div className="border-t border-black/8 bg-white px-6 py-5 lg:hidden">
-          <div className="grid gap-3 text-[11px] font-semibold tracking-[0.22em]">
+        <div className="border-t border-black/8 bg-white/98 px-4 py-4 shadow-[0_24px_50px_-40px_rgba(0,0,0,0.5)] backdrop-blur lg:hidden sm:px-6">
+          <div className="grid gap-2 text-[11px] font-semibold tracking-[0.18em] sm:grid-cols-2">
             {desktopLinks.map((link) => (
               <button
                 key={link.id}
@@ -356,7 +386,7 @@ export function Header({
                   closeMenu();
                   onShopCategory(link.categoryId, link.query);
                 }}
-                className={`rounded-full border px-4 py-3 text-center transition-colors ${
+                className={`rounded-[var(--radius-sm)] border px-4 py-3 text-center transition-colors ${
                   isDesktopLinkActive(link.categoryId, link.query)
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
                     : "border-black/10 bg-white"
@@ -372,7 +402,7 @@ export function Header({
                   key={link.href}
                   href={link.href}
                   onClick={closeMenu}
-                  className={`rounded-full border px-4 py-3 text-center transition-colors ${
+                  className={`rounded-[var(--radius-sm)] border px-4 py-3 text-center transition-colors ${
                     isActive(link.href)
                       ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
                       : "border-black/10 bg-white"
@@ -383,25 +413,25 @@ export function Header({
               ))}
           </div>
 
-          <div className="mt-4 grid gap-3 text-[11px] font-semibold tracking-[0.18em]">
+          <div className="mt-3 grid gap-2 text-[11px] font-semibold tracking-[0.16em] sm:grid-cols-2">
             <a
               href="#/shop"
               onClick={closeMenu}
-              className="rounded-full border border-black/10 bg-white px-4 py-3 text-center"
+              className="rounded-[var(--radius-sm)] border border-black/10 bg-white px-4 py-3 text-center"
             >
               SEARCH PRODUCTS
             </a>
             <a
               href="#/account"
               onClick={closeMenu}
-              className="rounded-full border border-black/10 px-4 py-3 text-center"
+              className="rounded-[var(--radius-sm)] border border-black/10 px-4 py-3 text-center"
             >
               LOGIN / SIGN UP
             </a>
             <a
               href="#/wishlist"
               onClick={closeMenu}
-              className="rounded-full border border-black/10 px-4 py-3 text-center"
+              className="rounded-[var(--radius-sm)] border border-black/10 px-4 py-3 text-center"
             >
               SAVED {wishlistCount}
             </a>
@@ -411,7 +441,7 @@ export function Header({
                 closeMenu();
                 onOpenCart();
               }}
-              className="rounded-full border border-black/10 px-4 py-3 text-center"
+              className="rounded-[var(--radius-sm)] border border-black/10 px-4 py-3 text-center"
             >
               BAG {cartCount}
             </button>

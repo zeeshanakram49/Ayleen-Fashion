@@ -23,8 +23,8 @@ export function CartPage({
   onRemoveLine,
 }: CartPageProps) {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
-      <div className="reveal-up mb-8 flex items-end justify-between gap-4">
+    <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 md:py-16 lg:py-20">
+      <div className="reveal-up mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">BAG SUMMARY</p>
           <h1 className="font-editorial mt-3 text-4xl sm:text-5xl">Your Cart</h1>
@@ -33,13 +33,13 @@ export function CartPage({
       </div>
 
       {rows.length === 0 ? (
-        <article className="reveal-up is-visible rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-8 text-center sm:p-10">
           <h2 className="font-editorial text-3xl">Your cart is empty</h2>
           <p className="mt-3 text-sm text-[var(--muted)]">Add products to continue checkout.</p>
           <a
             href="#/shop"
                 style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
-            className="mt-5 inline-flex rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"
+            className="mt-5 inline-flex rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.18em] text-[var(--champagne)]"
           >
             START SHOPPING
           </a>
@@ -50,14 +50,14 @@ export function CartPage({
             {rows.map((row, index) => (
               <article
                 key={`${row.product.id}-${row.size}`}
-                className="reveal-up soft-panel grid gap-4 rounded-3xl border border-[var(--line)] p-4 sm:grid-cols-[150px_1fr]"
+                className="reveal-up soft-panel grid gap-4 rounded-[var(--radius-lg)] border border-[var(--line)] p-4 sm:grid-cols-[150px_1fr]"
                 style={{ animationDelay: `${index * 70}ms` }}
               >
-                <img src={row.product.image} alt={row.product.title} className="h-36 w-full rounded-2xl object-cover" />
+                <img src={row.product.image} alt={row.product.title} className="h-36 w-full rounded-[var(--radius-md)] object-cover" />
                 <div>
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-editorial text-3xl leading-tight">{row.product.title}</h3>
+                      <h3 className="font-editorial text-2xl leading-tight sm:text-3xl">{row.product.title}</h3>
                       <p className="text-xs tracking-[0.16em] text-[var(--muted)]">
                         {row.product.fit} | SIZE {row.size}
                       </p>
@@ -69,7 +69,7 @@ export function CartPage({
                     <button
                       type="button"
                       onClick={() => onRemoveLine(row.product.id, row.size)}
-                      className="rounded-full border border-[var(--line-strong)] px-3 py-1 text-[10px] tracking-[0.14em]"
+                      className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-3 py-1 text-[10px] tracking-[0.12em]"
                     >
                       REMOVE
                     </button>
@@ -79,7 +79,7 @@ export function CartPage({
                     <button
                       type="button"
                       onClick={() => onUpdateQty(row.product.id, row.size, row.qty - 1)}
-                      className="h-8 w-8 rounded-full border border-[var(--line-strong)]"
+                      className="h-8 w-8 rounded-[var(--radius-sm)] border border-[var(--line-strong)]"
                     >
                       -
                     </button>
@@ -87,7 +87,7 @@ export function CartPage({
                     <button
                       type="button"
                       onClick={() => onUpdateQty(row.product.id, row.size, row.qty + 1)}
-                      className="h-8 w-8 rounded-full border border-[var(--line-strong)]"
+                      className="h-8 w-8 rounded-[var(--radius-sm)] border border-[var(--line-strong)]"
                     >
                       +
                     </button>
@@ -97,7 +97,7 @@ export function CartPage({
             ))}
           </div>
 
-          <aside className="reveal-up delay-1 soft-panel rounded-3xl border border-[var(--line)] p-6">
+          <aside className="reveal-up delay-1 soft-panel rounded-[var(--radius-lg)] border border-[var(--line)] p-6">
             <h2 className="font-editorial text-3xl">Order Summary</h2>
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex justify-between">
@@ -123,7 +123,7 @@ export function CartPage({
             <a
               href="#/checkout"
               style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-xs font-semibold tracking-[0.2em]"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-[var(--radius-sm)] px-6 py-3 text-xs font-semibold tracking-[0.18em]"
             >
               PROCEED CHECKOUT
             </a>

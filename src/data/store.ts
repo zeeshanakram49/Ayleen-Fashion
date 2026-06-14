@@ -10,7 +10,7 @@ export const categories: Category[] = [
   {
     id: "women",
     name: "Women",
-    subtitle: "Elegant cuts for daily polish and festive evenings",
+    subtitle: "Tops, denim, dresses, and going-out layers",
     items: 128,
     image:
       "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1400&auto=format&fit=crop",
@@ -18,15 +18,15 @@ export const categories: Category[] = [
   {
     id: "men",
     name: "Men",
-    subtitle: "Refined street tailoring with premium essentials",
+    subtitle: "T-shirts, shirts, trousers, jackets, and shoes",
     items: 96,
     image:
       "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?q=80&w=1400&auto=format&fit=crop",
   },
   {
     id: "juniors",
-    name: "Juniors",
-    subtitle: "Comfort-forward silhouettes built for movement",
+    name: "Kids",
+    subtitle: "Casual denim and comfort-first everyday outfits",
     items: 74,
     image:
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1400&auto=format&fit=crop",
@@ -34,7 +34,7 @@ export const categories: Category[] = [
   {
     id: "accessories",
     name: "Accessories",
-    subtitle: "Premium details that complete every look",
+    subtitle: "Bags, sneakers, slides, and finishing touches",
     items: 53,
     image:
       "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1400&auto=format&fit=crop",
@@ -48,11 +48,11 @@ export const products: Product[] = [
     title: "Silk Line Co-ord",
     categoryId: "women",
     categoryLabel: "Women",
-    tags: ["women", "new-in"],
+    tags: ["women", "new-in", "sale"],
     fit: "Relaxed Fit",
     price: 8490,
     oldPrice: 10990,
-    badge: "Best Seller",
+    badge: "Sale",
     image:
       "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -75,7 +75,7 @@ export const products: Product[] = [
     title: "Linen Overshirt",
     categoryId: "men",
     categoryLabel: "Men",
-    tags: ["men", "new-in"],
+    tags: ["men", "new-in", "shirt", "textured", "polo"],
     fit: "Regular Fit",
     price: 6290,
     oldPrice: 7690,
@@ -102,11 +102,11 @@ export const products: Product[] = [
     title: "Refined Cargo Trouser",
     categoryId: "men",
     categoryLabel: "Men",
-    tags: ["men"],
+    tags: ["men", "sale", "trouser", "denim"],
     fit: "Tapered Fit",
     price: 5990,
     oldPrice: 7190,
-    badge: "Limited",
+    badge: "Sale",
     image:
       "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -129,11 +129,11 @@ export const products: Product[] = [
     title: "Signature White Shirt",
     categoryId: "women",
     categoryLabel: "Women",
-    tags: ["women", "new-in"],
+    tags: ["women", "new-in", "shirt", "striped"],
     fit: "Tailored Fit",
     price: 4690,
     oldPrice: 5490,
-    badge: "AYLEEN Edit",
+    badge: "Aylee Edit",
     image:
       "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -156,11 +156,11 @@ export const products: Product[] = [
     title: "Urban Leather Sneaker",
     categoryId: "accessories",
     categoryLabel: "Shoes",
-    tags: ["accessories", "shoes"],
+    tags: ["accessories", "shoes", "sale"],
     fit: "Comfort Fit",
     price: 9990,
     oldPrice: 11590,
-    badge: "Premium",
+    badge: "Sale",
     image:
       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -183,11 +183,11 @@ export const products: Product[] = [
     title: "Luxe Tote Bag",
     categoryId: "accessories",
     categoryLabel: "Luxury Bags",
-    tags: ["accessories", "bags"],
+    tags: ["accessories", "bags", "sale"],
     fit: "Structured",
     price: 7490,
     oldPrice: 8990,
-    badge: "Back In Stock",
+    badge: "Sale",
     image:
       "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -206,11 +206,11 @@ export const products: Product[] = [
   },
   {
     id: "p7",
-    slug: "noir-abaya-set",
-    title: "Noir Abaya Set",
+    slug: "black-midi-dress",
+    title: "Black Midi Dress",
     categoryId: "women",
     categoryLabel: "Women",
-    tags: ["women"],
+    tags: ["women", "dress"],
     fit: "Flowing Fit",
     price: 11990,
     oldPrice: 13990,
@@ -222,10 +222,10 @@ export const products: Product[] = [
       "https://images.unsplash.com/photo-1502716119720-b23a93e5fe1b?q=80&w=1200&auto=format&fit=crop",
     ],
     colors: ["Black", "Onyx", "Charcoal"],
-    description: "Flowing premium abaya with contrast inner.",
+    description: "Flowing black dress with contrast inner styling.",
     details:
       "Tailored front line, fluid sleeves, and elegant drape for formal and semi-formal styling.",
-    material: "Nida Premium",
+    material: "Soft Crepe",
     stock: 12,
     sizes: ["S", "M", "L"],
     rating: 4.9,
@@ -236,12 +236,12 @@ export const products: Product[] = [
     slug: "soft-denim-jacket",
     title: "Soft Denim Jacket",
     categoryId: "juniors",
-    categoryLabel: "Juniors",
-    tags: ["juniors"],
+    categoryLabel: "Kids",
+    tags: ["juniors", "denim", "sale"],
     fit: "Relaxed Fit",
     price: 5390,
     oldPrice: 6490,
-    badge: "Top Rated",
+    badge: "Sale",
     image:
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -264,7 +264,7 @@ export const products: Product[] = [
     title: "Pleated Lawn Shirt",
     categoryId: "women",
     categoryLabel: "Women",
-    tags: ["women"],
+    tags: ["women", "shirt", "printed", "embroidered"],
     fit: "Straight Fit",
     price: 4390,
     oldPrice: 5690,
@@ -291,11 +291,11 @@ export const products: Product[] = [
     title: "Tailored Waistcoat Set",
     categoryId: "men",
     categoryLabel: "Men",
-    tags: ["men", "formal"],
+    tags: ["men", "formal", "sale", "shirt", "basic"],
     fit: "Slim Fit",
     price: 13490,
     oldPrice: 15490,
-    badge: "Occasion Wear",
+    badge: "Sale",
     image:
       "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -318,7 +318,7 @@ export const products: Product[] = [
     title: "Weekend Canvas Backpack",
     categoryId: "accessories",
     categoryLabel: "Luxury Bags",
-    tags: ["accessories", "bags"],
+    tags: ["accessories", "bags", "backpack"],
     fit: "Utility",
     price: 5190,
     oldPrice: 6390,
@@ -344,8 +344,8 @@ export const products: Product[] = [
     slug: "athleisure-track-set",
     title: "Athleisure Track Set",
     categoryId: "juniors",
-    categoryLabel: "Juniors",
-    tags: ["juniors"],
+    categoryLabel: "Kids",
+    tags: ["juniors", "track"],
     fit: "Loose Fit",
     price: 5790,
     oldPrice: 6990,
@@ -373,7 +373,7 @@ export const products: Product[] = [
     title: "Outdoor Luxe Sneakers",
     categoryId: "men",
     categoryLabel: "Men",
-    tags: ["men", "new-in"],
+    tags: ["men", "new-in", "shoes"],
     fit: "Regular Fit",
     price: 6890,
     oldPrice: 8290,
@@ -396,7 +396,7 @@ export const products: Product[] = [
     title: "Ceremony Navy Suit",
     categoryId: "men",
     categoryLabel: "Men",
-    tags: ["men", "formal", "new-in"],
+    tags: ["men", "formal", "new-in", "shirt", "checks", "jacquard"],
     fit: "Tailored Fit",
     price: 15490,
     oldPrice: 17690,
@@ -419,11 +419,11 @@ export const products: Product[] = [
     title: "Tokyo Suede Sneakers",
     categoryId: "accessories",
     categoryLabel: "Shoes",
-    tags: ["accessories", "shoes", "new-in"],
+    tags: ["accessories", "shoes", "new-in", "sneaker"],
     fit: "Comfort Fit",
     price: 9390,
     oldPrice: 10890,
-    badge: "AYLEEN Edit",
+    badge: "Aylee Edit",
     image:
       "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1400&auto=format&fit=crop",
     gallery: [
@@ -446,7 +446,7 @@ export const products: Product[] = [
     title: "Rio Toe Slides",
     categoryId: "accessories",
     categoryLabel: "Shoes",
-    tags: ["accessories", "shoes"],
+    tags: ["accessories", "shoes", "slides"],
     fit: "Easy Fit",
     price: 5790,
     oldPrice: 6790,
@@ -500,7 +500,7 @@ export const products: Product[] = [
     title: "Monaco Soft Loafers",
     categoryId: "accessories",
     categoryLabel: "Shoes",
-    tags: ["accessories", "shoes"],
+    tags: ["accessories", "shoes", "loafers"],
     fit: "Comfort Fit",
     price: 8290,
     oldPrice: 9590,
@@ -552,20 +552,20 @@ export const products: Product[] = [
 
 export const services: Service[] = [
   {
-    title: "Nationwide Express",
-    detail: "Free delivery across Pakistan above PKR 6,000.",
+    title: "Nationwide Delivery",
+    detail: "Free delivery across Pakistan above PKR 2,500.",
   },
   {
     title: "Easy Exchange",
-    detail: "7-day exchange policy with smooth pickup process.",
+    detail: "Exchange support for unused articles with original tags.",
   },
   {
     title: "Secure Checkout",
     detail: "COD, JazzCash, EasyPaisa, and card payment options.",
   },
   {
-    title: "Style Assistance",
-    detail: "Curated recommendations from our in-house team.",
+    title: "Online & In Stores",
+    detail: "Shop campaign drops online or visit your nearest retail store.",
   },
 ];
 
@@ -583,7 +583,7 @@ export const testimonials: Testimonial[] = [
       "The men collection has clean cuts and smart stitching. Great for office and evening both.",
   },
   {
-    name: "Ayleen Nasir",
+    name: "Ayesha Nasir",
     city: "Lahore",
     quote:
       "Packaging, quality and support team all feel professional. My go-to brand for gifting now.",
@@ -593,7 +593,7 @@ export const testimonials: Testimonial[] = [
 export const navLinks = [
   { href: "#/", label: "HOME" },
   { href: "#/shop", label: "SHOP" },
-  { href: "#/about", label: "ABOUT" },
+  { href: "#/about", label: "STORES" },
   { href: "#/contact", label: "CONTACT" },
 ];
 

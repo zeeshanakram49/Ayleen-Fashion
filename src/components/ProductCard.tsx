@@ -37,27 +37,33 @@ export function ProductCard({
 
   return (
     <article
-      className={`group product-card reveal-up overflow-hidden border border-[var(--line)] bg-white ${
+      className={`group product-card reveal-up overflow-hidden bg-white ${
         isCatalog
-          ? "catalog-product-card rounded-[0.25rem] p-4"
+          ? "catalog-product-card"
           : compact
-            ? "rounded-[1.65rem] p-3"
-            : "rounded-[1.65rem] p-4"
+            ? "rounded-[var(--radius-lg)] border border-[var(--line)] p-3 shadow-[var(--shadow-soft)]"
+            : "rounded-[var(--radius-lg)] border border-[var(--line)] p-3.5 shadow-[var(--shadow-soft)]"
       }`}
       style={{ animationDelay: `${80 + index * 80}ms` }}
     >
-      <div className={`relative overflow-hidden ${isCatalog ? "rounded-[0.15rem]" : "rounded-[1.35rem]"}`}>
-        <ImageWithFallback
-          src={product.image}
-          alt={product.title}
-          className={`media-zoom w-full object-cover ${
-            isCatalog ? "h-[26rem]" : compact ? "h-[300px]" : "h-[360px]"
-          }`}
-        />
+      <div className={`relative overflow-hidden ${isCatalog ? "bg-[#f3f4f1]" : "rounded-[var(--radius-md)]"}`}>
+        <button
+          type="button"
+          onClick={() => onOpenProduct(product.slug)}
+          className="block w-full"
+        >
+          <ImageWithFallback
+            src={product.image}
+            alt={product.title}
+            className={`media-zoom w-full object-cover ${
+              isCatalog ? "catalog-product-image" : compact ? "h-[300px]" : "h-[360px]"
+            }`}
+          />
+        </button>
         <div
           className={`absolute inset-0 ${
             isCatalog
-              ? "bg-gradient-to-t from-black/10 via-transparent to-transparent"
+              ? "pointer-events-none bg-transparent"
               : "bg-gradient-to-t from-black/16 via-transparent to-transparent"
           }`}
         />
@@ -80,8 +86,8 @@ export function ProductCard({
           onClick={() => onToggleWishlist(product.id)}
           className={`absolute ${
             isCatalog
-              ? "catalog-heart-button right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/96 text-[1.45rem] text-[var(--ink)] shadow-lg"
-              : "right-3 top-3 rounded-full border border-white/70 bg-white/20 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur"
+              ? "catalog-heart-button right-3 top-3 flex h-9 w-9 items-center justify-center bg-white/82 text-[1.25rem] text-[var(--ink)]"
+              : "right-3 top-3 rounded-[var(--radius-sm)] border border-white/70 bg-white/20 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur"
           }`}
         >
           {isCatalog ? (liked ? "♥" : "♡") : liked ? "SAVED" : "SAVE"}
@@ -90,20 +96,22 @@ export function ProductCard({
         {isCatalog && (
           <button
             type="button"
-            onClick={() => onOpenProduct(product.slug)}
+            onClick={() => onAddToCart(product.id, pickedSize, true)}
             className="catalog-product-quickview"
           >
-            Quick view
+            Add to Basket
           </button>
         )}
       </div>
 
-      <div className={compact ? "mt-4" : "mt-5"}>
+      <div className={isCatalog ? "catalog-product-body" : compact ? "mt-4" : "mt-5"}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className={`tracking-[0.2em] text-[var(--gold-deep)] ${isCatalog ? "text-[9px]" : "text-[10px]"}`}>
+            {!isCatalog && (
+              <p className={`tracking-[0.2em] text-[var(--gold-deep)] ${compact ? "text-[10px]" : "text-[10px]"}`}>
               {product.categoryLabel.toUpperCase()}
-            </p>
+              </p>
+            )}
             <button
               type="button"
               onClick={() => onOpenProduct(product.slug)}
@@ -117,13 +125,18 @@ export function ProductCard({
             >
               {product.title}
             </button>
+            {isCatalog && (
+              <p className="catalog-product-meta">
+                {product.fit} | {product.categoryLabel}
+              </p>
+            )}
           </div>
 
           {!compact && !isCatalog && (
             <button
               type="button"
               onClick={() => onAddToCart(product.id, pickedSize, true)}
-              className="rounded-full border border-[var(--line-strong)] px-4 py-2 text-[10px] font-semibold tracking-[0.16em] transition hover:border-[var(--gold-deep)] hover:text-[var(--gold-deep)]"
+              className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2 text-[10px] font-semibold tracking-[0.14em] transition hover:border-[var(--gold-deep)] hover:text-[var(--gold-deep)]"
             >
               ADD TO BAG
             </button>
@@ -137,12 +150,15 @@ export function ProductCard({
         )}
 
         <div className="mt-4 flex items-center gap-2 text-sm">
-          <span className="font-semibold text-[var(--ink)]">
-            {money(product.price)}
-          </span>
           <span className="text-[var(--muted)] line-through">
             {money(product.oldPrice)}
           </span>
+          <span className="font-semibold text-[var(--ink)]">
+            {money(product.price)}
+          </span>
+          {isCatalog && salePercent > 0 && (
+            <span className="font-semibold text-[var(--ink)]">-{salePercent}%</span>
+          )}
         </div>
 
         {!isCatalog && (
@@ -151,15 +167,21 @@ export function ProductCard({
           </p>
         )}
 
-        {!isCatalog && (
+        {!isCatalog ? (
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {product.colors.slice(0, compact ? 2 : 3).map((color) => (
               <span
                 key={color}
-                className="rounded-full border border-[var(--line-strong)] px-3 py-1 text-[10px] tracking-[0.14em] text-[var(--muted)]"
+                className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-3 py-1 text-[10px] tracking-[0.12em] text-[var(--muted)]"
               >
                 {color}
               </span>
+            ))}
+          </div>
+        ) : (
+          <div className="catalog-swatches">
+            {product.colors.slice(0, 2).map((color) => (
+              <span key={color} title={color} />
             ))}
           </div>
         )}
@@ -168,19 +190,11 @@ export function ProductCard({
           <button
             type="button"
             onClick={() => onAddToCart(product.id, pickedSize, true)}
-            className="mt-5 w-full rounded-full bg-[var(--ink)] px-4 py-3 text-[10px] font-semibold tracking-[0.18em] text-[var(--paper)]"
+            className="mt-5 w-full rounded-[var(--radius-sm)] bg-[var(--ink)] px-4 py-3 text-[10px] font-semibold tracking-[0.16em] text-[var(--paper)]"
           >
             QUICK ADD
           </button>
-        ) : isCatalog ? (
-          <button
-            type="button"
-            onClick={() => onAddToCart(product.id, pickedSize, true)}
-            className="mt-5 w-full rounded-[0.15rem] border border-[var(--ink)] bg-[var(--ink)] px-4 py-3 text-[10px] font-semibold tracking-[0.18em] text-[var(--paper)]"
-          >
-            ADD TO BAG
-          </button>
-        ) : (
+        ) : isCatalog ? null : (
           <div className="mt-5">
             <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--muted)]">
               SELECT SIZE
@@ -191,10 +205,10 @@ export function ProductCard({
                   key={size}
                   type="button"
                   onClick={() => onPickSize(product.id, size)}
-                  className={`rounded-full px-3 py-1.5 text-[10px] font-semibold tracking-[0.15em] transition ${
+                  className={`px-3 py-1.5 text-[10px] font-semibold tracking-[0.14em] transition ${
                     pickedSize === size
-                      ? "bg-[var(--ink)] text-[var(--paper)]"
-                      : "border border-[var(--line-strong)] hover:border-[var(--gold-deep)]"
+                      ? "rounded-[var(--radius-sm)] bg-[var(--ink)] text-[var(--paper)]"
+                      : "rounded-[var(--radius-sm)] border border-[var(--line-strong)] hover:border-[var(--gold-deep)]"
                   }`}
                 >
                   {size}

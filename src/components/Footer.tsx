@@ -8,15 +8,15 @@ type FooterProps = {
 const storeLocations = [
   {
     city: "Lahore",
-    locations: ["Flagship Store / Gulberg II", "Emporium Mall / Level 3"],
+    locations: ["Gulberg II / Flagship", "Emporium Mall / Level 3"],
   },
   {
     city: "Islamabad",
-    locations: ["F-10 Markaz / Styling Desk", "Zeta Mall / UG-07"],
+    locations: ["F-10 Markaz / Retail Store", "Centaurus Mall / Level 2"],
   },
   {
     city: "Karachi",
-    locations: ["Dolmen Mall Clifton / Ground Floor", "Private gifting support"],
+    locations: ["Dolmen Mall Clifton / Ground Floor", "Lucky One Mall / Ground Floor"],
   },
 ];
 
@@ -26,19 +26,18 @@ export function Footer({ categories }: FooterProps) {
 
   return (
     <footer className="border-t border-[var(--line)] bg-[var(--paper)]">
-      <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
+      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 md:py-16 lg:py-20">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-[var(--line)] bg-white p-7 shadow-[0_24px_60px_-34px_rgba(22,17,12,0.4)] sm:p-8">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-6 shadow-[var(--shadow-soft)] sm:p-8">
             <p className="text-[11px] font-semibold tracking-[0.3em] text-[var(--gold-deep)]">
               SIGN UP AND SAVE
             </p>
             <h2 className="font-editorial mt-4 max-w-lg text-4xl leading-tight sm:text-5xl">
-              Join the AYLEEN list for drops, styling notes, and private offers.
+              Join the Aylee list for new drops, sale alerts, and private offers.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">
-              This footer follows the same premium store logic as the reference:
-              a clear newsletter area, support details, and visible city-level
-              retail presence.
+              Get early access to campaign launches, selected stock markdowns,
+              and online exclusives across women, men, kids, and accessories.
             </p>
 
             <form
@@ -58,11 +57,11 @@ export function Footer({ categories }: FooterProps) {
                   if (subscribed) setSubscribed(false);
                 }}
                 placeholder="Enter your email"
-                className="footer-input h-14 flex-1 rounded-full border border-[var(--line-strong)] bg-[var(--paper)] px-5 text-sm outline-none"
+                className="footer-input h-14 flex-1 rounded-[var(--radius-sm)] border border-[var(--line-strong)] bg-[var(--paper)] px-5 text-sm outline-none"
               />
               <button
                 type="submit"
-                className="footer-submit h-14 rounded-full bg-[var(--ink)] px-7 text-[11px] font-semibold tracking-[0.2em] text-[var(--paper)]"
+                className="footer-submit h-14 rounded-[var(--radius-sm)] bg-[var(--ink)] px-7 text-[11px] font-semibold tracking-[0.18em] text-[var(--paper)]"
               >
                 SUBSCRIBE
               </button>
@@ -79,7 +78,7 @@ export function Footer({ categories }: FooterProps) {
                 href="https://www.instagram.com/"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border border-[var(--line-strong)] px-4 py-2"
+                className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2"
               >
                 INSTAGRAM
               </a>
@@ -87,7 +86,7 @@ export function Footer({ categories }: FooterProps) {
                 href="https://www.facebook.com/"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border border-[var(--line-strong)] px-4 py-2"
+                className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2"
               >
                 FACEBOOK
               </a>
@@ -95,7 +94,7 @@ export function Footer({ categories }: FooterProps) {
                 href="https://www.tiktok.com/"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border border-[var(--line-strong)] px-4 py-2"
+                className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2"
               >
                 TIKTOK
               </a>
@@ -103,7 +102,7 @@ export function Footer({ categories }: FooterProps) {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-6">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6">
               <h3 className="text-[11px] font-semibold tracking-[0.28em] text-[var(--gold-deep)]">
                 CUSTOMER SERVICE
               </h3>
@@ -111,19 +110,19 @@ export function Footer({ categories }: FooterProps) {
                 <p>
                   Email:
                   {" "}
-                  <a href="mailto:support@ayleen.pk">support@ayleen.pk</a>
+                  <a href="mailto:support@aylee.pk">support@aylee.pk</a>
                 </p>
                 <p>
                   WhatsApp:
                   {" "}
-                  <a href="tel:+923034965359">+92 303 4965359</a>
+                  <a href="tel:+924235467243">+92 42 35467243</a>
                 </p>
                 <p>09:00 AM to 09:00 PM (PST)</p>
                 <p>Monday to Saturday</p>
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--panel)] p-6">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6">
               <h3 className="text-[11px] font-semibold tracking-[0.28em] text-[var(--gold-deep)]">
                 SHOP
               </h3>
@@ -145,7 +144,7 @@ export function Footer({ categories }: FooterProps) {
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--ink)] p-7 text-[var(--paper)]">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--ink)] p-6 text-[var(--paper)] sm:p-7">
             <p className="text-[11px] font-semibold tracking-[0.3em] text-[var(--gold)]">
               STORE LOCATION
             </p>
@@ -153,7 +152,7 @@ export function Footer({ categories }: FooterProps) {
               {storeLocations.map((location) => (
                 <article
                   key={location.city}
-                  className="rounded-[1.5rem] border border-white/12 bg-white/6 p-4"
+                  className="rounded-[var(--radius-md)] border border-white/12 bg-white/6 p-4"
                 >
                   <h3 className="font-editorial text-3xl">{location.city}</h3>
                   <div className="mt-3 space-y-2 text-sm text-[var(--paper)]/70">
@@ -166,7 +165,7 @@ export function Footer({ categories }: FooterProps) {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[var(--line)] bg-white p-7">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-6 sm:p-7">
             <p className="text-[11px] font-semibold tracking-[0.3em] text-[var(--gold-deep)]">
               POLICIES
             </p>
@@ -181,7 +180,7 @@ export function Footer({ categories }: FooterProps) {
       </div>
 
       <div className="border-t border-[var(--line)] px-6 py-4 text-center text-[11px] tracking-[0.18em] text-[var(--muted)]">
-        © 2026 AYLEEN. ALL RIGHTS RESERVED.
+        © 2026 AYLEE. ALL RIGHTS RESERVED.
       </div>
     </footer>
   );

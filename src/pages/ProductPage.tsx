@@ -37,10 +37,10 @@ export function ProductPage({
   const salePercent = discountPercent(product.price, product.oldPrice);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+    <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 md:py-16 lg:py-20">
       <a
         href="#/shop"
-        className="reveal-up inline-flex rounded-full border border-[var(--line-strong)] px-4 py-2 text-xs tracking-[0.16em]"
+        className="reveal-up inline-flex rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2 text-xs tracking-[0.14em] transition hover:border-[var(--ink)]"
       >
         BACK TO SHOP
       </a>
@@ -52,14 +52,14 @@ export function ProductPage({
               key={image}
               src={image}
               alt={product.title}
-              className="cinema-card media-zoom h-[360px] w-full rounded-[1.8rem] object-cover"
+              className="cinema-card media-zoom h-[320px] w-full rounded-[var(--radius-lg)] object-cover sm:h-[360px]"
             />
           ))}
         </div>
 
-        <article className="reveal-up delay-1 soft-panel rounded-[2rem] border border-[var(--line)] p-7">
+        <article className="reveal-up delay-1 soft-panel rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-7">
           <p className="text-xs tracking-[0.22em] text-[var(--gold-deep)]">{product.categoryLabel.toUpperCase()}</p>
-          <h1 className="font-editorial mt-3 text-5xl leading-[0.95]">{product.title}</h1>
+          <h1 className="font-editorial mt-3 text-4xl leading-[1.02] sm:text-5xl">{product.title}</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">{product.description}</p>
           <p className="mt-2 text-xs tracking-[0.18em] text-[var(--muted)]">{product.fit}</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -78,7 +78,7 @@ export function ProductPage({
             Pay in 3 installments of {money(installmentAmount(product.price))}
           </p>
 
-          <div className="mt-6 grid gap-3 rounded-2xl border border-[var(--line)] bg-white/60 p-4 text-sm text-[var(--muted)]">
+          <div className="mt-6 grid gap-3 rounded-[var(--radius-md)] border border-[var(--line)] bg-white/72 p-4 text-sm text-[var(--muted)]">
             <p>Premium fabric: {product.material}</p>
             <p>Ready stock: {product.stock} units</p>
             <p>Delivery: 2 to 5 working days nationwide</p>
@@ -91,7 +91,7 @@ export function ProductPage({
               {product.colors.map((color) => (
                 <span
                   key={color}
-                  className="rounded-full border border-[var(--line-strong)] px-4 py-2 text-xs tracking-[0.15em]"
+                  className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2 text-xs tracking-[0.12em]"
                 >
                   {color}
                 </span>
@@ -107,7 +107,7 @@ export function ProductPage({
                   key={size}
                   type="button"
                   onClick={() => onPickSize(size)}
-                  className={`rounded-full px-4 py-2 text-xs tracking-[0.15em] ${pickedSize === size ? 'bg-[var(--ink)] text-[var(--champagne)]' : 'border border-[var(--line-strong)]'}`}
+                  className={`rounded-[var(--radius-sm)] px-4 py-2 text-xs tracking-[0.12em] ${pickedSize === size ? 'bg-[var(--ink)] text-[var(--champagne)]' : 'border border-[var(--line-strong)]'}`}
                 >
                   {size}
                 </button>
@@ -121,14 +121,14 @@ export function ProductPage({
             <button
               type="button"
               onClick={onAddToCart}
-              className="magnetic-btn rounded-full bg-[var(--ink)] px-7 py-3 text-xs tracking-[0.2em] text-[var(--champagne)]"
+              className="magnetic-btn rounded-[var(--radius-sm)] bg-[var(--ink)] px-7 py-3 text-xs tracking-[0.18em] text-[var(--champagne)]"
             >
               ADD TO CART
             </button>
             <button
               type="button"
               onClick={onToggleWishlist}
-              className="ghost-btn rounded-full border border-[var(--line-strong)] px-7 py-3 text-xs tracking-[0.2em]"
+              className="ghost-btn rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-7 py-3 text-xs tracking-[0.18em]"
             >
               {liked ? 'SAVED' : 'SAVE ITEM'}
             </button>

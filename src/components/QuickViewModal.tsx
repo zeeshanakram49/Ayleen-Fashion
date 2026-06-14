@@ -140,7 +140,7 @@ export function QuickViewModal({
                 {money(product.price).replace("PKR ", "Rs.")}
               </p>
               {salePercent > 0 && (
-                <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-[0.68rem] tracking-[0.18em] text-white">
+                <span className="rounded-[var(--radius-sm)] bg-[var(--ink)] px-3 py-1 text-[0.68rem] tracking-[0.16em] text-white">
                   SAVE {salePercent}%
                 </span>
               )}
@@ -163,7 +163,7 @@ export function QuickViewModal({
                 {product.colors.map((color) => (
                   <span
                     key={color}
-                    className="rounded-full border border-[var(--line)] px-3 py-1.5 text-[0.72rem] tracking-[0.1em]"
+                    className="rounded-[var(--radius-sm)] border border-[var(--line)] px-3 py-1.5 text-[0.72rem] tracking-[0.1em]"
                   >
                     {color}
                   </span>

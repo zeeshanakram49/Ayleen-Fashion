@@ -26,8 +26,8 @@ export function WishlistPage({
   onOpenProduct,
 }: WishlistPageProps) {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
-      <div className="reveal-up mb-8 flex items-end justify-between">
+    <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 md:py-16 lg:py-20">
+      <div className="reveal-up mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">
             PERSONAL LIST
@@ -42,17 +42,17 @@ export function WishlistPage({
       </div>
 
       {products.length === 0 ? (
-        <article className="reveal-up is-visible rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+        <article className="reveal-up is-visible rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-8 text-center sm:p-10">
           <h2 className="font-editorial text-3xl">No saved items yet</h2>
           <a
             href="#/shop"
-            className="mt-5 inline-flex rounded-full bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.2em] !text-white"
+            className="mt-5 inline-flex rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.18em] !text-white"
           >
             EXPLORE SHOP
           </a>
         </article>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {products.map((product, index) => (
             <ProductCard
               key={product.id}
