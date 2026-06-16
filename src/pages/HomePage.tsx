@@ -24,99 +24,92 @@ type HomePageProps = {
 
 const categoryTiles = [
   {
-    label: "T-Shirts",
+    label: "Sand Polo",
     categoryId: "men",
-    query: "shirt",
-    image:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop",
+    query: "sand",
+    image: "/products/product_06_website_square_1600.jpg",
   },
   {
-    label: "Polos",
+    label: "Ice Henley",
     categoryId: "men",
-    query: "polo",
-    image:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1200&auto=format&fit=crop",
+    query: "ice",
+    image: "/products/product_02_website_square_1600.jpg",
   },
   {
-    label: "Shirts",
+    label: "Olive Polo",
     categoryId: "men",
-    query: "shirt",
-    image:
-      "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1200&auto=format&fit=crop",
+    query: "olive",
+    image: "/products/product_04_website_square_1600.jpg",
   },
   {
-    label: "Activewear",
+    label: "Side Edits",
     categoryId: "men",
-    query: "activewear",
-    image:
-      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    label: "Denim",
-    categoryId: "juniors",
-    query: "denim",
-    image:
-      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    label: "Trousers",
-    categoryId: "men",
-    query: "trouser",
-    image:
-      "https://images.unsplash.com/photo-1506629905607-d9f297d2222b?q=80&w=1200&auto=format&fit=crop",
+    query: "easy",
+    image: "/products/product_05_website_square_1600.jpg",
   },
 ] as const;
 
 const focusLinks = [
-  { label: "Tees & Polos", categoryId: "men", query: "shirt" },
-  { label: "Shorts", categoryId: "men", query: "shorts" },
-  { label: "Shirts", categoryId: "men", query: "shirt" },
+  { label: "Textured Polos", categoryId: "men", query: "polo" },
+  { label: "Knit Henleys", categoryId: "men", query: "henley" },
+  { label: "Sale Picks", categoryId: "all", query: "sale" },
 ] as const;
 
 const mustHaveTabs = [
-  { label: "T-Shirts", categoryId: "all", query: "shirt" },
-  { label: "Denim", categoryId: "juniors", query: "denim" },
-  { label: "Footwear", categoryId: "accessories", query: "shoes" },
-  { label: "Trousers", categoryId: "men", query: "trouser" },
-  { label: "Fragrances", categoryId: "accessories", query: "bags" },
+  { label: "Textured", categoryId: "men", query: "textured" },
+  { label: "Polo", categoryId: "men", query: "polo" },
+  { label: "Henley", categoryId: "men", query: "henley" },
+  { label: "Sale", categoryId: "all", query: "sale" },
 ] as const;
 
 const heroSlides = [
   {
-    kicker: "Winter Sale",
-    title: "Sale Edit",
-    subtitle: "Selected stock",
-    categoryId: "all",
-    query: "sale",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2200&auto=format&fit=crop",
-  },
-  {
-    kicker: "New Arrivals",
-    title: "Going Out",
-    subtitle: "Polished fits",
-    categoryId: "women",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2200&auto=format&fit=crop",
-  },
-  {
-    kicker: "Men",
-    title: "City Casual",
-    subtitle: "Everyday layers",
+    kicker: "New Arrival",
+    title: "Sand Textured Knit Polo",
+    subtitle: "Soft sand knit",
     categoryId: "men",
-    query: "",
-    image:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2200&auto=format&fit=crop",
+    query: "sand",
+    image: "/products/product_06_website_square_1600.jpg",
   },
   {
-    kicker: "Kids",
-    title: "Denim Days",
-    subtitle: "Easy outfits",
-    categoryId: "juniors",
-    query: "denim",
-    image:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=2200&auto=format&fit=crop",
+    kicker: "New Arrival",
+    title: "Ice Textured Knit Henley",
+    subtitle: "Cool grey texture",
+    categoryId: "men",
+    query: "ice",
+    image: "/products/product_02_website_square_1600.jpg",
+  },
+  {
+    kicker: "Sale Edit",
+    title: "Olive Textured Knit Polo",
+    subtitle: "Deep olive finish",
+    categoryId: "men",
+    query: "olive",
+    image: "/products/product_04_website_square_1600.jpg",
+  },
+  {
+    kicker: "Detail View",
+    title: "Sand Knit Polo Side Edit",
+    subtitle: "Easy everyday fit",
+    categoryId: "men",
+    query: "sand",
+    image: "/products/product_01_website_square_1600.jpg",
+  },
+  {
+    kicker: "Fresh Drop",
+    title: "Ice Knit Henley Side Edit",
+    subtitle: "Airy knit profile",
+    categoryId: "men",
+    query: "henley",
+    image: "/products/product_03_website_square_1600.jpg",
+  },
+  {
+    kicker: "Selected Stock",
+    title: "Olive Knit Polo Side Edit",
+    subtitle: "Relaxed textured drape",
+    categoryId: "men",
+    query: "olive",
+    image: "/products/product_05_website_square_1600.jpg",
   },
 ] as const;
 
@@ -284,8 +277,8 @@ export function HomePage({
       <section className="outfit-focus-section">
         <div className="outfit-focus-image reveal-up">
           <img
-            src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1400&auto=format&fit=crop"
-            alt="Men category feature"
+            src="/products/product_03_website_square_1600.jpg"
+            alt="Textured knit polo feature"
           />
         </div>
         <div className="outfit-focus-content">

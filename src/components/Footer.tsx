@@ -36,8 +36,8 @@ export function Footer({ categories }: FooterProps) {
               Join the Aylee list for new drops, sale alerts, and private offers.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">
-              Get early access to campaign launches, selected stock markdowns,
-              and online exclusives across women, men, kids, and accessories.
+              Get early access to product drops, selected stock markdowns,
+              and online exclusives from Aylee.
             </p>
 
             <form

@@ -31,7 +31,10 @@ import type {
 function readStoredCart() {
   try {
     const storedCart = localStorage.getItem("ayleen_cart_v1");
-    return storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
+    const storedLines = storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
+    return storedLines.filter((line) =>
+      products.some((product) => product.id === line.productId),
+    );
   } catch {
     return [];
   }
@@ -40,7 +43,10 @@ function readStoredCart() {
 function readStoredWishlist() {
   try {
     const storedWishlist = localStorage.getItem("ayleen_wishlist_v1");
-    return storedWishlist ? (JSON.parse(storedWishlist) as string[]) : [];
+    const storedIds = storedWishlist ? (JSON.parse(storedWishlist) as string[]) : [];
+    return storedIds.filter((productId) =>
+      products.some((product) => product.id === productId),
+    );
   } catch {
     return [];
   }

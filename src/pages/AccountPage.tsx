@@ -3,7 +3,7 @@ import { useState } from "react";
 type AccountMode = "login" | "signup";
 
 const accountImage =
-  "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1600&auto=format&fit=crop";
+  "/products/product_05_website_square_1600.jpg";
 
 export function AccountPage() {
   const [mode, setMode] = useState<AccountMode>("login");

@@ -26,15 +26,13 @@ type ShopPageProps = {
 
 const collectionTabs = [
   { label: "All", query: "" },
-  { label: "Basics", query: "basic" },
   { label: "Textured", query: "textured" },
-  { label: "Printed", query: "printed" },
-  { label: "Checks", query: "checks" },
-  { label: "Striped", query: "striped" },
-  { label: "Embroidered", query: "embroidered" },
+  { label: "Polo", query: "polo" },
+  { label: "Henley", query: "henley" },
   { label: "Knit", query: "knit" },
-  { label: "Jacquard", query: "jacquard" },
-  { label: "Denim", query: "denim" },
+  { label: "Sand", query: "sand" },
+  { label: "Ice", query: "ice" },
+  { label: "Olive", query: "olive" },
 ] as const;
 
 export function ShopPage({
@@ -53,43 +51,11 @@ export function ShopPage({
 }: ShopPageProps) {
   const pageRef = useRef<HTMLElement | null>(null);
   const collectionCopy = useMemo(() => {
-    if (activeCategory === "men" && (query === "shirt" || query === "")) {
-      return {
-        title: query === "shirt" ? "Men - Shirts" : "Men",
-        breadcrumb: query === "shirt" ? ["Home", "Men", "Men - Shirts"] : ["Home", "Men"],
-        description: "",
-      };
-    }
-
-    if (query === "shoes") {
-      return {
-        title: "Shoes",
-        breadcrumb: ["Home", "Accessories", "Shoes"],
-        description: "Minimal sneakers, slides, and luxe footwear edits in one clean view.",
-      };
-    }
-
-    if (query === "bags") {
-      return {
-        title: "Bags",
-        breadcrumb: ["Home", "Accessories", "Bags"],
-        description: "Structured totes, backpacks, and carryalls for everyday polish.",
-      };
-    }
-
     if (query === "sale") {
       return {
         title: "Sale",
         breadcrumb: ["Home", "Sale"],
-        description: "Selected stock markdowns across women, men, kids, shoes, and accessories.",
-      };
-    }
-
-    if (activeCategory === "women") {
-      return {
-        title: "Women",
-        breadcrumb: ["Home", "Women"],
-        description: "Soft tailoring, elevated separates, denim, and going-out silhouettes.",
+        description: "Selected markdowns on textured polos and knit henleys.",
       };
     }
 
@@ -97,22 +63,14 @@ export function ShopPage({
       return {
         title: "Men",
         breadcrumb: ["Home", "Men"],
-        description: "Refined casual layers, premium essentials, and sharp evening tailoring.",
-      };
-    }
-
-    if (activeCategory === "juniors") {
-      return {
-        title: "Kids",
-        breadcrumb: ["Home", "Kids"],
-        description: "Comfort-first denim, casual sets, and everyday outfits for movement.",
+        description: "Textured polos and knit henleys in sand, ice, and olive.",
       };
     }
 
     return {
       title: "All Collections",
       breadcrumb: ["Home", "All Collections"],
-      description: "Search, filter, and sort across the full Aylee storefront.",
+      description: "Search, filter, and sort the current Aylee edit.",
     };
   }, [activeCategory, query]);
 
@@ -165,7 +123,7 @@ export function ShopPage({
               type="button"
               onClick={() => {
                 if (activeCategory === "all") onCategoryChange("men");
-                onQueryChange(tab.query || "shirt");
+                onQueryChange(tab.query);
               }}
               className={active ? "is-active" : ""}
             >
