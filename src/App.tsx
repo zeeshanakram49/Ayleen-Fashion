@@ -99,6 +99,8 @@ function App() {
       cart: "Cart | Aylee",
       checkout: "Checkout | Aylee",
       account: "Account | Aylee",
+      login: "Login | Aylee",
+      register: "Register | Aylee",
       about: "Stores | Aylee",
       contact: "Contact | Aylee",
     };
@@ -496,6 +498,8 @@ function App() {
 
         {route.page === "about" && <AboutPage />}
         {route.page === "account" && <AccountPage />}
+        {route.page === "login" && <AccountPage initialMode="login" />}
+        {route.page === "register" && <AccountPage initialMode="signup" />}
         {route.page === "contact" && <ContactPage />}
       </main>
 

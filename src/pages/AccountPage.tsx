@@ -1,28 +1,155 @@
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { getApiErrorMessage } from "../api/apiError";
+import { useAuth } from "../hooks/useAuth";
 
 type AccountMode = "login" | "signup";
 
 const accountImage =
   "/products/product_05_website_square_1600.jpg";
 
-export function AccountPage() {
-  const [mode, setMode] = useState<AccountMode>("login");
+type AccountPageProps = {
+  initialMode?: AccountMode;
+};
+
+type AuthResult = {
+  response: unknown;
+  token: string | null;
+};
+
+type AuthActions = {
+  login: (
+    credentials: { email: string; password: string },
+    options?: { redirect?: boolean },
+  ) => Promise<AuthResult>;
+  register: (
+    details: { name: string; email: string; password: string },
+    options?: { redirect?: boolean },
+  ) => Promise<AuthResult>;
+};
+
+function getSuccessMessage(response: unknown, fallback: string) {
+  if (!response || typeof response !== "object") return fallback;
+
+  const data = response as {
+    message?: string;
+    data?: { message?: string };
+  };
+
+  return data.message ?? data.data?.message ?? fallback;
+}
+
+export function AccountPage({ initialMode = "login" }: AccountPageProps) {
+  const [mode, setMode] = useState<AccountMode>(initialMode);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login, register } = useAuth() as AuthActions;
 
   const isLogin = mode === "login";
+
+  useEffect(() => {
+    setMode(initialMode);
+    setMessage("");
+    setError("");
+  }, [initialMode]);
 
   function switchMode(nextMode: AccountMode) {
     setMode(nextMode);
     setMessage("");
+    setError("");
+    window.location.hash = nextMode === "login" ? "/login" : "/register";
   }
 
-  function submitAccount(event: React.FormEvent<HTMLFormElement>) {
+  function updateField(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  }
+
+  function validateForm() {
+    const email = form.email.trim();
+    const password = form.password.trim();
+    const name = form.name.trim();
+
+    if (!isLogin && !name) return "Please enter your name.";
+    if (!email) return "Please enter your email address.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return "Please enter a valid email address.";
+    }
+    if (!password) return "Please enter your password.";
+
+    return "";
+  }
+
+  async function submitAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage(
-      isLogin
-        ? "Welcome back. Your Aylee account is ready."
-        : "Your Aylee account has been created.",
-    );
+
+    const validationMessage = validateForm();
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      if (isLogin) {
+        const result = await login(
+          {
+            email: form.email.trim(),
+            password: form.password,
+          },
+          { redirect: false },
+        );
+
+        setMessage(
+          getSuccessMessage(
+            result.response,
+            result.token
+              ? "Welcome back. Redirecting you now."
+              : "Login successful. Redirecting you now.",
+          ),
+        );
+        window.setTimeout(() => {
+          window.location.hash = "/";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 650);
+        return;
+      }
+
+      const result = await register(
+        {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+        },
+        { redirect: false },
+      );
+
+      setMessage(
+        getSuccessMessage(
+          result.response,
+          result.token
+            ? "Your account has been created. Redirecting you now."
+            : "Your account has been created. Please sign in.",
+        ),
+      );
+      window.setTimeout(() => {
+        window.location.hash = result.token ? "/" : "/login";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 900);
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -68,28 +195,30 @@ export function AccountPage() {
 
             <form className="mt-10 grid gap-7" onSubmit={submitAccount}>
               {!isLogin && (
-                <div className="grid gap-7 sm:grid-cols-2">
-                  <label className="account-field">
-                    <span>First name</span>
-                    <input required name="firstName" autoComplete="given-name" />
-                  </label>
-                  <label className="account-field">
-                    <span>Last name</span>
-                    <input required name="lastName" autoComplete="family-name" />
-                  </label>
-                </div>
-              )}
-
-              {!isLogin && (
                 <label className="account-field">
-                  <span>Phone</span>
-                  <input required name="phone" type="tel" autoComplete="tel" />
+                  <span>Name</span>
+                  <input
+                    required
+                    name="name"
+                    autoComplete="name"
+                    value={form.name}
+                    onChange={updateField}
+                    disabled={loading}
+                  />
                 </label>
               )}
 
               <label className="account-field">
                 <span>Email</span>
-                <input required name="email" type="email" autoComplete="email" />
+                <input
+                  required
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={updateField}
+                  disabled={loading}
+                />
               </label>
 
               <label className="account-field">
@@ -99,6 +228,9 @@ export function AccountPage() {
                   name="password"
                   type="password"
                   autoComplete={isLogin ? "current-password" : "new-password"}
+                  value={form.password}
+                  onChange={updateField}
+                  disabled={loading}
                 />
               </label>
 
@@ -113,7 +245,8 @@ export function AccountPage() {
                   <input
                     required
                     type="checkbox"
-                  className="mt-1 h-4 w-4 rounded-[var(--radius-sm)] border-[var(--line-strong)] accent-[var(--ink)]"
+                    disabled={loading}
+                    className="mt-1 h-4 w-4 rounded-[var(--radius-sm)] border-[var(--line-strong)] accent-[var(--ink)]"
                   />
                   <span>
                     I agree to the Aylee Terms and Conditions and confirm that I
@@ -124,11 +257,18 @@ export function AccountPage() {
 
               <button
                 type="submit"
+                disabled={loading}
                 className="account-submit mt-6 h-14 w-full text-xs font-semibold tracking-[0.28em]"
               >
-                {isLogin ? "SIGN IN" : "CREATE"}
+                {loading ? "PLEASE WAIT" : isLogin ? "SIGN IN" : "CREATE"}
               </button>
             </form>
+
+            {error && (
+              <p className="mt-6 border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                {error}
+              </p>
+            )}
 
             {message && (
               <p className="mt-6 border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-center text-sm text-[var(--muted)]">

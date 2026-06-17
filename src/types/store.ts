@@ -64,6 +64,8 @@ export type Route =
   | { page: 'cart' }
   | { page: 'checkout' }
   | { page: 'account' }
+  | { page: 'login' }
+  | { page: 'register' }
   | { page: 'about' }
   | { page: 'contact' };
 

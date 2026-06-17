@@ -155,6 +155,16 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
+.account-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.account-submit:disabled:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
 .font-editorial {
   font-family: var(--font-display);
   font-weight: 400;

@@ -5,4 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      "/backend-api": {
+        target: "http://admin.aylee.store",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/backend-api/, ""),
+      },
+    },
+  },
 });
