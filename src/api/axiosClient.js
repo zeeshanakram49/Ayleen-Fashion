@@ -19,7 +19,12 @@ axiosClient.interceptors.request.use((config) => {
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const unauthorizedByStatus = error.response?.status === 401;
+    const unauthorizedByPayload =
+      error.response?.data?.payload === "User is not authenticated" ||
+      error.response?.data?.message === "401";
+
+    if (unauthorizedByStatus || unauthorizedByPayload) {
       removeToken();
       removeUser();
 

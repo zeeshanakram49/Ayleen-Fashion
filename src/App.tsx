@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
+import { getApiErrorMessage } from "./api/apiError";
+import {
+  addFavoriteProduct,
+  fetchCatalog,
+  fetchFavoriteProductIds,
+  removeFavoriteProduct,
+} from "./api/storeApi";
 import { CartDrawer } from "./components/CartDrawer";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import {
-  categories,
   initialCheckout,
   navLinks,
-  products,
   services,
   testimonials,
 } from "./data/store";
+import { useAuth } from "./hooks/useAuth";
 import { orderTotal, parseHash, shippingFee, taxAmount } from "./lib/store";
 import { AboutPage } from "./pages/AboutPage";
 import { AccountPage } from "./pages/AccountPage";
@@ -21,20 +27,30 @@ import { ProductPage } from "./pages/ProductPage";
 import { ShopPage } from "./pages/ShopPage";
 import { WishlistPage } from "./pages/WishlistPage";
 import type {
+  Category,
   CartItem,
   CartRow,
   CheckoutState,
   Notice,
+  Product,
   Route,
 } from "./types/store";
 
 function readStoredCart() {
   try {
     const storedCart = localStorage.getItem("ayleen_cart_v1");
-    const storedLines = storedCart ? (JSON.parse(storedCart) as CartItem[]) : [];
-    return storedLines.filter((line) =>
-      products.some((product) => product.id === line.productId),
-    );
+    const storedLines = storedCart ? (JSON.parse(storedCart) as unknown) : [];
+    if (!Array.isArray(storedLines)) return [];
+
+    return storedLines.filter((line): line is CartItem => {
+      if (!line || typeof line !== "object") return false;
+      const record = line as Record<string, unknown>;
+      return (
+        typeof record.productId === "string" &&
+        typeof record.size === "string" &&
+        typeof record.qty === "number"
+      );
+    });
   } catch {
     return [];
   }
@@ -43,17 +59,23 @@ function readStoredCart() {
 function readStoredWishlist() {
   try {
     const storedWishlist = localStorage.getItem("ayleen_wishlist_v1");
-    const storedIds = storedWishlist ? (JSON.parse(storedWishlist) as string[]) : [];
-    return storedIds.filter((productId) =>
-      products.some((product) => product.id === productId),
-    );
+    const storedIds = storedWishlist ? (JSON.parse(storedWishlist) as unknown) : [];
+    if (!Array.isArray(storedIds)) return [];
+
+    return storedIds
+      .map((productId) => (typeof productId === "string" ? productId : String(productId)))
+      .filter(Boolean);
   } catch {
     return [];
   }
 }
 
 function App() {
+  const { isAuthenticated } = useAuth() as { isAuthenticated: boolean };
   const [route, setRoute] = useState<Route>(() => parseHash());
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("featured");
@@ -71,6 +93,41 @@ function App() {
   const [notice, setNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function loadCatalog() {
+      setCatalogLoading(true);
+
+      try {
+        const nextCatalog = await fetchCatalog();
+        if (cancelled) return;
+
+        setCategories(nextCatalog.categories);
+        setProducts(nextCatalog.products);
+      } catch (error) {
+        if (cancelled) return;
+
+        setCategories([]);
+        setProducts([]);
+        setNotice({
+          kind: "info",
+          message: getApiErrorMessage(error),
+        });
+      } finally {
+        if (!cancelled) {
+          setCatalogLoading(false);
+        }
+      }
+    }
+
+    void loadCatalog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("ayleen_cart_v1", JSON.stringify(cart));
   }, [cart]);
 
@@ -85,10 +142,27 @@ function App() {
   }, [notice]);
 
   useEffect(() => {
+    if (catalogLoading) return;
+
+    const validProductIds = new Set(products.map((product) => product.id));
+    setCart((prev) => prev.filter((line) => validProductIds.has(line.productId)));
+
+    if (!isAuthenticated) {
+      setWishlist((prev) => prev.filter((productId) => validProductIds.has(productId)));
+    }
+  }, [catalogLoading, isAuthenticated, products]);
+
+  useEffect(() => {
     const onHash = () => setRoute(parseHash());
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
+
+  useEffect(() => {
+    if (activeCategory === "all") return;
+    if (categories.some((category) => category.id === activeCategory)) return;
+    setActiveCategory("all");
+  }, [activeCategory, categories]);
 
   useEffect(() => {
     const titles: Record<Route["page"], string> = {
@@ -106,6 +180,14 @@ function App() {
     };
     document.title = titles[route.page];
   }, [route]);
+
+  useEffect(() => {
+    if (route.page === "checkout") return;
+    if (!placedOrder && !placedPayment) return;
+
+    setPlacedOrder("");
+    setPlacedPayment("");
+  }, [placedOrder, placedPayment, route.page]);
 
   useEffect(() => {
     const sections = Array.from(
@@ -152,6 +234,34 @@ function App() {
     return () => observer.disconnect();
   }, [route]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+
+    async function loadFavorites() {
+      try {
+        const favoriteIds = await fetchFavoriteProductIds();
+        if (!cancelled) {
+          setWishlist(favoriteIds);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setNotice({
+            kind: "info",
+            message: getApiErrorMessage(error),
+          });
+        }
+      }
+    }
+
+    void loadFavorites();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
   const cartRows = useMemo<CartRow[]>(() => {
     return cart
       .map((line) => {
@@ -160,7 +270,7 @@ function App() {
         return { ...line, product };
       })
       .filter((line): line is CartRow => line !== null);
-  }, [cart]);
+  }, [cart, products]);
 
   const cartSubtotal = useMemo(
     () => cartRows.reduce((acc, row) => acc + row.product.price * row.qty, 0),
@@ -201,18 +311,18 @@ function App() {
     if (sortBy === "newest") return [...visible].reverse();
 
     return visible;
-  }, [activeCategory, query, sortBy]);
+  }, [activeCategory, products, query, sortBy]);
 
   const wishlistProducts = useMemo(
     () => products.filter((product) => wishlist.includes(product.id)),
-    [wishlist],
+    [products, wishlist],
   );
   const productRoute = useMemo(
     () =>
       route.page === "product"
         ? (products.find((p) => p.slug === route.slug) ?? null)
         : null,
-    [route],
+    [products, route],
   );
   const relatedProducts = useMemo(() => {
     if (!productRoute) return [];
@@ -223,7 +333,7 @@ function App() {
           item.id !== productRoute.id,
       )
       .slice(0, 4);
-  }, [productRoute]);
+  }, [productRoute, products]);
   const latestCartRow = useMemo(() => {
     if (!latestCartLine) return null;
     return (
@@ -234,13 +344,56 @@ function App() {
       ) ?? null
     );
   }, [cartRows, latestCartLine]);
+  const cartPreviewRow = useMemo(
+    () => latestCartRow ?? cartRows[cartRows.length - 1] ?? null,
+    [cartRows, latestCartRow],
+  );
 
-  function toggleWishlist(productId: string) {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    );
+  async function toggleWishlist(productId: string) {
+    const product = products.find((item) => item.id === productId);
+    const isSaved = wishlist.includes(productId);
+
+    if (!isAuthenticated) {
+      setWishlist((prev) =>
+        prev.includes(productId)
+          ? prev.filter((id) => id !== productId)
+          : [...prev, productId],
+      );
+
+      if (product) {
+        setNotice({
+          kind: isSaved ? "info" : "success",
+          message: isSaved
+            ? `${product.title} removed from your wishlist.`
+            : `${product.title} saved to your wishlist.`,
+        });
+      }
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        await removeFavoriteProduct(productId);
+        setWishlist((prev) => prev.filter((id) => id !== productId));
+      } else {
+        await addFavoriteProduct(productId);
+        setWishlist((prev) => [...prev, productId]);
+      }
+
+      if (product) {
+        setNotice({
+          kind: isSaved ? "info" : "success",
+          message: isSaved
+            ? `${product.title} removed from your wishlist.`
+            : `${product.title} saved to your wishlist.`,
+        });
+      }
+    } catch (error) {
+      setNotice({
+        kind: "info",
+        message: getApiErrorMessage(error),
+      });
+    }
   }
 
   function pickSize(productId: string, size: string) {
@@ -442,7 +595,7 @@ function App() {
           />
         )}
 
-        {route.page === "product" && !productRoute && (
+        {route.page === "product" && !productRoute && !catalogLoading && (
           <section className="mx-auto max-w-7xl px-5 py-14 sm:px-6 md:py-16">
             <article className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-8 text-center sm:p-10">
               <h1 className="font-editorial text-4xl">Product not found</h1>
@@ -507,7 +660,7 @@ function App() {
 
       <CartDrawer
         open={cartDrawerOpen}
-        latestItem={latestCartRow}
+        latestItem={cartPreviewRow}
         cartCount={cartCount}
         subtotal={cartSubtotal}
         onClose={() => setCartDrawerOpen(false)}

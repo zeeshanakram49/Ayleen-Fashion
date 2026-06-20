@@ -185,12 +185,14 @@ export function CartPage({
           <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--line-strong)] text-[var(--gold-deep)]">
             <IconBag />
           </div>
-          <h2 className="font-editorial mt-5 text-3xl">Your cart is empty</h2>
+          <h2
+           className="font-editorial mt-5 text-3xl">Your cart is empty</h2>
           <p className="mt-2 max-w-xs text-sm leading-6 text-[var(--muted)]">
             Items you add will show up here. Start exploring the collection to
             find something you love.
           </p>
           <a
+           style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
             href="#/shop"
             className={`mt-7 inline-flex rounded-[var(--radius-sm)] bg-[var(--ink)] px-7 py-3 text-xs font-semibold tracking-[0.18em] text-[var(--champagne)] transition-opacity hover:opacity-90 ${focusRing}`}
           >

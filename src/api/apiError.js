@@ -23,6 +23,7 @@ export function getApiErrorMessage(error) {
   const data = error?.response?.data;
 
   if (typeof data === "string") return data;
+  if (typeof data?.payload === "string") return data.payload;
   if (data?.message) return String(data.message);
   if (data?.error) return String(data.error);
 
