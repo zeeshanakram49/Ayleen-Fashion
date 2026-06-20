@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ProductCard } from "../components/ProductCard";
+import { money } from "../lib/store";
 import type { Category, Product } from "../types/store";
 
 type ShopPageProps = {
@@ -35,10 +36,69 @@ const collectionTabs = [
   { label: "Olive", query: "olive" },
 ] as const;
 
+const sortOptions = [
+  { label: "Featured", value: "featured" },
+  { label: "Newest Arrivals", value: "newest" },
+  { label: "Best Rated", value: "rating" },
+  { label: "Price: Low to High", value: "price-low" },
+  { label: "Price: High to Low", value: "price-high" },
+] as const;
+
+type GridLayout = "single" | "double" | "quad";
+
+function IconGridSingle() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect x="3" y="2.75" width="12" height="12.5" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function IconGridDouble() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect x="2.5" y="2.75" width="5.75" height="12.5" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="9.75" y="2.75" width="5.75" height="12.5" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function IconGridQuad() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect x="2.5" y="2.5" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="8" y="2.5" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="13.5" y="2.5" width="2" height="4" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="2.5" y="8" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="8" y="8" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="13.5" y="8" width="2" height="4" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function IconSearch() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="7" cy="7" r="4.75" stroke="currentColor" strokeWidth="1.35" />
+      <path d="M10.5 10.5 14 14" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconFilter() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M3 5.25H15M5.75 9H12.25M7.75 12.75H10.25" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function ShopPage({
+  categories,
   products,
   activeCategory,
   query,
+  sortBy,
   wishlist,
   selectedSize,
   onCategoryChange,
@@ -50,125 +110,288 @@ export function ShopPage({
   onOpenProduct,
 }: ShopPageProps) {
   const pageRef = useRef<HTMLElement | null>(null);
-  const collectionCopy = useMemo(() => {
-    if (query === "sale") {
-      return {
-        title: "Sale",
-        breadcrumb: ["Home", "Sale"],
-        description: "Selected markdowns on textured polos and knit henleys.",
-      };
-    }
+  const [gridLayout, setGridLayout] = useState<GridLayout>("quad");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-    if (activeCategory === "men") {
-      return {
-        title: "Men",
-        breadcrumb: ["Home", "Men"],
-        description: "Textured polos and knit henleys in sand, ice, and olive.",
-      };
-    }
-
-    return {
-      title: "All Collections",
-      breadcrumb: ["Home", "All Collections"],
-      description: "Search, filter, and sort the current Aylee edit.",
-    };
-  }, [activeCategory, query]);
+  const activeCategoryData = useMemo(
+    () => categories.find((category) => category.id === activeCategory) ?? null,
+    [activeCategory, categories],
+  );
+  const sortLabel = useMemo(
+    () => sortOptions.find((option) => option.value === sortBy)?.label ?? "Featured",
+    [sortBy],
+  );
+  const priceRange = useMemo(() => {
+    if (products.length === 0) return null;
+    const prices = products.map((product) => product.price);
+    return `${money(Math.min(...prices))} - ${money(Math.max(...prices))}`;
+  }, [products]);
+  const paletteCount = useMemo(() => {
+    return new Set(
+      products.flatMap((product) => product.colors.map((color) => color.toLowerCase())),
+    ).size;
+  }, [products]);
 
   useEffect(() => {
-    const cards = pageRef.current?.querySelectorAll<HTMLElement>(
-      ".product-card.reveal-up, .product-card.reveal-scale",
-    );
+    const cards = pageRef.current?.querySelectorAll<HTMLElement>(".product-card.reveal-up");
     if (!cards?.length) return;
 
     cards.forEach((card, index) => {
-      card.style.setProperty("--section-stagger", `${Math.min(index * 70, 420)}ms`);
+      card.style.setProperty("--section-stagger", `${Math.min(index * 60, 360)}ms`);
       card.classList.add("is-visible");
     });
   }, [products]);
 
+  const gridClass =
+    gridLayout === "single"
+      ? "shop-product-grid--single"
+      : gridLayout === "double"
+        ? "shop-product-grid--double"
+        : "shop-product-grid--quad";
+
+  const collectionTitle = activeCategoryData
+    ? `${activeCategoryData.name} Knit Edit`
+    : "All Collections";
+  const hasActiveFilters =
+    activeCategory !== "all" || query.trim().length > 0 || sortBy !== "featured";
+
   return (
-    <section ref={pageRef} className="collection-page">
-      <div className="collection-topbar reveal-up">
-        <div className="collection-breadcrumb">
-          {collectionCopy.breadcrumb.map((item, index) => (
-            <span key={item}>
-              {index > 0 && "/ "}
-              <strong className={index === collectionCopy.breadcrumb.length - 1 ? "is-current" : ""}>
-                {item}
-              </strong>
-            </span>
-          ))}
-        </div>
+    <section ref={pageRef} className="shop-page">
+      <div className="shop-page__shell">
+        <header className="shop-header reveal-up">
+          <div className="shop-header__intro">
+            <nav className="shop-breadcrumb" aria-label="Breadcrumb">
+              <span>Home</span>
+              <span>/</span>
+              <span>{activeCategoryData?.name ?? "Collections"}</span>
+              <span>/</span>
+              <strong>{query ? query.replace(/(^\w|\s\w)/g, (match) => match.toUpperCase()) : collectionTitle}</strong>
+            </nav>
 
-        <div className="collection-tools" aria-label="Collection display tools">
-          <button type="button" aria-label="Single column view" />
-          <button type="button" aria-label="Two column view" className="is-active" />
-          <button type="button" aria-label="Four column view" />
-          <button type="button" aria-label="Filters">
-            <span />
-          </button>
-        </div>
-      </div>
+            <h1 className="shop-header__title">{collectionTitle}</h1>
+            <p className="shop-header__description">
+              Clean silhouettes, breathable textures, and a refined catalog layout inspired
+              by modern retail storefronts.
+            </p>
+          </div>
 
-      {collectionCopy.description && (
-        <p className="collection-description reveal-up">{collectionCopy.description}</p>
-      )}
+          <div className="shop-header__utility">
+            <label className="shop-search-inline">
+              <span className="shop-search-inline__icon">
+                <IconSearch />
+              </span>
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => onQueryChange(event.target.value)}
+                placeholder="Search"
+                aria-label="Search products"
+              />
+            </label>
 
-      <nav className="collection-tabs reveal-up" aria-label="Collection filters">
-        {collectionTabs.map((tab) => {
-          const active = tab.query ? query === tab.query : !query || query === "shirt";
-          return (
+            <div className="shop-header__meta">
+              <span>{products.length} Items</span>
+              {priceRange && <span>{priceRange}</span>}
+              <span>{paletteCount} Colors</span>
+            </div>
+          </div>
+        </header>
+
+        <section className="shop-collection-bar reveal-up" aria-label="Collection controls">
+          <nav className="shop-tabs" aria-label="Collection tags">
+            {collectionTabs.map((tab) => {
+              const active = query === tab.query || (!query && tab.query === "");
+              return (
+                <button
+                  key={tab.label}
+                  type="button"
+                  className={active ? "is-active" : ""}
+                  onClick={() => {
+                    if (tab.query && activeCategory === "all" && categories[0]) {
+                      onCategoryChange(categories[0].id);
+                    }
+                    onQueryChange(tab.query);
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="shop-tools">
+            <div className="shop-grid-toggle" role="group" aria-label="Grid layout">
+              <button
+                type="button"
+                aria-label="Single column view"
+                aria-pressed={gridLayout === "single"}
+                className={gridLayout === "single" ? "is-active" : ""}
+                onClick={() => setGridLayout("single")}
+              >
+                <IconGridSingle />
+              </button>
+              <button
+                type="button"
+                aria-label="Two column view"
+                aria-pressed={gridLayout === "double"}
+                className={gridLayout === "double" ? "is-active" : ""}
+                onClick={() => setGridLayout("double")}
+              >
+                <IconGridDouble />
+              </button>
+              <button
+                type="button"
+                aria-label="Four column view"
+                aria-pressed={gridLayout === "quad"}
+                className={gridLayout === "quad" ? "is-active" : ""}
+                onClick={() => setGridLayout("quad")}
+              >
+                <IconGridQuad />
+              </button>
+            </div>
+
+            <label className="shop-sort-field">
+              <span className="sr-only">Sort products</span>
+              <select value={sortBy} onChange={(event) => onSortChange(event.target.value)}>
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <button
-              key={tab.label}
+              type="button"
+              aria-expanded={filtersOpen}
+              aria-controls="shop-filters-panel"
+              className={`shop-filter-toggle${filtersOpen ? " is-active" : ""}`}
+              onClick={() => setFiltersOpen((value) => !value)}
+            >
+              <IconFilter />
+            </button>
+          </div>
+        </section>
+
+        {filtersOpen && (
+          <section
+            id="shop-filters-panel"
+            className="shop-filters reveal-up is-visible"
+            aria-label="Shop filters"
+          >
+            <div className="shop-filter-group">
+              <p>Category</p>
+              <div className="shop-pill-row">
+                <button
+                  type="button"
+                  className={activeCategory === "all" ? "is-active" : ""}
+                  onClick={() => onCategoryChange("all")}
+                >
+                  All Collections
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    className={activeCategory === category.id ? "is-active" : ""}
+                    onClick={() => onCategoryChange(category.id)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="shop-filter-group">
+              <p>Sort Preference</p>
+              <div className="shop-pill-row">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={sortBy === option.value ? "is-active" : ""}
+                    onClick={() => onSortChange(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div className="shop-results-strip reveal-up">
+          <p>{products.length} products available</p>
+          <p>Sorted by {sortLabel.toLowerCase()}</p>
+        </div>
+
+        {hasActiveFilters && (
+          <div className="shop-active-filters reveal-up is-visible" aria-label="Applied filters">
+            <span className="shop-active-filters__label">Active</span>
+            {activeCategory !== "all" && (
+              <button type="button" onClick={() => onCategoryChange("all")}>
+                {activeCategoryData?.name ?? activeCategory}
+              </button>
+            )}
+            {query.trim().length > 0 && (
+              <button type="button" onClick={() => onQueryChange("")}>
+                {query}
+              </button>
+            )}
+            {sortBy !== "featured" && (
+              <button type="button" onClick={() => onSortChange("featured")}>
+                {sortLabel}
+              </button>
+            )}
+            <button
+              type="button"
+              className="shop-active-filters__reset"
+              onClick={() => {
+                onCategoryChange("all");
+                onQueryChange("");
+                onSortChange("featured");
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        )}
+
+        {products.length === 0 ? (
+          <article className="shop-empty-state reveal-up is-visible">
+            <span className="shop-empty-state__eyebrow">No match yet</span>
+            <h2 className="font-editorial">We could not find products for this edit</h2>
+            <p>Try another keyword or clear the current category and sorting filters.</p>
+            <button
               type="button"
               onClick={() => {
-                if (activeCategory === "all") onCategoryChange("men");
-                onQueryChange(tab.query);
+                onCategoryChange("all");
+                onQueryChange("");
+                onSortChange("featured");
               }}
-              className={active ? "is-active" : ""}
             >
-              {tab.label}
+              Reset filters
             </button>
-          );
-        })}
-      </nav>
-
-      {products.length === 0 ? (
-        <article className="reveal-up is-visible mt-8 rounded-[0.3rem] border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
-          <h2 className="font-editorial text-3xl">No products found</h2>
-          <p className="mt-3 text-sm text-[var(--muted)]">
-            Try changing category, sort, or clearing search.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              onQueryChange("");
-              onCategoryChange("all");
-              onSortChange("featured");
-            }}
-            className="mt-5 rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.16em]"
-          >
-            RESET FILTERS
-          </button>
-        </article>
-      ) : (
-        <div className="collection-product-grid">
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              index={index}
-              liked={wishlist.includes(product.id)}
-              pickedSize={selectedSize[product.id]}
-              onPickSize={onPickSize}
-              onToggleWishlist={onToggleWishlist}
-              onAddToCart={onAddToCart}
-              onOpenProduct={onOpenProduct}
-              variant="catalog"
-            />
-          ))}
-        </div>
-      )}
+          </article>
+        ) : (
+          <div className={`shop-product-grid ${gridClass}`}>
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                liked={wishlist.includes(product.id)}
+                pickedSize={selectedSize[product.id]}
+                onPickSize={onPickSize}
+                onToggleWishlist={onToggleWishlist}
+                onAddToCart={onAddToCart}
+                onOpenProduct={onOpenProduct}
+                variant="catalog"
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

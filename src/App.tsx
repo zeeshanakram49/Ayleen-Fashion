@@ -428,12 +428,12 @@ function App() {
           <ProductPage
             product={productRoute}
             relatedProducts={relatedProducts}
-            pickedSize={selectedSize[productRoute.id] || productRoute.sizes[0]}
+            pickedSize={selectedSize[productRoute.id] || ""}
             liked={wishlist.includes(productRoute.id)}
             wishlist={wishlist}
             selectedSize={selectedSize}
             onPickSize={(size) => pickSize(productRoute.id, size)}
-            onAddToCart={() => addToCart(productRoute.id)}
+            onAddToCart={() => addToCart(productRoute.id, undefined, true)}
             onToggleWishlist={() => toggleWishlist(productRoute.id)}
             onOpenProduct={openProduct}
             onCardAddToCart={addToCart}
