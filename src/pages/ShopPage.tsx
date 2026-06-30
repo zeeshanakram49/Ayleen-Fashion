@@ -23,6 +23,9 @@ type ShopPageProps = {
     qty?: number,
   ) => void;
   onOpenProduct: (slug: string) => void;
+  isLoading?: boolean;
+  errorMessage?: string;
+  onRetryCatalog?: () => void;
 };
 
 const collectionTabs = [
@@ -108,6 +111,9 @@ export function ShopPage({
   onToggleWishlist,
   onAddToCart,
   onOpenProduct,
+  isLoading = false,
+  errorMessage = "",
+  onRetryCatalog,
 }: ShopPageProps) {
   const pageRef = useRef<HTMLElement | null>(null);
   const [gridLayout, setGridLayout] = useState<GridLayout>("quad");
@@ -357,7 +363,29 @@ export function ShopPage({
           </div>
         )}
 
-        {products.length === 0 ? (
+        {errorMessage && (
+          <article className="shop-empty-state reveal-up is-visible">
+            <span className="shop-empty-state__eyebrow">Catalog notice</span>
+            <h2 className="font-editorial">Live catalog is unavailable</h2>
+            <p>{errorMessage} Saved products are shown so shopping can continue.</p>
+            {onRetryCatalog && (
+              <button type="button" onClick={onRetryCatalog}>
+                Retry catalog
+              </button>
+            )}
+          </article>
+        )}
+
+        {isLoading ? (
+          <div className={`shop-product-grid ${gridClass}`} aria-label="Loading products">
+            {Array.from({ length: 8 }, (_, index) => (
+              <div
+                key={index}
+                className="animate-shimmer min-h-[460px] rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--panel)]"
+              />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
           <article className="shop-empty-state reveal-up is-visible">
             <span className="shop-empty-state__eyebrow">No match yet</span>
             <h2 className="font-editorial">We could not find products for this edit</h2>

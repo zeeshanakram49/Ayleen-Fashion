@@ -1,5 +1,7 @@
-import { useState, type WheelEvent } from "react";
+import { useEffect, useRef, useState, type WheelEvent } from "react";
 import type { Route } from "../types/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl } from "../routes/routeUtils";
 
 type HeaderProps = {
   navLinks: { href: string; label: string }[];
@@ -108,16 +110,49 @@ export function Header({
 }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const closeMenuTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeMenuTimer.current !== null) {
+        window.clearTimeout(closeMenuTimer.current);
+      }
+    };
+  }, []);
 
   function isActive(href: string) {
-    return (
-      (route.page === "home" && href === "#/") ||
-      (route.page !== "home" && href === `#/${route.page}`)
-    );
+    const page = href.replace(/^#/, "");
+    if (route.page === "home") return page === "/" || page === "";
+    return page === `/${route.page}`;
   }
 
   function closeMenu() {
     setMenuOpen(false);
+  }
+
+  function clearDesktopMenuClose() {
+    if (closeMenuTimer.current !== null) {
+      window.clearTimeout(closeMenuTimer.current);
+      closeMenuTimer.current = null;
+    }
+  }
+
+  function openDesktopMenu(menuId: string) {
+    clearDesktopMenuClose();
+    setActiveMenu(menuId);
+  }
+
+  function closeDesktopMenuSoon() {
+    clearDesktopMenuClose();
+    closeMenuTimer.current = window.setTimeout(() => {
+      setActiveMenu(null);
+      closeMenuTimer.current = null;
+    }, 200);
+  }
+
+  function closeDesktopMenuNow() {
+    clearDesktopMenuClose();
+    setActiveMenu(null);
   }
 
   function keepMegaMenuScroll(event: WheelEvent<HTMLDivElement>) {
@@ -159,9 +194,10 @@ export function Header({
 
       <div
         className="relative mx-auto hidden min-h-[84px] max-w-[1700px] items-center gap-8 px-8 lg:flex xl:px-12"
-        onMouseLeave={() => setActiveMenu(null)}
+        onMouseEnter={clearDesktopMenuClose}
+        onMouseLeave={closeDesktopMenuSoon}
       >
-        <a href="#/" className="site-wordmark shrink-0">
+        <a href={getHashUrl(APP_ROUTES.home)} className="site-wordmark shrink-0">
           Aylee
         </a>
 
@@ -170,10 +206,12 @@ export function Header({
             <button
               key={link.id}
               type="button"
-              onMouseEnter={() => setActiveMenu(link.id)}
-              onMouseLeave={() => setActiveMenu(null)}
-              onFocus={() => setActiveMenu(link.id)}
-              onClick={() => onShopCategory(link.categoryId, link.query)}
+              onMouseEnter={() => openDesktopMenu(link.id)}
+              onFocus={() => openDesktopMenu(link.id)}
+              onClick={() => {
+                closeDesktopMenuNow();
+                onShopCategory(link.categoryId, link.query);
+              }}
               className={`site-nav-link-minimal ${
                 isDesktopLinkActive(link.categoryId, link.query) ? "is-active" : ""
               }`}
@@ -182,15 +220,15 @@ export function Header({
             </button>
           ))}
           <a
-            href="#/about"
-            onMouseEnter={() => setActiveMenu(null)}
+            href={getHashUrl(APP_ROUTES.about)}
+            onMouseEnter={closeDesktopMenuNow}
             className="site-nav-link-minimal"
           >
             STORES
           </a>
           <a
-            href="#/contact"
-            onMouseEnter={() => setActiveMenu(null)}
+            href={getHashUrl(APP_ROUTES.contact)}
+            onMouseEnter={closeDesktopMenuNow}
             className="site-nav-link-minimal"
           >
             CONTACT
@@ -199,14 +237,14 @@ export function Header({
 
         <div className="flex shrink-0 items-center gap-2">
           <a
-            href="#/shop"
+            href={getHashUrl(APP_ROUTES.shop)}
             className="site-icon-link"
             aria-label="Search products"
           >
             <SearchIcon />
           </a>
           <a
-            href="#/wishlist"
+            href={getHashUrl(APP_ROUTES.wishlist)}
             className="site-icon-link"
             aria-label={`Wishlist, ${wishlistCount} items`}
           >
@@ -216,7 +254,7 @@ export function Header({
             )}
           </a>
           <a
-            href="#/account"
+            href={getHashUrl(APP_ROUTES.account)}
             className="site-icon-link"
             aria-label="Account login and sign up"
           >
@@ -234,14 +272,22 @@ export function Header({
         </div>
 
         {activeDesktopMenu && (
-          <div className="site-mega-menu" onWheel={keepMegaMenuScroll}>
+          <div
+            className="site-mega-menu"
+            onMouseEnter={clearDesktopMenuClose}
+            onMouseLeave={closeDesktopMenuSoon}
+            onWheel={keepMegaMenuScroll}
+          >
             <div className="site-mega-menu-grid">
               <div className="site-mega-list">
                 {activeDesktopMenu.items.map((item) => (
                   <button
                     key={item.label}
                     type="button"
-                    onClick={() => onShopCategory(item.categoryId, item.query)}
+                    onClick={() => {
+                      closeDesktopMenuNow();
+                      onShopCategory(item.categoryId, item.query);
+                    }}
                     className="site-mega-link"
                   >
                     {item.label}
@@ -251,12 +297,13 @@ export function Header({
 
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  closeDesktopMenuNow();
                   onShopCategory(
                     activeDesktopMenu.categoryId,
                     activeDesktopMenu.query,
-                  )
-                }
+                  );
+                }}
                 className="site-mega-preview"
               >
                 <img
@@ -277,7 +324,7 @@ export function Header({
 
       <div className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-3 px-4 lg:hidden sm:px-6">
         <a
-          href="#/"
+          href={getHashUrl(APP_ROUTES.home)}
           className="site-wordmark text-[1.55rem]"
           aria-label="Aylee home"
         >
@@ -286,7 +333,7 @@ export function Header({
 
         <div className="flex items-center gap-1.5">
           <a
-            href="#/wishlist"
+            href={getHashUrl(APP_ROUTES.wishlist)}
             className="site-mobile-icon"
             aria-label={`Wishlist, ${wishlistCount} items`}
           >
@@ -340,40 +387,46 @@ export function Header({
               </button>
             ))}
             {navLinks
-              .filter((link) => link.href !== "#/shop")
-              .map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMenu}
-                  className={`rounded-[var(--radius-sm)] border px-4 py-3 text-center transition-colors ${
-                    isActive(link.href)
-                      ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
-                      : "border-black/10 bg-white"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              ))}
+              .filter((link) => link.href !== getHashUrl(APP_ROUTES.shop))
+              .map((link) => {
+                const cleanHref =
+                  link.href === getHashUrl(APP_ROUTES.home)
+                    ? APP_ROUTES.home
+                    : link.href.replace(/^#/, "");
+                return (
+                  <a
+                    key={link.href}
+                    href={getHashUrl(cleanHref)}
+                    onClick={closeMenu}
+                    className={`rounded-[var(--radius-sm)] border px-4 py-3 text-center transition-colors ${
+                      isActive(link.href)
+                        ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+                        : "border-black/10 bg-white"
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })}
           </div>
 
           <div className="mt-3 grid gap-2 text-[11px] font-semibold tracking-[0.16em] sm:grid-cols-2">
             <a
-              href="#/shop"
+              href={getHashUrl(APP_ROUTES.shop)}
               onClick={closeMenu}
               className="rounded-[var(--radius-sm)] border border-black/10 bg-white px-4 py-3 text-center"
             >
               SEARCH PRODUCTS
             </a>
             <a
-              href="#/account"
+              href={getHashUrl(APP_ROUTES.account)}
               onClick={closeMenu}
               className="rounded-[var(--radius-sm)] border border-black/10 px-4 py-3 text-center"
             >
               LOGIN / SIGN UP
             </a>
             <a
-              href="#/wishlist"
+              href={getHashUrl(APP_ROUTES.wishlist)}
               onClick={closeMenu}
               className="rounded-[var(--radius-sm)] border border-black/10 px-4 py-3 text-center"
             >

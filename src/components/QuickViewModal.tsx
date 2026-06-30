@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { discountPercent, installmentAmount, money } from "../lib/store";
+import { discountPercent, money } from "../lib/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { navigateToHash } from "../routes/routeUtils";
 import type { Product } from "../types/store";
 import { ImageWithFallback } from "./ImageWithFallback";
 
@@ -70,8 +72,7 @@ export function QuickViewModal({
       return;
     }
     onAddToCart(product.id, finalSize, true, qty);
-    window.location.hash = "/checkout";
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigateToHash(APP_ROUTES.checkout);
     onClose();
   }
 
@@ -149,14 +150,6 @@ export function QuickViewModal({
             <p className="mt-2 text-sm text-[var(--muted)]">
               Shipping calculated at checkout.
             </p>
-            <p className="mt-3 text-lg text-[var(--muted)]">
-              Pay in 3 installments of
-              {" "}
-              <span className="font-semibold text-[#5e43ff]">
-                {money(installmentAmount(product.price)).replace("PKR ", "Rs.")}
-              </span>
-            </p>
-
             <div className="mt-6">
               <p className="quickview-label">COLOR</p>
               <div className="mt-3 flex flex-wrap gap-2">

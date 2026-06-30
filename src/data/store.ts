@@ -5,6 +5,8 @@ import type {
   Service,
   Testimonial,
 } from "../types/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl } from "../routes/routeUtils";
 
 export const categories: Category[] = [
   {
@@ -228,10 +230,10 @@ export const testimonials: Testimonial[] = [
 ];
 
 export const navLinks = [
-  { href: "#/", label: "HOME" },
-  { href: "#/shop", label: "SHOP" },
-  { href: "#/about", label: "STORES" },
-  { href: "#/contact", label: "CONTACT" },
+  { href: getHashUrl(APP_ROUTES.home), label: "HOME" },
+  { href: getHashUrl(APP_ROUTES.shop), label: "SHOP" },
+  { href: getHashUrl(APP_ROUTES.about), label: "STORES" },
+  { href: getHashUrl(APP_ROUTES.contact), label: "CONTACT" },
 ];
 
 export const initialCheckout: CheckoutState = {

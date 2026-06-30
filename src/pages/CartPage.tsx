@@ -1,4 +1,6 @@
 import { installmentAmount, money } from "../lib/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl } from "../routes/routeUtils";
 import type { CartRow } from "../types/store";
 
 type CartPageProps = {
@@ -8,6 +10,7 @@ type CartPageProps = {
   shipping: number;
   tax: number;
   total: number;
+  isLoading?: boolean;
   onUpdateQty: (productId: string, size: string, qty: number) => void;
   onRemoveLine: (productId: string, size: string) => void;
 };
@@ -152,6 +155,7 @@ export function CartPage({
   shipping,
   tax,
   total,
+  isLoading = false,
   onUpdateQty,
   onRemoveLine,
 }: CartPageProps) {
@@ -180,7 +184,16 @@ export function CartPage({
         </p>
       </div>
 
-      {rows.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-4">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="animate-shimmer h-36 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)]"
+            />
+          ))}
+        </div>
+      ) : rows.length === 0 ? (
         <article className="reveal-up is-visible flex flex-col items-center rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-10 text-center sm:p-14">
           <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[var(--line-strong)] text-[var(--gold-deep)]">
             <IconBag />
@@ -193,7 +206,7 @@ export function CartPage({
           </p>
           <a
            style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
-            href="#/shop"
+            href={getHashUrl(APP_ROUTES.shop)}
             className={`mt-7 inline-flex rounded-[var(--radius-sm)] bg-[var(--ink)] px-7 py-3 text-xs font-semibold tracking-[0.18em] text-[var(--champagne)] transition-opacity hover:opacity-90 ${focusRing}`}
           >
             START SHOPPING
@@ -353,7 +366,7 @@ export function CartPage({
 
             <a
              style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
-              href="#/checkout"
+              href={getHashUrl(APP_ROUTES.checkout)}
               className={`mt-6 inline-flex w-full items-center justify-center rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs font-semibold tracking-[0.18em] text-white transition-opacity hover:opacity-90 ${focusRing}`}
             >
               PROCEED CHECKOUT

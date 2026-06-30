@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { installmentAmount, money } from '../lib/store';
+import { APP_ROUTES } from '../routes/appRoutes';
+import { getHashUrl } from '../routes/routeUtils';
 import type { CartRow } from '../types/store';
 
 type CartDrawerProps = {
@@ -155,7 +157,7 @@ export function CartDrawer({ open, latestItem, cartCount, subtotal, onClose }: C
               specificity than any stylesheet rule, so this guarantees the right
               colors regardless of cascade order. */}
           <a
-            href="#/checkout"
+            href={getHashUrl(APP_ROUTES.checkout)}
             onClick={onClose}
             style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
             className="rounded-[var(--radius-sm)] px-5 py-3 text-center font-semibold transition hover:opacity-90 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"
@@ -163,7 +165,7 @@ export function CartDrawer({ open, latestItem, cartCount, subtotal, onClose }: C
             CHECKOUT
           </a>
           <a
-            href="#/cart"
+            href={getHashUrl(APP_ROUTES.cart)}
             onClick={onClose}
             style={{ color: 'var(--ink)' }}
             className="rounded-[var(--radius-sm)] border border-[var(--ink)] px-5 py-3 text-center font-semibold transition hover:bg-[var(--panel)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]"

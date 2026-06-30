@@ -1,4 +1,6 @@
 import { ProductCard } from "../components/ProductCard";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl } from "../routes/routeUtils";
 import type { Product } from "../types/store";
 
 type WishlistPageProps = {
@@ -45,7 +47,7 @@ export function WishlistPage({
         <article className="reveal-up is-visible rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-8 text-center sm:p-10">
           <h2 className="font-editorial text-3xl">No saved items yet</h2>
           <a
-            href="#/shop"
+            href={getHashUrl(APP_ROUTES.shop)}
             className="mt-5 inline-flex rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.18em] !text-white"
           >
             EXPLORE SHOP

@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { ImageWithFallback } from '../components/ImageWithFallback';
 import { ProductCard } from '../components/ProductCard';
 import { discountPercent, installmentAmount, money } from '../lib/store';
+import { APP_ROUTES } from '../routes/appRoutes';
+import { getHashUrl } from '../routes/routeUtils';
 import type { Product } from '../types/store';
 
 type ProductPageProps = {
@@ -120,17 +122,17 @@ export function ProductPage({
     <section className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="reveal-up mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] pb-4 text-[11px] tracking-[0.18em] text-[var(--muted)]">
         <div className="flex flex-wrap items-center gap-2">
-          <a href="#/" className="transition hover:text-[var(--ink)]">
+          <a href={getHashUrl(APP_ROUTES.home)} className="transition hover:text-[var(--ink)]">
             HOME
           </a>
           <span>/</span>
-          <a href="#/shop" className="transition hover:text-[var(--ink)]">
+          <a href={getHashUrl(APP_ROUTES.shop)} className="transition hover:text-[var(--ink)]">
             SHOP
           </a>
           <span>/</span>
           <span className="text-[var(--ink)]">{product.title.toUpperCase()}</span>
         </div>
-        <a href="#/shop" className="transition hover:text-[var(--ink)]">
+        <a href={getHashUrl(APP_ROUTES.shop)} className="transition hover:text-[var(--ink)]">
           BACK TO SHOP
         </a>
       </div>

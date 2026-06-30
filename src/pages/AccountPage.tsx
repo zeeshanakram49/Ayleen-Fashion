@@ -1,6 +1,11 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { getApiErrorMessage } from "../api/apiError";
 import { useAuth } from "../hooks/useAuth";
+import { fetchOrdersApi } from "../api/orderApi";
+import { money } from "../lib/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl, navigateToHash } from "../routes/routeUtils";
+import type { Order } from "../api/apiTypes";
 
 type AccountMode = "login" | "signup";
 
@@ -9,22 +14,6 @@ const accountImage =
 
 type AccountPageProps = {
   initialMode?: AccountMode;
-};
-
-type AuthResult = {
-  response: unknown;
-  token: string | null;
-};
-
-type AuthActions = {
-  login: (
-    credentials: { email: string; password: string },
-    options?: { redirect?: boolean },
-  ) => Promise<AuthResult>;
-  register: (
-    details: { name: string; email: string; password: string },
-    options?: { redirect?: boolean },
-  ) => Promise<AuthResult>;
 };
 
 function getSuccessMessage(response: unknown, fallback: string) {
@@ -48,7 +37,9 @@ export function AccountPage({ initialMode = "login" }: AccountPageProps) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth() as AuthActions;
+  const { login, register, user, isAuthenticated, logout } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const isLogin = mode === "login";
 
@@ -58,11 +49,36 @@ export function AccountPage({ initialMode = "login" }: AccountPageProps) {
     setError("");
   }, [initialMode]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let active = true;
+    async function loadOrders() {
+      setOrdersLoading(true);
+      try {
+        const response = await fetchOrdersApi();
+        if (!active) return;
+        if (response.success && response.payload) {
+          setOrders(response.payload);
+        } else if (response.data) {
+          setOrders(response.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (active) setOrdersLoading(false);
+      }
+    }
+    void loadOrders();
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
+
   function switchMode(nextMode: AccountMode) {
     setMode(nextMode);
     setMessage("");
     setError("");
-    window.location.hash = nextMode === "login" ? "/login" : "/register";
+    navigateToHash(nextMode === "login" ? APP_ROUTES.login : APP_ROUTES.register);
   }
 
   function updateField(event: ChangeEvent<HTMLInputElement>) {
@@ -118,8 +134,7 @@ export function AccountPage({ initialMode = "login" }: AccountPageProps) {
           ),
         );
         window.setTimeout(() => {
-          window.location.hash = "/";
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          navigateToHash(APP_ROUTES.home);
         }, 650);
         return;
       }
@@ -142,14 +157,115 @@ export function AccountPage({ initialMode = "login" }: AccountPageProps) {
         ),
       );
       window.setTimeout(() => {
-        window.location.hash = result.token ? "/" : "/login";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        navigateToHash(result.token ? APP_ROUTES.home : APP_ROUTES.login);
       }, 900);
     } catch (submitError) {
       setError(getApiErrorMessage(submitError));
     } finally {
       setLoading(false);
     }
+  }
+
+  if (isAuthenticated && user) {
+    const badgeStyles: Record<string, string> = {
+      pending: "bg-amber-50 text-amber-800 border-amber-200",
+      paid: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      failed: "bg-rose-50 text-rose-800 border-rose-200",
+      cancelled: "bg-slate-150 text-slate-600 border-slate-300",
+      shipped: "bg-blue-50 text-blue-800 border-blue-200",
+      delivered: "bg-teal-50 text-teal-800 border-teal-200",
+    };
+
+    return (
+      <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 md:py-16">
+        <div className="reveal-up is-visible mb-8">
+          <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">MEMBER ACCOUNT</p>
+          <h1 className="font-editorial mt-3 text-4xl sm:text-5xl">Dashboard</h1>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_2fr] items-start">
+          <article className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6 sm:p-8">
+            <div className="flex flex-col items-center text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--ink)] text-2xl font-semibold text-[var(--champagne)] uppercase shadow-sm">
+                {user.name ? user.name.charAt(0) : "U"}
+              </span>
+              <h2 className="mt-4 font-editorial text-2xl text-[var(--ink)]">{user.name}</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">{user.email}</p>
+
+              <div className="mt-8 w-full border-t border-[var(--line-strong)] pt-6 text-left text-xs leading-6 text-[var(--muted)]">
+                <span className="block font-semibold tracking-wider text-[var(--ink)] uppercase">Membership</span>
+                <p className="mt-1">Aylee Store Member since 2026</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={logout}
+                className="mt-8 w-full rounded-[var(--radius-sm)] border border-[var(--line-strong)] py-3 text-xs font-semibold tracking-[0.2em] text-red-600 hover:bg-red-50 hover:border-red-200 transition uppercase"
+              >
+                Logout
+              </button>
+            </div>
+          </article>
+
+          <article className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-white p-6 sm:p-8">
+            <h2 className="font-editorial text-2xl text-[var(--ink)] border-b border-[var(--line)] pb-4">
+              Order History
+            </h2>
+
+            {ordersLoading ? (
+              <div className="space-y-4 mt-6">
+                {[1, 2].map((n) => (
+                  <div key={n} className="animate-shimmer rounded-[var(--radius-md)] bg-[var(--panel)] h-24"></div>
+                ))}
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-sm text-[var(--muted)]">No orders found.</p>
+                <a
+                  href={getHashUrl(APP_ROUTES.shop)}
+                  className="mt-4 inline-flex rounded-[var(--radius-sm)] bg-[var(--ink)] px-5 py-2.5 text-xs font-semibold tracking-wider text-[var(--champagne)]"
+                >
+                  SHOP NOW
+                </a>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-6">
+                {orders.map((order) => (
+                  <div key={order.id} className="border-b border-[var(--line)] pb-5 last:border-0 last:pb-0">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <div>
+                        <span className="text-[var(--muted)]">Order ID</span>
+                        <p className="font-mono font-bold text-[var(--ink)]">{order.orderNumber}</p>
+                      </div>
+                      <div>
+                        <span className="text-[var(--muted)]">Placed</span>
+                        <p className="font-semibold text-[var(--ink)]">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[var(--muted)]">Total</span>
+                        <p className="font-bold text-[var(--gold-deep)]">{money(order.total)}</p>
+                      </div>
+                      <div>
+                        <span className="text-[var(--muted)]">Status</span>
+                        <span
+                          className={`block mt-0.5 rounded-full border px-2 py-0.5 font-semibold text-center capitalize ${
+                            badgeStyles[order.status.toLowerCase()] || "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </article>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -236,7 +352,7 @@ export function AccountPage({ initialMode = "login" }: AccountPageProps) {
 
               {isLogin ? (
                 <div className="flex justify-end text-sm">
-                  <a href="#/account" className="font-medium hover:underline">
+                  <a href={getHashUrl(APP_ROUTES.account)} className="font-medium hover:underline">
                     Forgot your password?
                   </a>
                 </div>

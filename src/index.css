@@ -1100,6 +1100,24 @@ textarea:focus-visible {
   height: clamp(18rem, 26vw, 25rem);
 }
 
+.outfit-must-empty {
+  display: flex;
+  min-height: clamp(13rem, 18vw, 18rem);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  text-align: center;
+}
+
+.outfit-must-empty p {
+  margin: 0;
+  padding: 1.5rem;
+  font-size: clamp(0.95rem, 1vw, 1.05rem);
+  font-weight: 500;
+}
+
 .outfit-product-row {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

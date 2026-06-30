@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { QuickViewModal } from "../components/QuickViewModal";
 import { money } from "../lib/store";
@@ -61,6 +61,8 @@ const mustHaveTabs = [
   { label: "Henley", categoryId: "men", query: "henley" },
   { label: "Sale", categoryId: "all", query: "sale" },
 ] as const;
+
+type MustHaveTab = (typeof mustHaveTabs)[number];
 
 const heroSlides = [
   {
@@ -127,10 +129,8 @@ export function HomePage({
 }: HomePageProps) {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const [activeMustHaveTab, setActiveMustHaveTab] = useState<MustHaveTab>(mustHaveTabs[0]);
 
-  const newInProducts = products
-    .filter((product) => product.tags.includes("new-in"))
-    .slice(0, 5);
   const saleProducts = products
     .filter((product) => product.tags.includes("sale"))
     .slice(0, 4);
@@ -138,7 +138,28 @@ export function HomePage({
   const focusProducts = products
     .filter((product) => product.categoryId === "men" || product.tags.includes("shirt"))
     .slice(0, 4);
-  const mustHaveProducts = newInProducts.length >= 5 ? newInProducts : featuredProducts.slice(0, 5);
+  const mustHaveProducts = useMemo(() => {
+    const query = activeMustHaveTab.query.toLowerCase();
+    const categoryId = activeMustHaveTab.categoryId;
+
+    return products
+      .filter((product) => {
+        const categoryMatch =
+          categoryId === "all" || product.categoryId === categoryId;
+        const queryMatch =
+          product.tags.some((tag) => tag.toLowerCase() === query) ||
+          product.title.toLowerCase().includes(query) ||
+          product.description.toLowerCase().includes(query) ||
+          product.categoryLabel.toLowerCase().includes(query) ||
+          product.fit.toLowerCase().includes(query) ||
+          product.material.toLowerCase().includes(query) ||
+          product.badge.toLowerCase().includes(query) ||
+          product.colors.some((color) => color.toLowerCase().includes(query));
+
+        return categoryMatch && queryMatch;
+      })
+      .slice(0, 5);
+  }, [activeMustHaveTab, products]);
   const saleRailProducts = saleProducts.length ? saleProducts : featuredProducts.slice(0, 4);
   const activeSlide = heroSlides[activeHeroSlide];
 
@@ -312,21 +333,28 @@ export function HomePage({
             seamlessly into your daily wardrobe.
           </p>
           <nav aria-label="Must-have categories">
-            {mustHaveTabs.map((tab, index) => (
+            {mustHaveTabs.map((tab) => (
               <button
                 key={tab.label}
                 type="button"
-                onClick={() => onShopCategory(tab.categoryId, tab.query)}
-                className={index === 0 ? "is-active" : ""}
+                onClick={() => setActiveMustHaveTab(tab)}
+                className={tab.label === activeMustHaveTab.label ? "is-active" : ""}
+                aria-pressed={tab.label === activeMustHaveTab.label}
               >
                 {tab.label}
               </button>
             ))}
           </nav>
         </div>
-        <div className="outfit-must-products">
-          {mustHaveProducts.map((product, index) => renderProductTile(product, index))}
-        </div>
+        {mustHaveProducts.length > 0 ? (
+          <div className="outfit-must-products" key={activeMustHaveTab.label}>
+            {mustHaveProducts.map((product, index) => renderProductTile(product, index))}
+          </div>
+        ) : (
+          <div className="outfit-must-empty reveal-up is-visible">
+            <p>No products found in this collection.</p>
+          </div>
+        )}
       </section>
 
       <section className="outfit-sale-rail">

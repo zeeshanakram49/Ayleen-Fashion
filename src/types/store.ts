@@ -67,7 +67,11 @@ export type Route =
   | { page: 'login' }
   | { page: 'register' }
   | { page: 'about' }
-  | { page: 'contact' };
+  | { page: 'contact' }
+  | { page: 'orderSuccess'; orderId?: string }
+  | { page: 'orderFailed'; orderId?: string }
+  | { page: 'paymentProcessing'; orderId?: string }
+  | { page: 'orders' };
 
 export type CartRow = CartItem & { product: Product };
 
@@ -75,3 +79,4 @@ export type Notice = {
   kind: 'success' | 'info';
   message: string;
 };
+

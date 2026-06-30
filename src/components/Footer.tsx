@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { Category } from "../types/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl } from "../routes/routeUtils";
 
 type FooterProps = {
   categories: Category[];
@@ -128,14 +130,14 @@ export function Footer({ categories }: FooterProps) {
               </h3>
               <div className="mt-5 grid gap-3 text-sm text-[var(--muted)]">
                 {categories.map((category) => (
-                  <a key={category.id} href="#/shop" className="transition hover:text-[var(--ink)]">
+                  <a key={category.id} href={getHashUrl(APP_ROUTES.shop)} className="transition hover:text-[var(--ink)]">
                     {category.name}
                   </a>
                 ))}
-                <a href="#/about" className="transition hover:text-[var(--ink)]">
+                <a href={getHashUrl(APP_ROUTES.about)} className="transition hover:text-[var(--ink)]">
                   About
                 </a>
-                <a href="#/contact" className="transition hover:text-[var(--ink)]">
+                <a href={getHashUrl(APP_ROUTES.contact)} className="transition hover:text-[var(--ink)]">
                   Contact
                 </a>
               </div>

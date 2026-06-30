@@ -1,5 +1,6 @@
 import axiosClient from "./axiosClient";
 import type { Category, Product } from "../types/store";
+import { API_ROUTES } from "./apiRoutes";
 
 type RawCategory = Record<string, unknown>;
 type RawProduct = Record<string, unknown>;
@@ -435,8 +436,8 @@ function mapRawProduct(
 
 export async function fetchCatalog(): Promise<CatalogData> {
   const [rawCategories, rawProducts] = await Promise.all([
-    fetchPaginatedItems<RawCategory>("/api/categories"),
-    fetchPaginatedItems<RawProduct>("/api/products"),
+    fetchPaginatedItems<RawCategory>(API_ROUTES.catalog.categories),
+    fetchPaginatedItems<RawProduct>(API_ROUTES.catalog.products),
   ]);
 
   const categories = new Map<string, Category>();
@@ -513,7 +514,7 @@ function extractFavoriteProductId(item: unknown): string {
 }
 
 export async function fetchFavoriteProductIds(): Promise<string[]> {
-  const response = await axiosClient.get("/api/fetch/favorites");
+  const response = await axiosClient.get(API_ROUTES.wishlist.legacyList);
   const favorites = extractListData<unknown>(response.data);
 
   return dedupeStrings(
@@ -527,7 +528,7 @@ export async function addFavoriteProduct(productId: string): Promise<unknown> {
   const formData = new FormData();
   formData.append("product_id", productId);
 
-  const response = await axiosClient.post("/api/add/favorite", formData);
+  const response = await axiosClient.post(API_ROUTES.wishlist.legacyAdd, formData);
   return response.data;
 }
 
@@ -535,6 +536,6 @@ export async function removeFavoriteProduct(productId: string): Promise<unknown>
   const formData = new FormData();
   formData.append("product_id", productId);
 
-  const response = await axiosClient.post("/api/delete/favorites", formData);
+  const response = await axiosClient.post(API_ROUTES.wishlist.legacyRemove, formData);
   return response.data;
 }

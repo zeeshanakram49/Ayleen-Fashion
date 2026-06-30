@@ -13,7 +13,7 @@ export const orderTotal = (subtotal: number) => subtotal + shippingFee(subtotal)
 
 export function parseHash(): Route {
   const raw = window.location.hash.replace(/^#/, '');
-  const path = raw || '/';
+  const path = (raw.split("?")[0] || '/');
   const [base, maybeSlug] = path.split('/').filter(Boolean);
 
   if (!base) return { page: 'home' };
@@ -27,5 +27,9 @@ export function parseHash(): Route {
   if (base === 'register') return { page: 'register' };
   if (base === 'about') return { page: 'about' };
   if (base === 'contact') return { page: 'contact' };
+  if (base === 'order-success') return { page: 'orderSuccess', orderId: maybeSlug };
+  if (base === 'order-failed') return { page: 'orderFailed', orderId: maybeSlug };
+  if (base === 'payment-processing') return { page: 'paymentProcessing', orderId: maybeSlug };
+  if (base === 'orders') return { page: 'orders' };
   return { page: 'home' };
 }

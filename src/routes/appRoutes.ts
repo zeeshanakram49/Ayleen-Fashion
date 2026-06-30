@@ -1,0 +1,17 @@
+export const APP_ROUTES = {
+  home: "/",
+  shop: "/shop",
+  product: (slug: string) => `/product/${slug}`,
+  wishlist: "/wishlist",
+  cart: "/cart",
+  checkout: "/checkout",
+  account: "/account",
+  login: "/login",
+  register: "/register",
+  about: "/about",
+  contact: "/contact",
+  orderSuccess: "/order-success",
+  orderFailed: "/order-failed",
+  paymentProcessing: "/payment-processing",
+  orders: "/orders",
+};

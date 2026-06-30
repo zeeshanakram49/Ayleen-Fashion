@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { CartRow, CheckoutState } from '../types/store';
 import { money } from '../lib/store';
+import { APP_ROUTES } from '../routes/appRoutes';
+import { getHashUrl } from '../routes/routeUtils';
 
 const paymentMethods: {
   value: CheckoutState['payment'];
@@ -224,6 +226,7 @@ type CheckoutPageProps = {
   placedPayment: CheckoutState['payment'] | '';
   onCheckoutChange: (field: keyof CheckoutState, value: string) => void;
   onPlaceOrder: (e: React.FormEvent<HTMLFormElement>) => void;
+  isProcessing?: boolean;
 };
 
 export function CheckoutPage({
@@ -237,6 +240,7 @@ export function CheckoutPage({
   placedPayment,
   onCheckoutChange,
   onPlaceOrder,
+  isProcessing = false,
 }: CheckoutPageProps) {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const selectedPayment = placedPayment || checkout.payment;
@@ -336,7 +340,7 @@ export function CheckoutPage({
           </div>
 
           <a
-            href="#/shop"
+            href={getHashUrl(APP_ROUTES.shop)}
             style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
             className="mt-8 inline-flex rounded-[var(--radius-sm)] px-6 py-3 text-xs font-semibold tracking-[0.18em] transition-opacity hover:opacity-90"
           >
@@ -372,130 +376,133 @@ export function CheckoutPage({
             </div>
           )}
 
-          <article className="reveal-up soft-panel space-y-8 rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-6">
-            <div>
-              <h2 className="font-editorial text-3xl">Delivery Details</h2>
-              <p className="mt-1 text-xs text-[var(--muted)]">Fields marked * are required to ship your order.</p>
-            </div>
-
-            <div className="space-y-4">
-              <SectionEyebrow index="1" title="CONTACT" />
-              <div className="grid gap-x-4 gap-y-5 pl-9 sm:grid-cols-2">
-                <FloatingInput
-                  id="fullName"
-                  label="Full Name"
-                  required
-                  value={checkout.fullName}
-                  onChange={(v) => onCheckoutChange('fullName', v)}
-                  className="sm:col-span-2"
-                />
-                <FloatingInput
-                  id="phone"
-                  label="Phone Number"
-                  required
-                  type="tel"
-                  value={checkout.phone}
-                  onChange={(v) => onCheckoutChange('phone', v)}
-                />
-                <FloatingInput
-                  id="email"
-                  label="Email (optional)"
-                  type="email"
-                  value={checkout.email}
-                  onChange={(v) => onCheckoutChange('email', v)}
-                />
+          <fieldset disabled={isProcessing} className="contents">
+            <article className="reveal-up soft-panel space-y-8 rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-6 bg-white">
+              <div>
+                <h2 className="font-editorial text-3xl">Delivery Details</h2>
+                <p className="mt-1 text-xs text-[var(--muted)]">Fields marked * are required to ship your order.</p>
               </div>
-            </div>
 
-            <div className="space-y-4 border-t border-[var(--line)] pt-6">
-              <SectionEyebrow index="2" title="DELIVERY ADDRESS" />
-              <div className="grid gap-x-4 gap-y-5 pl-9 sm:grid-cols-2">
-                <FloatingInput
-                  id="address"
-                  label="Address"
-                  required
-                  value={checkout.address}
-                  onChange={(v) => onCheckoutChange('address', v)}
-                  className="sm:col-span-2"
-                />
-                <FloatingInput
-                  id="city"
-                  label="City"
-                  required
-                  list="checkout-city-list"
-                  value={checkout.city}
-                  onChange={(v) => onCheckoutChange('city', v)}
-                  className="sm:col-span-2"
-                />
-                <datalist id="checkout-city-list">
-                  {pakistaniCities.map((city) => (
-                    <option key={city} value={city} />
-                  ))}
-                </datalist>
-                <div className="flex items-center gap-2 text-xs text-[var(--muted)] sm:col-span-2">
-                  <span className="inline-flex h-5 items-center rounded-full border border-[var(--line-strong)] px-2 text-[10px] font-semibold tracking-[0.12em] text-[var(--ink)]">
-                    PK
-                  </span>
-                  Currently shipping within Pakistan only
+              <div className="space-y-4">
+                <SectionEyebrow index="1" title="CONTACT" />
+                <div className="grid gap-x-4 gap-y-5 pl-9 sm:grid-cols-2">
+                  <FloatingInput
+                    id="fullName"
+                    label="Full Name"
+                    required
+                    value={checkout.fullName}
+                    onChange={(v) => onCheckoutChange('fullName', v)}
+                    className="sm:col-span-2"
+                  />
+                  <FloatingInput
+                    id="phone"
+                    label="Phone Number"
+                    required
+                    type="tel"
+                    value={checkout.phone}
+                    onChange={(v) => onCheckoutChange('phone', v)}
+                  />
+                  <FloatingInput
+                    id="email"
+                    label="Email (optional)"
+                    type="email"
+                    value={checkout.email}
+                    onChange={(v) => onCheckoutChange('email', v)}
+                  />
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-4 border-t border-[var(--line)] pt-6">
-              <SectionEyebrow index="3" title="PAYMENT METHOD" />
-              <div className="grid gap-3 pl-9 sm:grid-cols-2">
-                {paymentMethods.map((method) => {
-                  const selected = checkout.payment === method.value;
-
-                  return (
-                    <label
-                      key={method.value}
-                      className={`flex min-h-24 cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border bg-white p-4 transition ${
-                        selected
-                          ? 'border-[var(--ink)] shadow-[0_18px_45px_-30px_rgba(22,17,12,0.75)]'
-                          : 'border-[var(--line-strong)] hover:border-[var(--ink)]'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="payment"
-                        value={method.value}
-                        checked={selected}
-                        onChange={() => onCheckoutChange('payment', method.value)}
-                        className="sr-only"
-                      />
-                      <span className={selected ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}>
-                        {paymentIcon(method.value)}
-                      </span>
-                      <span className="flex-1">
-                        <span className="block text-sm font-semibold text-[var(--ink)]">{method.label}</span>
-                        <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{method.detail}</span>
-                      </span>
-                      <span
-                        className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                          selected ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--champagne)]' : 'border-[var(--line-strong)]'
-                        }`}
-                        aria-hidden="true"
-                      >
-                        {selected && <IconCheck className="h-2.5 w-2.5" />}
-                      </span>
-                    </label>
-                  );
-                })}
+              <div className="space-y-4 border-t border-[var(--line)] pt-6">
+                <SectionEyebrow index="2" title="DELIVERY ADDRESS" />
+                <div className="grid gap-x-4 gap-y-5 pl-9 sm:grid-cols-2">
+                  <FloatingInput
+                    id="address"
+                    label="Address"
+                    required
+                    value={checkout.address}
+                    onChange={(v) => onCheckoutChange('address', v)}
+                    className="sm:col-span-2"
+                  />
+                  <FloatingInput
+                    id="city"
+                    label="City"
+                    required
+                    list="checkout-city-list"
+                    value={checkout.city}
+                    onChange={(v) => onCheckoutChange('city', v)}
+                    className="sm:col-span-2"
+                  />
+                  <datalist id="checkout-city-list">
+                    {pakistaniCities.map((city) => (
+                      <option key={city} value={city} />
+                    ))}
+                  </datalist>
+                  <div className="flex items-center gap-2 text-xs text-[var(--muted)] sm:col-span-2">
+                    <span className="inline-flex h-5 items-center rounded-full border border-[var(--line-strong)] px-2 text-[10px] font-semibold tracking-[0.12em] text-[var(--ink)]">
+                      PK
+                    </span>
+                    Currently shipping within Pakistan only
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="border-t border-[var(--line)] pt-6">
-              <FloatingTextarea
-                id="note"
-                label="Order note (optional)"
-                value={checkout.note}
-                onChange={(v) => onCheckoutChange('note', v)}
-              />
-            </div>
-          </article>
+              <div className="space-y-4 border-t border-[var(--line)] pt-6">
+                <SectionEyebrow index="3" title="PAYMENT METHOD" />
+                <div className="grid gap-3 pl-9 sm:grid-cols-2">
+                  {paymentMethods.map((method) => {
+                    const selected = checkout.payment === method.value;
 
-          <aside className="reveal-up delay-1 soft-panel hidden rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-6 lg:sticky lg:top-10 lg:block">
+                    return (
+                      <label
+                        key={method.value}
+                        className={`flex min-h-24 cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border bg-white p-4 transition ${
+                          selected
+                            ? 'border-[var(--ink)] shadow-[0_18px_45px_-30px_rgba(22,17,12,0.75)]'
+                            : 'border-[var(--line-strong)] hover:border-[var(--ink)]'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="payment"
+                          value={method.value}
+                          checked={selected}
+                          onChange={() => onCheckoutChange('payment', method.value)}
+                          className="sr-only"
+                          disabled={isProcessing}
+                        />
+                        <span className={selected ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}>
+                          {paymentIcon(method.value)}
+                        </span>
+                        <span className="flex-1">
+                          <span className="block text-sm font-semibold text-[var(--ink)]">{method.label}</span>
+                          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{method.detail}</span>
+                        </span>
+                        <span
+                          className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                            selected ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--champagne)]' : 'border-[var(--line-strong)]'
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {selected && <IconCheck className="h-2.5 w-2.5" />}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--line)] pt-6">
+                <FloatingTextarea
+                  id="note"
+                  label="Order note (optional)"
+                  value={checkout.note}
+                  onChange={(v) => onCheckoutChange('note', v)}
+                />
+              </div>
+            </article>
+          </fieldset>
+
+          <aside className="reveal-up delay-1 soft-panel hidden rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-6 lg:sticky lg:top-10 lg:block bg-white">
             <div className="flex items-baseline justify-between">
               <h2 className="font-editorial text-3xl">Order Summary</h2>
               <span className="text-xs tracking-[0.12em] text-[var(--muted)]">
@@ -524,9 +531,10 @@ export function CheckoutPage({
 
             <button
               type="submit"
-              className="mt-6 w-full rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.18em] text-[var(--champagne)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold-deep)]"
+              disabled={isProcessing}
+              className="mt-6 w-full rounded-[var(--radius-sm)] bg-[var(--ink)] px-6 py-3 text-xs tracking-[0.18em] text-[var(--champagne)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold-deep)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              PLACE ORDER
+              {isProcessing ? "PROCESSING..." : "PLACE ORDER"}
             </button>
             <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-[var(--muted)]">
               <IconLock className="h-3 w-3" />
@@ -538,9 +546,10 @@ export function CheckoutPage({
           <div className="sticky bottom-3 z-10 rounded-[var(--radius-md)] border border-[var(--line)] bg-white/95 p-3 shadow-[0_18px_45px_-25px_rgba(22,17,12,0.55)] backdrop-blur lg:hidden">
             <button
               type="submit"
-              className="flex w-full items-center justify-between rounded-[var(--radius-sm)] bg-[var(--ink)] px-5 py-3 text-xs tracking-[0.18em] text-[var(--champagne)] transition-opacity hover:opacity-90"
+              disabled={isProcessing}
+              className="flex w-full items-center justify-between rounded-[var(--radius-sm)] bg-[var(--ink)] px-5 py-3 text-xs tracking-[0.18em] text-[var(--champagne)] transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>PLACE ORDER</span>
+              <span>{isProcessing ? "PROCESSING..." : "PLACE ORDER"}</span>
               <span>{money(total)}</span>
             </button>
           </div>
