@@ -9,9 +9,6 @@ import type { Order } from "../api/apiTypes";
 
 type AccountMode = "login" | "signup";
 
-const accountImage =
-  "/products/product_05_website_square_1600.jpg";
-
 type AccountPageProps = {
   initialMode?: AccountMode;
 };
@@ -271,13 +268,8 @@ export function AccountPage({ initialMode = "login" }: AccountPageProps) {
   return (
     <section className="bg-white px-4 py-6 sm:px-5 md:px-8 md:py-12">
       <div className="mx-auto grid max-w-[1500px] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-white shadow-[var(--shadow-soft)] lg:min-h-[720px] lg:grid-cols-[1.04fr_0.96fr]">
-        <div className="relative min-h-[420px] overflow-hidden bg-[#ede5da] lg:min-h-full">
-          <img
-            src={accountImage}
-            alt="Aylee fashion edit"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+        <div className="relative min-h-[420px] overflow-hidden bg-[var(--ink)] lg:min-h-full">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,rgba(255,255,255,0.18),transparent_34%),linear-gradient(145deg,#121212_0%,#2f2b25_58%,#f8f7f4_160%)]" />
           <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-10">
             <p className="text-xs font-semibold tracking-[0.34em] text-white/75">
               AYLEE MEMBERS

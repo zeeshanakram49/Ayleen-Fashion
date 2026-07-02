@@ -114,6 +114,28 @@ textarea:focus-visible {
   outline-offset: 3px;
 }
 
+.image-placeholder {
+  display: block;
+  min-height: 100%;
+  background:
+    linear-gradient(135deg, rgba(18, 18, 18, 0.06), rgba(18, 18, 18, 0.02)),
+    var(--panel-strong);
+  position: relative;
+}
+
+.image-placeholder::after {
+  content: "No API image";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .account-field {
   display: grid;
   gap: 0.55rem;
@@ -2948,6 +2970,954 @@ textarea:focus-visible {
     max-height: 66vh;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   PREMIUM ANIMATION SYSTEM — Aylee Fashion
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Skeleton / Shimmer Loaders ────────────────────────────────── */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    110deg,
+    var(--panel) 0%,
+    var(--panel-strong) 40%,
+    var(--panel) 60%
+  );
+  border-radius: var(--radius-md);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 45%,
+    rgba(255, 255, 255, 0.72) 50%,
+    rgba(255, 255, 255, 0.55) 55%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer-sweep 1.8s var(--ease-premium) infinite;
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    110deg,
+    var(--panel) 0%,
+    var(--panel-strong) 40%,
+    var(--panel) 60%
+  );
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 45%,
+    rgba(255, 255, 255, 0.72) 50%,
+    rgba(255, 255, 255, 0.55) 55%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer-sweep 1.8s var(--ease-premium) infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Skeleton card placeholder for product grid */
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton-card__image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-card__title {
+  width: 72%;
+  height: 0.85rem;
+  border-radius: 4px;
+}
+
+.skeleton-card__price {
+  width: 40%;
+  height: 0.75rem;
+  border-radius: 4px;
+}
+
+/* ── Product Card Stagger Entry ───────────────────────────────── */
+
+.card-enter {
+  opacity: 0;
+  transform: translateY(28px) scale(0.97);
+  animation: card-enter 0.62s var(--ease-premium) forwards;
+}
+
+@keyframes card-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Stagger delays for grid items */
+.card-stagger-1 { animation-delay: 60ms; }
+.card-stagger-2 { animation-delay: 120ms; }
+.card-stagger-3 { animation-delay: 180ms; }
+.card-stagger-4 { animation-delay: 240ms; }
+.card-stagger-5 { animation-delay: 300ms; }
+.card-stagger-6 { animation-delay: 360ms; }
+.card-stagger-7 { animation-delay: 420ms; }
+.card-stagger-8 { animation-delay: 480ms; }
+
+/* ── Wishlist Heart Animations ────────────────────────────────── */
+
+.heart-pop {
+  animation: heart-pop 0.42s var(--ease-premium);
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.38);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  75% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heart-saved {
+  color: #e63946 !important;
+  filter: drop-shadow(0 0 6px rgba(230, 57, 70, 0.35));
+}
+
+.outfit-heart-button.heart-saved,
+.catalog-heart-button.heart-saved {
+  background: rgba(230, 57, 70, 0.08);
+  border-color: rgba(230, 57, 70, 0.18);
+  color: #e63946;
+}
+
+.outfit-heart-button.heart-saved:hover,
+.catalog-heart-button.heart-saved:hover {
+  background: #e63946;
+  color: white;
+}
+
+/* Subtle heartbeat loop for active saved state */
+.heart-pulse {
+  animation: heart-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes heart-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.08);
+  }
+  28% {
+    transform: scale(1);
+  }
+}
+
+/* ── Product Card Hover Enhancements ──────────────────────────── */
+
+.outfit-product-tile,
+.catalog-product-card {
+  will-change: transform;
+}
+
+.outfit-product-media::after,
+.catalog-product-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+  opacity: 0;
+  transition: opacity 420ms var(--ease-premium);
+}
+
+.outfit-product-tile:hover .outfit-product-media::after,
+.catalog-product-card:hover .catalog-product-media::after {
+  opacity: 1;
+}
+
+/* Quick-view button glow on hover */
+.outfit-quick-button,
+.catalog-product-quickview {
+  backdrop-filter: blur(8px);
+}
+
+.outfit-product-tile:hover .outfit-quick-button,
+.catalog-product-card:hover .catalog-product-quickview {
+  box-shadow: 0 8px 28px -12px rgba(0, 0, 0, 0.28);
+}
+
+/* ── Page Transition System ───────────────────────────────────── */
+
+.page-fade-in {
+  animation: page-fade-in 0.48s var(--ease-premium) forwards;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-slide-up {
+  animation: page-slide-up 0.56s var(--ease-premium) forwards;
+}
+
+@keyframes page-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Order Success Checkmark ──────────────────────────────────── */
+
+.checkmark-circle {
+  animation: checkmark-circle-fill 0.5s ease-in-out forwards;
+}
+
+@keyframes checkmark-circle-fill {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.checkmark-draw {
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: checkmark-draw-stroke 0.6s ease-in-out 0.35s forwards;
+}
+
+@keyframes checkmark-draw-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Success ring burst */
+.success-ring {
+  position: relative;
+}
+
+.success-ring::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  opacity: 0;
+  animation: success-ring-burst 0.7s ease-out 0.6s forwards;
+}
+
+@keyframes success-ring-burst {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ── Payment Processing Spinner ───────────────────────────────── */
+
+.payment-spinner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+}
+
+.payment-spinner::before,
+.payment-spinner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+}
+
+.payment-spinner::before {
+  inset: 0;
+  border-top-color: var(--ink);
+  border-right-color: var(--ink);
+  animation: spinner-rotate 0.9s linear infinite;
+}
+
+.payment-spinner::after {
+  inset: 8px;
+  border-bottom-color: var(--gold-deep);
+  border-left-color: var(--gold-deep);
+  animation: spinner-rotate 1.4s linear infinite reverse;
+}
+
+.payment-spinner-inner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--muted);
+  animation: spinner-rotate 2s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Inline processing dots */
+.processing-dots::after {
+  content: "";
+  animation: processing-dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes processing-dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+}
+
+/* Checkout button processing state */
+.btn-processing {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn-processing::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  animation: spinner-rotate 0.7s linear infinite;
+}
+
+/* ── Cart Drawer Slide & Item Animations ──────────────────────── */
+
+.cart-slide-in {
+  animation: cart-slide-in 0.36s var(--ease-premium);
+}
+
+@keyframes cart-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cart-item-enter {
+  animation: cart-item-enter 0.38s var(--ease-premium);
+}
+
+@keyframes cart-item-enter {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.cart-item-remove {
+  animation: cart-item-remove 0.28s var(--ease-premium) forwards;
+}
+
+@keyframes cart-item-remove {
+  to {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+}
+
+/* ── Notice / Toast Animations ────────────────────────────────── */
+
+.notice-enter {
+  animation: notice-enter 0.42s var(--ease-premium);
+}
+
+@keyframes notice-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.notice-exit {
+  animation: notice-exit 0.3s var(--ease-premium) forwards;
+}
+
+@keyframes notice-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+/* ── Button Micro-interactions ────────────────────────────────── */
+
+.btn-magnetic {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 280ms var(--ease-premium),
+    box-shadow 280ms var(--ease-premium),
+    background-color 280ms var(--ease-premium),
+    color 280ms var(--ease-premium);
+}
+
+.btn-magnetic:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.35);
+}
+
+.btn-magnetic:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 12px -8px rgba(0, 0, 0, 0.3);
+}
+
+/* Ripple effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease;
+}
+
+.btn-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* ── Glassmorphism Panel Upgrades ─────────────────────────────── */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  box-shadow:
+    0 8px 32px -12px rgba(0, 0, 0, 0.08),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-panel-dark {
+  background: rgba(18, 18, 18, 0.82);
+  backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 8px 32px -12px rgba(0, 0, 0, 0.36),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ── Gradient Glow & Ambient Effects ──────────────────────────── */
+
+.glow-ring {
+  position: relative;
+}
+
+.glow-ring::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(18, 18, 18, 0.12) 25%,
+    transparent 50%,
+    rgba(18, 18, 18, 0.08) 75%,
+    transparent 100%
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 420ms var(--ease-premium);
+}
+
+.glow-ring:hover::after {
+  opacity: 1;
+}
+
+/* Ambient gradient shift for section backgrounds */
+.ambient-gradient {
+  background-size: 200% 200%;
+  animation: ambient-gradient-shift 12s ease-in-out infinite;
+}
+
+@keyframes ambient-gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ── Focus / Selection Styles ─────────────────────────────────── */
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: rgba(18, 18, 18, 0.14);
+  color: var(--ink);
+}
+
+/* ── Scroll Progress Indicator ────────────────────────────────── */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 9999;
+  background: linear-gradient(90deg, var(--ink), var(--gold-deep));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 120ms linear;
+}
+
+/* ── Image Reveal on Scroll ───────────────────────────────────── */
+
+.img-reveal {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.8s var(--ease-premium);
+}
+
+.img-reveal.is-visible {
+  clip-path: inset(0 0 0% 0);
+}
+
+/* ── Order Status Badge Animations ────────────────────────────── */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    background-color 220ms var(--ease-premium),
+    color 220ms var(--ease-premium);
+}
+
+.status-badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge--processing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge--shipped {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge--delivered {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-badge--cancelled {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* Status badge pulse dot */
+.status-badge--processing::before,
+.status-badge--pending::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: status-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+}
+
+/* ── Loading Bar (Determinate) ────────────────────────────────── */
+
+.loading-bar {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--panel-strong);
+  overflow: hidden;
+}
+
+.loading-bar__fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ink);
+  transition: width 0.4s var(--ease-premium);
+}
+
+/* Indeterminate loading bar */
+.loading-bar--indeterminate .loading-bar__fill {
+  width: 35%;
+  animation: loading-slide 1.2s var(--ease-premium) infinite;
+}
+
+@keyframes loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+
+/* ── Quantity Stepper Animation ────────────────────────────────── */
+
+.qty-bounce {
+  animation: qty-bounce 0.25s var(--ease-premium);
+}
+
+@keyframes qty-bounce {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── Image Hover Parallax Layer ───────────────────────────────── */
+
+.parallax-hover {
+  transition: transform 0.7s var(--ease-premium);
+}
+
+.parallax-hover:hover {
+  transform: scale(1.04) translate3d(0, -2px, 0);
+}
+
+/* ── Tooltip Fade ─────────────────────────────────────────────── */
+
+.tooltip-fade {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition:
+    opacity 180ms var(--ease-premium),
+    visibility 180ms var(--ease-premium),
+    transform 180ms var(--ease-premium);
+}
+
+.tooltip-fade.is-shown,
+*:hover > .tooltip-fade {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ── Mega Menu Enter ──────────────────────────────────────────── */
+
+.mega-menu-enter {
+  animation: mega-menu-enter 0.32s var(--ease-premium);
+}
+
+@keyframes mega-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Mobile Menu Slide ────────────────────────────────────────── */
+
+.mobile-menu-enter {
+  animation: mobile-menu-enter 0.36s var(--ease-premium);
+}
+
+@keyframes mobile-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Quickview Modal Enter ────────────────────────────────────── */
+
+.quickview-enter .quickview-shell {
+  animation: quickview-shell-enter 0.4s var(--ease-premium);
+}
+
+@keyframes quickview-shell-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.quickview-enter {
+  animation: quickview-backdrop-enter 0.3s ease forwards;
+}
+
+@keyframes quickview-backdrop-enter {
+  from {
+    background-color: rgba(20, 18, 16, 0);
+  }
+  to {
+    background-color: rgba(20, 18, 16, 0.46);
+  }
+}
+
+/* ── Size Selector Chip Animation ─────────────────────────────── */
+
+.size-chip {
+  transition:
+    background-color 180ms var(--ease-premium),
+    color 180ms var(--ease-premium),
+    border-color 180ms var(--ease-premium),
+    transform 180ms var(--ease-premium),
+    box-shadow 180ms var(--ease-premium);
+}
+
+.size-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.18);
+}
+
+.size-chip.is-selected {
+  transform: scale(1.04);
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.22);
+}
+
+/* ── Price Ticker Animation ───────────────────────────────────── */
+
+.price-change {
+  animation: price-flash 0.5s var(--ease-premium);
+}
+
+@keyframes price-flash {
+  0% {
+    color: var(--ink);
+  }
+  30% {
+    color: #059669;
+  }
+  100% {
+    color: var(--ink);
+  }
+}
+
+/* ── Smooth Number Counter ────────────────────────────────────── */
+
+.count-up {
+  display: inline-block;
+  transition: all 0.35s var(--ease-premium);
+}
+
+/* ── Announcement Bar Scroll ──────────────────────────────────── */
+
+.announcement-scroll {
+  animation: announcement-scroll 20s linear infinite;
+}
+
+@keyframes announcement-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Gradient Border Button ───────────────────────────────────── */
+
+.btn-gradient-border {
+  position: relative;
+  background: var(--paper);
+  border: none;
+  z-index: 0;
+}
+
+.btn-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    var(--ink) 0%,
+    var(--muted) 50%,
+    var(--ink) 100%
+  );
+  mask:
+    linear-gradient(white 0 0) content-box,
+    linear-gradient(white 0 0);
+  mask-composite: exclude;
+  z-index: -1;
+}
+
+/* ── Premium Image Treatments ─────────────────────────────────── */
+
+.img-premium-shadow {
+  box-shadow:
+    0 24px 48px -20px rgba(0, 0, 0, 0.16),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.img-vignette {
+  position: relative;
+}
+
+.img-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+}
+
+/* ── Smooth Scroll Snap ───────────────────────────────────────── */
+
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-x > * {
+  scroll-snap-align: start;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   END PREMIUM ANIMATION SYSTEM
+   ══════════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
   *,

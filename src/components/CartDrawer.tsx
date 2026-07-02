@@ -3,6 +3,7 @@ import { installmentAmount, money } from '../lib/store';
 import { APP_ROUTES } from '../routes/appRoutes';
 import { getHashUrl } from '../routes/routeUtils';
 import type { CartRow } from '../types/store';
+import { ImageWithFallback } from './ImageWithFallback';
 
 type CartDrawerProps = {
   open: boolean;
@@ -87,7 +88,7 @@ export function CartDrawer({ open, latestItem, cartCount, subtotal, onClose }: C
             <article className="mt-4 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-4">
               <div className="grid gap-4 sm:grid-cols-[116px_1fr]">
                 <div className="h-32 w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--line)]">
-                  <img
+                  <ImageWithFallback
                     src={latestItem.product.image}
                     alt={latestItem.product.title}
                     loading="lazy"

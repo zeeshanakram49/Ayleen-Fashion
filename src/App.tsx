@@ -6,11 +6,12 @@ import {
   removeCartLineApi,
   updateCartQtyApi,
 } from "./api/cartApi";
-import { fetchProductBySlugApi } from "./api/catalogApi";
 import {
   addFavoriteProduct,
+  fetchBanners,
   fetchCatalog,
   fetchFavoriteProductIds,
+  fetchProductDetail,
   removeFavoriteProduct,
 } from "./api/storeApi";
 import { CartDrawer } from "./components/CartDrawer";
@@ -18,9 +19,7 @@ import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import {
   initialCheckout,
-  categories as fallbackCategories,
   navLinks,
-  products as fallbackProducts,
   services,
   testimonials,
 } from "./data/store";
@@ -49,6 +48,7 @@ import {
 } from "./services/paymentService";
 import type {
   Category,
+  Banner,
   CartItem,
   CartRow,
   CheckoutState,
@@ -97,6 +97,7 @@ function App() {
   const [route, setRoute] = useState<Route>(() => parseHash());
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState("");
   const [productDetailLoading, setProductDetailLoading] = useState(false);
@@ -133,12 +134,12 @@ function App() {
       if (control?.cancelled) return;
 
       const message = getApiErrorMessage(error);
-      setCategories(fallbackCategories);
-      setProducts(fallbackProducts);
+      setCategories([]);
+      setProducts([]);
       setCatalogError(message);
       setNotice({
         kind: "info",
-        message: `${message} Showing saved catalog.`,
+        message,
       });
     } finally {
       if (!control?.cancelled) {
@@ -156,6 +157,33 @@ function App() {
       control.cancelled = true;
     };
   }, [loadCatalog]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBanners() {
+      try {
+        const nextBanners = await fetchBanners();
+        if (!cancelled) {
+          setBanners(nextBanners);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setBanners([]);
+          setNotice({
+            kind: "info",
+            message: getApiErrorMessage(error),
+          });
+        }
+      }
+    }
+
+    void loadBanners();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("ayleen_cart_v1", JSON.stringify(cart));
@@ -448,8 +476,7 @@ function App() {
     async function loadProductDetail() {
       setProductDetailLoading(true);
       try {
-        const response = await fetchProductBySlugApi(productSlug);
-        const product = response.payload ?? response.data ?? null;
+        const product = await fetchProductDetail(productSlug);
         if (!cancelled && product) {
           setFetchedProduct(product);
         }
@@ -806,6 +833,7 @@ function App() {
         cartCount={cartCount}
         onOpenCart={() => setCartDrawerOpen(true)}
         onShopCategory={navigateToShop}
+        categories={categories}
       />
 
       {notice && (
@@ -817,6 +845,7 @@ function App() {
       <main>
         {route.page === "home" && (
           <HomePage
+            banners={banners}
             products={products}
             services={services}
             testimonials={testimonials}

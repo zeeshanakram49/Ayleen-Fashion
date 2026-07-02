@@ -1,16 +1,17 @@
 import axiosClient from "./axiosClient";
-import type { Category, Product } from "../types/store";
+import type { Banner, Category, Product } from "../types/store";
 import { API_ROUTES } from "./apiRoutes";
 
 type RawCategory = Record<string, unknown>;
 type RawProduct = Record<string, unknown>;
+type RawBanner = Record<string, unknown>;
 
 type CatalogData = {
   categories: Category[];
   products: Product[];
 };
 
-const DEFAULT_PRODUCT_IMAGE = "/product-fallback.svg";
+const DEFAULT_PRODUCT_IMAGE = "";
 const DEFAULT_SIZES = ["S", "M", "L", "XL"];
 const KNOWN_COLORS = [
   "sand",
@@ -90,12 +91,19 @@ function dedupeStrings(values: string[]): string[] {
 function normalizeImageUrl(value: string): string {
   if (!value) return DEFAULT_PRODUCT_IMAGE;
   if (/^(https?:)?\/\//i.test(value) || value.startsWith("data:")) return value;
-  if (value === DEFAULT_PRODUCT_IMAGE || value.startsWith("/products/")) return value;
 
-  const baseUrl = String(import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
-  const normalizedPath = value.startsWith("/") ? value : `/${value}`;
-  return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+  const absoluteBase = "http://admin.aylee.store";
+  let path = value;
+
+  if (!path.startsWith("storage/") && !path.startsWith("/storage/")) {
+    path = path.startsWith("/") ? `/storage${path}` : `/storage/${path}`;
+  } else {
+    path = path.startsWith("/") ? path : `/${path}`;
+  }
+
+  return `${absoluteBase}${path}`;
 }
+
 
 function parseStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -131,6 +139,7 @@ function collectImageCandidates(raw: RawProduct): string[] {
     raw.photos,
     raw.product_images,
     raw.media,
+    raw.photo,
   ];
 
   const imageObjects = nestedArrays.flatMap((entry) => {
@@ -152,8 +161,8 @@ function collectImageCandidates(raw: RawProduct): string[] {
 
   return dedupeStrings(
     [
+      typeof raw.photo === "string" ? raw.photo : "",
       firstNonEmptyString(
-        raw.photo,
         raw.image,
         raw.thumbnail,
         raw.featured_image,
@@ -161,6 +170,7 @@ function collectImageCandidates(raw: RawProduct): string[] {
       ),
       ...imageObjects,
     ]
+      .filter(Boolean)
       .map((entry) => normalizeImageUrl(entry))
       .filter(Boolean),
   );
@@ -246,6 +256,7 @@ function extractListData<T>(payload: unknown): T[] {
   if (!isRecord(payload)) return [];
 
   if (Array.isArray(payload.data)) return payload.data as T[];
+  if (Array.isArray(payload.payload)) return payload.payload as T[];
   if (isRecord(payload.payload)) {
     const nestedPayload = payload.payload;
     if (Array.isArray(nestedPayload.data)) return nestedPayload.data as T[];
@@ -258,6 +269,21 @@ function extractListData<T>(payload: unknown): T[] {
   if (Array.isArray(payload.categories)) return payload.categories as T[];
   if (Array.isArray(payload.favorites)) return payload.favorites as T[];
   return [];
+}
+
+function extractRecordData(payload: unknown): RawProduct | null {
+  if (!isRecord(payload)) return null;
+  if (isRecord(payload.data)) return payload.data;
+  if (isRecord(payload.product)) return payload.product;
+
+  if (isRecord(payload.payload)) {
+    const nestedPayload = payload.payload;
+    if (isRecord(nestedPayload.data)) return nestedPayload.data;
+    if (isRecord(nestedPayload.product)) return nestedPayload.product;
+    return nestedPayload;
+  }
+
+  return payload;
 }
 
 function extractTotalPages(payload: unknown): number {
@@ -331,6 +357,7 @@ function mapRawProduct(
       raw.category_name,
       raw.category_title,
       categoryRecord?.title,
+      categoryRecord?.name,
     ),
   );
   const matchedCategory =
@@ -345,12 +372,13 @@ function mapRawProduct(
       raw.category_name,
       raw.category_title,
       categoryRecord?.title,
+      categoryRecord?.name,
       "Collection",
     );
   const gallery = collectImageCandidates(raw);
   const image = gallery[0] ?? DEFAULT_PRODUCT_IMAGE;
   const fit = firstNonEmptyString(raw.fit, raw.style, raw.type, "Regular Fit");
-  const price = firstFiniteNumber(
+  const basePrice = firstFiniteNumber(
     raw.sale_price,
     raw.discount_price,
     raw.final_price,
@@ -360,18 +388,33 @@ function mapRawProduct(
     raw.mrp,
     0,
   ) ?? 0;
-  const oldPrice = Math.max(
-    price,
-    firstFiniteNumber(
-      raw.old_price,
-      raw.compare_at_price,
-      raw.original_price,
-      raw.regular_price,
-      raw.price,
-      raw.mrp,
+  const rawDiscount = toNumberValue(raw.discount) ?? 0;
+
+  let price = basePrice;
+  let oldPrice = basePrice;
+
+  if (rawDiscount > 0) {
+    if (rawDiscount <= 100) {
+      price = basePrice * (1 - rawDiscount / 100);
+      oldPrice = basePrice;
+    } else {
+      price = Math.max(0, basePrice - rawDiscount);
+      oldPrice = basePrice;
+    }
+  } else {
+    oldPrice = Math.max(
       price,
-    ) ?? price,
-  );
+      firstFiniteNumber(
+        raw.old_price,
+        raw.compare_at_price,
+        raw.original_price,
+        raw.regular_price,
+        raw.price,
+        raw.mrp,
+        price,
+      ) ?? price,
+    );
+  }
   const colors = extractColors(raw, title);
   const badge = resolveBadge(raw, price, oldPrice);
   const description =
@@ -434,11 +477,25 @@ function mapRawProduct(
   };
 }
 
+export function mapApiProduct(raw: RawProduct): Product {
+  return mapRawProduct(raw, new Map(), new Map());
+}
+
+export async function fetchProductDetail(productSlug: string): Promise<Product | null> {
+  const response = await axiosClient.get(API_ROUTES.catalog.productBySlug(productSlug));
+  const rawProduct = extractRecordData(response.data);
+  return rawProduct ? mapApiProduct(rawProduct) : null;
+}
+
 export async function fetchCatalog(): Promise<CatalogData> {
-  const [rawCategories, rawProducts] = await Promise.all([
-    fetchPaginatedItems<RawCategory>(API_ROUTES.catalog.categories),
-    fetchPaginatedItems<RawProduct>(API_ROUTES.catalog.products),
-  ]);
+  const rawProducts = await fetchPaginatedItems<RawProduct>(API_ROUTES.catalog.products);
+  let rawCategories: RawCategory[] = [];
+
+  try {
+    rawCategories = await fetchPaginatedItems<RawCategory>(API_ROUTES.catalog.categories);
+  } catch {
+    rawCategories = [];
+  }
 
   const categories = new Map<string, Category>();
   const categoriesByBackendId = new Map<string, Category>();
@@ -487,6 +544,27 @@ export async function fetchCatalog(): Promise<CatalogData> {
     categories: finalizedCategories,
     products,
   };
+}
+
+function mapRawBanner(raw: RawBanner): Banner {
+  const title = firstNonEmptyString(raw.title, raw.name, "Aylee Banner");
+  const description = stripHtml(
+    firstNonEmptyString(raw.description, raw.summary, raw.subtitle),
+  );
+
+  return {
+    id: firstNonEmptyString(raw.id, raw.slug, title),
+    title,
+    description,
+    image: normalizeImageUrl(
+      firstNonEmptyString(raw.photo, raw.image, raw.banner, raw.url),
+    ),
+  };
+}
+
+export async function fetchBanners(): Promise<Banner[]> {
+  const response = await axiosClient.get(API_ROUTES.catalog.banners);
+  return extractListData<RawBanner>(response.data).map(mapRawBanner);
 }
 
 function extractFavoriteProductId(item: unknown): string {

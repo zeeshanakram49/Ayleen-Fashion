@@ -6,6 +6,13 @@ export type Category = {
   image: string;
 };
 
+export type Banner = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -79,4 +86,3 @@ export type Notice = {
   kind: 'success' | 'info';
   message: string;
 };
-

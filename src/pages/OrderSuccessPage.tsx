@@ -75,8 +75,8 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
 
   return (
     <section className="mx-auto max-w-3xl px-5 py-16 sm:px-6 md:py-20 lg:py-24">
-      <article className="reveal-up is-visible text-center">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--champagne)] shadow-[var(--shadow-lift)] ring-8 ring-[var(--panel)]">
+      <article className="page-slide-up text-center">
+        <div className="success-ring mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--champagne)] shadow-[var(--shadow-lift)] ring-8 ring-[var(--panel)] checkmark-circle">
           <svg
             className="h-9 w-9"
             fill="none"
@@ -85,6 +85,7 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
             strokeWidth="2.5"
           >
             <path
+              className="checkmark-draw"
               strokeLinecap="round"
               strokeLinejoin="round"
               d="M5 13l4 4L19 7"

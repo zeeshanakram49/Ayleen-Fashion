@@ -1,6 +1,7 @@
 import { installmentAmount, money } from "../lib/store";
 import { APP_ROUTES } from "../routes/appRoutes";
 import { getHashUrl } from "../routes/routeUtils";
+import { ImageWithFallback } from "../components/ImageWithFallback";
 import type { CartRow } from "../types/store";
 
 type CartPageProps = {
@@ -223,7 +224,7 @@ export function CartPage({
                   className="reveal-up soft-panel grid grid-cols-[96px_1fr] gap-4 rounded-[var(--radius-lg)] border border-[var(--line)] p-4 sm:grid-cols-[150px_1fr]"
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
-                  <img
+                  <ImageWithFallback
                     src={row.product.image}
                     alt={row.product.title}
                     className="aspect-[3/4] w-full rounded-[var(--radius-md)] object-cover"

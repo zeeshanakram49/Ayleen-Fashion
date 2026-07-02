@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { QuickViewModal } from "../components/QuickViewModal";
 import { money } from "../lib/store";
-import type { Product, Service, Testimonial } from "../types/store";
+import type { Banner, Product, Service, Testimonial } from "../types/store";
 
 type HomePageProps = {
+  banners: Banner[];
   products: Product[];
   services: Service[];
   testimonials: Testimonial[];
@@ -22,100 +23,19 @@ type HomePageProps = {
   onShopCategory: (categoryId: string, query?: string) => void;
 };
 
-const categoryTiles = [
-  {
-    label: "Sand Polo",
-    categoryId: "men",
-    query: "sand",
-    image: "/products/product_06_website_square_1600.jpg",
-  },
-  {
-    label: "Ice Henley",
-    categoryId: "men",
-    query: "ice",
-    image: "/products/product_02_website_square_1600.jpg",
-  },
-  {
-    label: "Olive Polo",
-    categoryId: "men",
-    query: "olive",
-    image: "/products/product_04_website_square_1600.jpg",
-  },
-  {
-    label: "Side Edits",
-    categoryId: "men",
-    query: "easy",
-    image: "/products/product_05_website_square_1600.jpg",
-  },
-] as const;
+function productMatchesQuery(product: Product, query: string) {
+  const normalizedQuery = query.toLowerCase();
 
-const focusLinks = [
-  { label: "Textured Polos", categoryId: "men", query: "polo" },
-  { label: "Knit Henleys", categoryId: "men", query: "henley" },
-  { label: "Sale Picks", categoryId: "all", query: "sale" },
-] as const;
-
-const mustHaveTabs = [
-  { label: "Textured", categoryId: "men", query: "textured" },
-  { label: "Polo", categoryId: "men", query: "polo" },
-  { label: "Henley", categoryId: "men", query: "henley" },
-  { label: "Sale", categoryId: "all", query: "sale" },
-] as const;
-
-type MustHaveTab = (typeof mustHaveTabs)[number];
-
-const heroSlides = [
-  {
-    kicker: "New Arrival",
-    title: "Sand Textured Knit Polo",
-    subtitle: "Soft sand knit",
-    categoryId: "men",
-    query: "sand",
-    image: "/products/product_06_website_square_1600.jpg",
-  },
-  {
-    kicker: "New Arrival",
-    title: "Ice Textured Knit Henley",
-    subtitle: "Cool grey texture",
-    categoryId: "men",
-    query: "ice",
-    image: "/products/product_02_website_square_1600.jpg",
-  },
-  {
-    kicker: "Sale Edit",
-    title: "Olive Textured Knit Polo",
-    subtitle: "Deep olive finish",
-    categoryId: "men",
-    query: "olive",
-    image: "/products/product_04_website_square_1600.jpg",
-  },
-  {
-    kicker: "Detail View",
-    title: "Sand Knit Polo Side Edit",
-    subtitle: "Easy everyday fit",
-    categoryId: "men",
-    query: "sand",
-    image: "/products/product_01_website_square_1600.jpg",
-  },
-  {
-    kicker: "Fresh Drop",
-    title: "Ice Knit Henley Side Edit",
-    subtitle: "Airy knit profile",
-    categoryId: "men",
-    query: "henley",
-    image: "/products/product_03_website_square_1600.jpg",
-  },
-  {
-    kicker: "Selected Stock",
-    title: "Olive Knit Polo Side Edit",
-    subtitle: "Relaxed textured drape",
-    categoryId: "men",
-    query: "olive",
-    image: "/products/product_05_website_square_1600.jpg",
-  },
-] as const;
+  return (
+    product.slug.toLowerCase().includes(normalizedQuery) ||
+    product.title.toLowerCase().includes(normalizedQuery) ||
+    product.description.toLowerCase().includes(normalizedQuery) ||
+    product.tags.some((tag) => tag.toLowerCase().includes(normalizedQuery))
+  );
+}
 
 export function HomePage({
+  banners,
   products,
   services,
   testimonials,
@@ -129,47 +49,69 @@ export function HomePage({
 }: HomePageProps) {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
-  const [activeMustHaveTab, setActiveMustHaveTab] = useState<MustHaveTab>(mustHaveTabs[0]);
+  const [activeMustHaveProductId, setActiveMustHaveProductId] = useState("");
 
   const saleProducts = products
     .filter((product) => product.tags.includes("sale"))
     .slice(0, 4);
   const featuredProducts = products.slice(0, 8);
   const focusProducts = products
-    .filter((product) => product.categoryId === "men" || product.tags.includes("shirt"))
     .slice(0, 4);
-  const mustHaveProducts = useMemo(() => {
-    const query = activeMustHaveTab.query.toLowerCase();
-    const categoryId = activeMustHaveTab.categoryId;
+  const categoryTiles = useMemo(
+    () =>
+      products.slice(0, 4).map((product) => ({
+        label: product.title,
+        categoryId: product.categoryId,
+        query: product.slug,
+        image: product.image,
+      })),
+    [products],
+  );
+  const focusLinks = useMemo(() => {
+    const seen = new Set<string>();
 
     return products
       .filter((product) => {
-        const categoryMatch =
-          categoryId === "all" || product.categoryId === categoryId;
-        const queryMatch =
-          product.tags.some((tag) => tag.toLowerCase() === query) ||
-          product.title.toLowerCase().includes(query) ||
-          product.description.toLowerCase().includes(query) ||
-          product.categoryLabel.toLowerCase().includes(query) ||
-          product.fit.toLowerCase().includes(query) ||
-          product.material.toLowerCase().includes(query) ||
-          product.badge.toLowerCase().includes(query) ||
-          product.colors.some((color) => color.toLowerCase().includes(query));
-
-        return categoryMatch && queryMatch;
+        if (seen.has(product.categoryId)) return false;
+        seen.add(product.categoryId);
+        return true;
       })
+      .slice(0, 4)
+      .map((product) => ({
+        label: product.categoryLabel,
+        categoryId: product.categoryId,
+      }));
+  }, [products]);
+  const mustHaveTabs = useMemo(() => products.slice(0, 4), [products]);
+  const heroBanners = useMemo(
+    () => banners.filter((banner) => banner.image).slice(0, 6),
+    [banners],
+  );
+  const normalizedHeroSlide = heroBanners.length > 0 ? activeHeroSlide % heroBanners.length : 0;
+  const activeHeroBanner = heroBanners[normalizedHeroSlide] ?? null;
+  const activeMustHaveProduct =
+    mustHaveTabs.find((product) => product.id === activeMustHaveProductId) ??
+    mustHaveTabs[0] ??
+    null;
+  const mustHaveProducts = useMemo(() => {
+    if (!activeMustHaveProduct) return products.slice(0, 5);
+    const query = activeMustHaveProduct.slug.toLowerCase();
+
+    return products
+      .filter((product) => product.categoryId === activeMustHaveProduct.categoryId || productMatchesQuery(product, query))
       .slice(0, 5);
-  }, [activeMustHaveTab, products]);
+  }, [activeMustHaveProduct, products]);
   const saleRailProducts = saleProducts.length ? saleProducts : featuredProducts.slice(0, 4);
-  const activeSlide = heroSlides[activeHeroSlide];
 
   useEffect(() => {
+    if (heroBanners.length < 2) return undefined;
+
     const timer = window.setInterval(() => {
-      setActiveHeroSlide((current) => (current + 1) % heroSlides.length);
+      setActiveHeroSlide((current) => (current + 1) % heroBanners.length);
     }, 5200);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [heroBanners.length]);
 
   function renderProductTile(product: Product, index: number) {
     return (
@@ -236,45 +178,54 @@ export function HomePage({
         <div
           className="outfit-hero-slide-button"
         >
-          {heroSlides.map((slide, index) => (
+          {heroBanners.map((banner, index) => (
             <span
-              key={slide.title}
-              className={`outfit-hero-slide ${
-                index === activeHeroSlide ? "is-active" : ""
-              }`}
-              aria-hidden={index !== activeHeroSlide}
+              key={banner.id}
+              className={`outfit-hero-slide ${index === normalizedHeroSlide ? "is-active" : ""
+                }`}
+              aria-hidden={index !== normalizedHeroSlide}
             >
               <ImageWithFallback
-                src={slide.image}
+                src={banner.image}
                 alt=""
                 className="outfit-hero-image"
               />
             </span>
           ))}
           <span className="outfit-hero-scrim" />
-          <button
-            type="button"
-            className="outfit-hero-copy"
-            onClick={() => onShopCategory(activeSlide.categoryId, activeSlide.query)}
-          >
-            <small>{activeSlide.kicker}</small>
-            <span>{activeSlide.title}</span>
-            <p>{activeSlide.subtitle}</p>
-            <strong>Shop now</strong>
-          </button>
+          {activeHeroBanner ? (
+            <button
+              type="button"
+              className="outfit-hero-copy"
+              onClick={() => onShopCategory("all")}
+            >
+              <small>Featured Banner</small>
+              <span>{activeHeroBanner.title}</span>
+              {activeHeroBanner.description && <p>{activeHeroBanner.description}</p>}
+              <strong>Shop now</strong>
+            </button>
+          ) : (
+            <div className="outfit-hero-copy">
+              <small>Live Banners</small>
+              <span>Loading Slider</span>
+              <p>Banners from the API will appear here.</p>
+            </div>
+          )}
         </div>
 
-        <div className="outfit-hero-dots" aria-label="Hero slider controls">
-          {heroSlides.map((slide, index) => (
+        {heroBanners.length > 1 && (
+          <div className="outfit-hero-dots" aria-label="Hero slider controls">
+          {heroBanners.map((banner, index) => (
             <button
-              key={slide.title}
+              key={banner.id}
               type="button"
               onClick={() => setActiveHeroSlide(index)}
-              className={index === activeHeroSlide ? "is-active" : ""}
-              aria-label={`Show ${slide.title}`}
+              className={index === normalizedHeroSlide ? "is-active" : ""}
+              aria-label={`Show ${banner.title}`}
             />
           ))}
-        </div>
+          </div>
+        )}
 
       </section>
 
@@ -288,7 +239,7 @@ export function HomePage({
               className="outfit-category-tile reveal-up"
               style={{ animationDelay: `${90 + index * 70}ms` }}
             >
-              <img src={category.image} alt={category.label} />
+              <ImageWithFallback src={category.image} alt={category.label} />
               <span>{category.label}</span>
             </button>
           ))}
@@ -297,9 +248,9 @@ export function HomePage({
 
       <section className="outfit-focus-section">
         <div className="outfit-focus-image reveal-up">
-          <img
-            src="/products/product_03_website_square_1600.jpg"
-            alt="Textured knit polo feature"
+          <ImageWithFallback
+            src={focusProducts[0]?.image}
+            alt={focusProducts[0]?.title ?? "Featured product"}
           />
         </div>
         <div className="outfit-focus-content">
@@ -310,7 +261,7 @@ export function HomePage({
                 <button
                   key={link.label}
                   type="button"
-                  onClick={() => onShopCategory(link.categoryId, link.query)}
+                  onClick={() => onShopCategory(link.categoryId)}
                   className={index === 0 ? "is-active" : ""}
                 >
                   {link.label}
@@ -335,19 +286,19 @@ export function HomePage({
           <nav aria-label="Must-have categories">
             {mustHaveTabs.map((tab) => (
               <button
-                key={tab.label}
+                key={tab.id}
                 type="button"
-                onClick={() => setActiveMustHaveTab(tab)}
-                className={tab.label === activeMustHaveTab.label ? "is-active" : ""}
-                aria-pressed={tab.label === activeMustHaveTab.label}
+                onClick={() => setActiveMustHaveProductId(tab.id)}
+                className={tab.id === activeMustHaveProduct?.id ? "is-active" : ""}
+                aria-pressed={tab.id === activeMustHaveProduct?.id}
               >
-                {tab.label}
+                {tab.title}
               </button>
             ))}
           </nav>
         </div>
         {mustHaveProducts.length > 0 ? (
-          <div className="outfit-must-products" key={activeMustHaveTab.label}>
+          <div className="outfit-must-products" key={activeMustHaveProduct?.id ?? "all"}>
             {mustHaveProducts.map((product, index) => renderProductTile(product, index))}
           </div>
         ) : (

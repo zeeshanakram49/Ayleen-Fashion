@@ -5,12 +5,15 @@ type ImageWithFallbackProps = ImgHTMLAttributes<HTMLImageElement> & {
   fallbackSrc?: string;
 };
 
-const DEFAULT_FALLBACK_SRC = '/product-fallback.svg';
+const DEFAULT_FALLBACK_SRC = '';
 
 export function ImageWithFallback({
   src,
   fallbackSrc = DEFAULT_FALLBACK_SRC,
   onError,
+  alt,
+  className,
+  style,
   ...props
 }: ImageWithFallbackProps) {
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -26,5 +29,25 @@ export function ImageWithFallback({
     onError?.(event);
   }
 
-  return <img {...props} src={currentSrc} onError={handleError} />;
+  if (!currentSrc) {
+    return (
+      <span
+        className={`image-placeholder ${className ?? ''}`}
+        role={alt ? 'img' : undefined}
+        aria-label={alt}
+        style={style}
+      />
+    );
+  }
+
+  return (
+    <img
+      {...props}
+      alt={alt}
+      className={className}
+      style={style}
+      src={currentSrc}
+      onError={handleError}
+    />
+  );
 }

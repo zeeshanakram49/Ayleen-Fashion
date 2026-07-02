@@ -111,26 +111,14 @@ export function PaymentProcessingPage({ orderId }: PaymentProcessingPageProps) {
     };
   }, [orderId, attempts]);
 
+  const progressPercent = Math.min((attempts / 30) * 100, 100);
+
   return (
     <section className="mx-auto max-w-2xl px-5 py-20 text-center sm:px-6 md:py-28">
-      <div className="reveal-up is-visible flex flex-col items-center">
+      <div className="page-fade-in flex flex-col items-center">
         {/* Animated premium concentric spinner */}
-        <div className="relative flex h-24 w-24 items-center justify-center">
-          <div className="absolute h-full w-full rounded-full border-4 border-[var(--line)] border-t-[var(--gold-deep)] animate-spin"></div>
-          <div className="absolute h-16 w-16 rounded-full border-4 border-[var(--line)] border-b-[var(--ink)] animate-spin-reverse"></div>
-          <svg
-            className="h-6 w-6 text-[var(--gold-deep)]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            />
-          </svg>
+        <div className="payment-spinner">
+          <div className="payment-spinner-inner"></div>
         </div>
 
         <p className="mt-8 text-xs font-semibold tracking-[0.3em] text-[var(--gold-deep)] uppercase">
@@ -142,6 +130,19 @@ export function PaymentProcessingPage({ orderId }: PaymentProcessingPageProps) {
         <p className="mt-4 max-w-md text-sm leading-relaxed text-[var(--muted)]">
           {message}
         </p>
+
+        {/* Progress bar */}
+        <div className="mt-8 w-full max-w-xs">
+          <div className="loading-bar">
+            <div
+              className="loading-bar__fill"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <p className="mt-2 text-[10px] tracking-[0.16em] text-[var(--muted)] uppercase">
+            {attempts > 0 ? `Attempt ${attempts} of 30` : "Starting verification..."}
+          </p>
+        </div>
 
         <div className="mt-12 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--panel)] p-5 text-xs text-[var(--muted)]">
           <p className="font-semibold text-[var(--ink)]">IMPORTANT NOTES:</p>

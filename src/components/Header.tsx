@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type WheelEvent } from "react";
-import type { Route } from "../types/store";
+import { ImageWithFallback } from "./ImageWithFallback";
+import type { Category, Route } from "../types/store";
 import { APP_ROUTES } from "../routes/appRoutes";
 import { getHashUrl } from "../routes/routeUtils";
 
@@ -10,6 +11,7 @@ type HeaderProps = {
   activeQuery: string;
   wishlistCount: number;
   cartCount: number;
+  categories: Category[];
   onOpenCart: () => void;
   onShopCategory: (categoryId: string, query?: string) => void;
 };
@@ -25,7 +27,6 @@ type DesktopLink = {
   label: string;
   categoryId: string;
   query?: string;
-  hero: string;
   title: string;
   items: MegaMenuItem[];
 };
@@ -36,7 +37,6 @@ const desktopLinks: DesktopLink[] = [
     label: "MEN",
     categoryId: "men",
     query: "polo",
-    hero: "/products/product_01_website_square_1600.jpg",
     title: "MEN",
     items: [
       { label: "TEXTURED POLOS", categoryId: "men", query: "polo" },
@@ -53,7 +53,6 @@ const desktopLinks: DesktopLink[] = [
     label: "SALE",
     categoryId: "all",
     query: "sale",
-    hero: "/products/product_04_website_square_1600.jpg",
     title: "SALE",
     items: [
       { label: "TEXTURED POLO SALE", categoryId: "all", query: "sale" },
@@ -105,6 +104,7 @@ export function Header({
   activeQuery,
   wishlistCount,
   cartCount,
+  categories,
   onOpenCart,
   onShopCategory,
 }: HeaderProps) {
@@ -181,6 +181,10 @@ export function Header({
 
   const activeDesktopMenu =
     desktopLinks.find((link) => link.id === activeMenu) ?? null;
+  const activeDesktopCategory =
+    activeDesktopMenu?.categoryId === "all"
+      ? categories.find((category) => category.image) ?? categories[0]
+      : categories.find((category) => category.id === activeDesktopMenu?.categoryId);
 
   return (
     <header
@@ -306,8 +310,8 @@ export function Header({
                 }}
                 className="site-mega-preview"
               >
-                <img
-                  src={activeDesktopMenu.hero}
+                <ImageWithFallback
+                  src={activeDesktopCategory?.image}
                   alt={activeDesktopMenu.title}
                   className="site-mega-preview-image"
                 />

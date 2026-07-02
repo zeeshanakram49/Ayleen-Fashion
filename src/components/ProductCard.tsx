@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ImageWithFallback } from "./ImageWithFallback";
 import type { Product } from "../types/store";
 import { discountPercent, installmentAmount, money } from "../lib/store";
@@ -34,6 +35,13 @@ export function ProductCard({
 }: ProductCardProps) {
   const salePercent = discountPercent(product.price, product.oldPrice);
   const isCatalog = variant === "catalog";
+  const [heartPop, setHeartPop] = useState(false);
+
+  function handleWishlistClick() {
+    setHeartPop(true);
+    onToggleWishlist(product.id);
+    setTimeout(() => setHeartPop(false), 450);
+  }
   const swatches = product.colors.slice(0, 3).map((color) => ({
     label: color,
     value: colorToSwatch(color),
@@ -60,9 +68,9 @@ export function ProductCard({
 
           <button
             type="button"
-            onClick={() => onToggleWishlist(product.id)}
+            onClick={handleWishlistClick}
             aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
-            className="catalog-heart-button"
+            className={`catalog-heart-button ${liked ? "heart-saved" : ""} ${heartPop ? "heart-pop" : ""}`}
           >
             {liked ? "♥" : "♡"}
           </button>
@@ -70,7 +78,7 @@ export function ProductCard({
           <button
             type="button"
             onClick={() => onAddToCart(product.id, pickedSize, true)}
-            className="catalog-product-quickview"
+            className="catalog-product-quickview btn-ripple"
           >
             Add to Basket
           </button>
@@ -147,10 +155,10 @@ export function ProductCard({
 
         <button
           type="button"
-          onClick={() => onToggleWishlist(product.id)}
-          className="absolute right-3 top-3 rounded-[var(--radius-sm)] border border-white/70 bg-white/20 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur"
+          onClick={handleWishlistClick}
+          className={`absolute right-3 top-3 rounded-[var(--radius-sm)] border border-white/70 bg-white/20 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur transition-all ${liked ? "bg-white/90 text-[var(--ink)]" : ""} ${heartPop ? "heart-pop" : ""}`}
         >
-          {liked ? "SAVED" : "SAVE"}
+          {liked ? "♥ SAVED" : "♡ SAVE"}
         </button>
       </div>
 
@@ -231,9 +239,9 @@ export function ProductCard({
                   key={size}
                   type="button"
                   onClick={() => onPickSize(product.id, size)}
-                  className={`px-3 py-1.5 text-[10px] font-semibold tracking-[0.14em] transition ${
+                  className={`size-chip px-3 py-1.5 text-[10px] font-semibold tracking-[0.14em] ${
                     pickedSize === size
-                      ? "rounded-[var(--radius-sm)] bg-[var(--ink)] text-[var(--paper)]"
+                      ? "is-selected rounded-[var(--radius-sm)] bg-[var(--ink)] text-[var(--paper)]"
                       : "rounded-[var(--radius-sm)] border border-[var(--line-strong)] hover:border-[var(--gold-deep)]"
                   }`}
                 >

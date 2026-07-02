@@ -11,6 +11,7 @@ export const API_ROUTES = {
   catalog: {
     products: "/api/products",
     categories: "/api/categories",
+    banners: "/api/banners",
     productBySlug: (slug: string) => `/api/products/${slug}`,
     search: "/api/products/search",
     featured: "/api/products/featured",
@@ -50,3 +51,5 @@ export const API_ROUTES = {
     paymentStatus: (orderId: string) => `/api/payments/status/${orderId}`,
   },
 };
+
+

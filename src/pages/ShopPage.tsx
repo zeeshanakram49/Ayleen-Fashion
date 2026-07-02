@@ -367,7 +367,7 @@ export function ShopPage({
           <article className="shop-empty-state reveal-up is-visible">
             <span className="shop-empty-state__eyebrow">Catalog notice</span>
             <h2 className="font-editorial">Live catalog is unavailable</h2>
-            <p>{errorMessage} Saved products are shown so shopping can continue.</p>
+            <p>{errorMessage}</p>
             {onRetryCatalog && (
               <button type="button" onClick={onRetryCatalog}>
                 Retry catalog

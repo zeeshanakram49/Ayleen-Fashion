@@ -22,7 +22,7 @@ export function OrderFailedPage({
 
   return (
     <section className="mx-auto max-w-2xl px-5 py-16 sm:px-6 md:py-20 lg:py-24">
-      <article className="reveal-up is-visible text-center">
+      <article className="page-slide-up text-center">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/50">
           <svg
             className="h-9 w-9"
