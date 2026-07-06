@@ -453,7 +453,7 @@ function mapRawProduct(
     Math.round(firstFiniteNumber(raw.reviews, raw.review_count, raw.total_reviews, 0) ?? 0),
   );
 
-  return {
+  const product = {
     id: firstNonEmptyString(raw.id, raw.product_id, slugify(title)),
     slug: slugify(firstNonEmptyString(raw.slug, title, raw.id)) || slugify(title),
     title,
@@ -475,6 +475,8 @@ function mapRawProduct(
     rating,
     reviews,
   };
+
+  return product;
 }
 
 export function mapApiProduct(raw: RawProduct): Product {

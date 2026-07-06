@@ -28,7 +28,23 @@ type ShopPageProps = {
   onRetryCatalog?: () => void;
 };
 
-const collectionTabs = [
+const POLO_SUB_TABS = [
+  { label: "All", query: "" },
+  { label: "Basics", query: "basics" },
+  { label: "Textured", query: "textured" },
+  { label: "Knit", query: "knit" },
+  { label: "Solids", query: "solids" },
+] as const;
+
+const TSHIRT_SUB_TABS = [
+  { label: "All", query: "" },
+  { label: "Basics", query: "basics" },
+  { label: "Textured", query: "textured" },
+  { label: "Graphics", query: "graphics" },
+  { label: "Solids", query: "solids" },
+] as const;
+
+const DEFAULT_SUB_TABS = [
   { label: "All", query: "" },
   { label: "Textured", query: "textured" },
   { label: "Polo", query: "polo" },
@@ -118,6 +134,35 @@ export function ShopPage({
   const pageRef = useRef<HTMLElement | null>(null);
   const [gridLayout, setGridLayout] = useState<GridLayout>("quad");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeSubFilter, setActiveSubFilter] = useState("");
+
+  const activeProductType = useMemo(() => {
+    const q = query.toLowerCase();
+    if (q.includes("polo")) return "polo";
+    if (
+      q.includes("t-shirt") ||
+      q.includes("t shirt") ||
+      q.includes("tee") ||
+      q.includes("v-neck")
+    )
+      return "t-shirt";
+    return "all";
+  }, [query]);
+
+  const [prevQuery, setPrevQuery] = useState(query);
+  const [prevCategory, setPrevCategory] = useState(activeCategory);
+
+  if (query !== prevQuery || activeCategory !== prevCategory) {
+    setPrevQuery(query);
+    setPrevCategory(activeCategory);
+    setActiveSubFilter("");
+  }
+
+  const subTabs = useMemo(() => {
+    if (activeProductType === "polo") return POLO_SUB_TABS;
+    if (activeProductType === "t-shirt") return TSHIRT_SUB_TABS;
+    return DEFAULT_SUB_TABS;
+  }, [activeProductType]);
 
   const activeCategoryData = useMemo(
     () => categories.find((category) => category.id === activeCategory) ?? null,
@@ -127,16 +172,35 @@ export function ShopPage({
     () => sortOptions.find((option) => option.value === sortBy)?.label ?? "Featured",
     [sortBy],
   );
+
+  const displayedProducts = useMemo(() => {
+    if (!activeSubFilter) return products;
+    const cleanFilter = activeSubFilter.toLowerCase();
+    return products.filter((product) => {
+      return (
+        product.title.toLowerCase().includes(cleanFilter) ||
+        product.description.toLowerCase().includes(cleanFilter) ||
+        product.categoryLabel.toLowerCase().includes(cleanFilter) ||
+        product.fit.toLowerCase().includes(cleanFilter) ||
+        product.material.toLowerCase().includes(cleanFilter) ||
+        product.badge.toLowerCase().includes(cleanFilter) ||
+        product.colors.some((color) => color.toLowerCase().includes(cleanFilter)) ||
+        product.tags.some((tag) => tag.toLowerCase().includes(cleanFilter))
+      );
+    });
+  }, [products, activeSubFilter]);
+
   const priceRange = useMemo(() => {
-    if (products.length === 0) return null;
-    const prices = products.map((product) => product.price);
+    if (displayedProducts.length === 0) return null;
+    const prices = displayedProducts.map((product) => product.price);
     return `${money(Math.min(...prices))} - ${money(Math.max(...prices))}`;
-  }, [products]);
+  }, [displayedProducts]);
+
   const paletteCount = useMemo(() => {
     return new Set(
-      products.flatMap((product) => product.colors.map((color) => color.toLowerCase())),
+      displayedProducts.flatMap((product) => product.colors.map((color) => color.toLowerCase())),
     ).size;
-  }, [products]);
+  }, [displayedProducts]);
 
   useEffect(() => {
     const cards = pageRef.current?.querySelectorAll<HTMLElement>(".product-card.reveal-up");
@@ -146,7 +210,7 @@ export function ShopPage({
       card.style.setProperty("--section-stagger", `${Math.min(index * 60, 360)}ms`);
       card.classList.add("is-visible");
     });
-  }, [products]);
+  }, [displayedProducts]);
 
   const gridClass =
     gridLayout === "single"
@@ -155,11 +219,44 @@ export function ShopPage({
         ? "shop-product-grid--double"
         : "shop-product-grid--quad";
 
-  const collectionTitle = activeCategoryData
-    ? `${activeCategoryData.name} Knit Edit`
-    : "All Collections";
+  const collectionTitle = useMemo(() => {
+    if (activeCategoryData) {
+      return `${activeCategoryData.name} Knit Edit`;
+    }
+    if (query) {
+      const cleanType =
+        activeProductType === "polo"
+          ? "Polo"
+          : activeProductType === "t-shirt"
+            ? "T-Shirt"
+            : query;
+      const formatted = cleanType.replace(/(^\w|\s\w)/g, (match) => match.toUpperCase());
+      return `${formatted} Knit Edit`;
+    }
+    return "All Collections";
+  }, [activeCategoryData, query, activeProductType]);
+
+  const breadcrumbTitle = useMemo(() => {
+    if (activeCategoryData) {
+      return activeCategoryData.name;
+    }
+    if (query) {
+      const cleanType =
+        activeProductType === "polo"
+          ? "Polo"
+          : activeProductType === "t-shirt"
+            ? "T-Shirt"
+            : query;
+      return cleanType.replace(/(^\w|\s\w)/g, (match) => match.toUpperCase());
+    }
+    return "All Collections";
+  }, [activeCategoryData, query, activeProductType]);
+
   const hasActiveFilters =
-    activeCategory !== "all" || query.trim().length > 0 || sortBy !== "featured";
+    activeCategory !== "all" ||
+    query.trim().length > 0 ||
+    sortBy !== "featured" ||
+    activeSubFilter !== "";
 
   return (
     <section ref={pageRef} className="shop-page">
@@ -171,7 +268,7 @@ export function ShopPage({
               <span>/</span>
               <span>{activeCategoryData?.name ?? "Collections"}</span>
               <span>/</span>
-              <strong>{query ? query.replace(/(^\w|\s\w)/g, (match) => match.toUpperCase()) : collectionTitle}</strong>
+              <strong>{breadcrumbTitle}</strong>
             </nav>
 
             <h1 className="shop-header__title">{collectionTitle}</h1>
@@ -196,7 +293,7 @@ export function ShopPage({
             </label>
 
             <div className="shop-header__meta">
-              <span>{products.length} Items</span>
+              <span>{displayedProducts.length} Items</span>
               {priceRange && <span>{priceRange}</span>}
               <span>{paletteCount} Colors</span>
             </div>
@@ -205,18 +302,33 @@ export function ShopPage({
 
         <section className="shop-collection-bar reveal-up" aria-label="Collection controls">
           <nav className="shop-tabs" aria-label="Collection tags">
-            {collectionTabs.map((tab) => {
-              const active = query === tab.query || (!query && tab.query === "");
+            {subTabs.map((tab) => {
+              const active =
+                activeSubFilter === tab.query ||
+                (activeSubFilter === "" && tab.query === "");
               return (
                 <button
                   key={tab.label}
                   type="button"
                   className={active ? "is-active" : ""}
                   onClick={() => {
-                    if (tab.query && activeCategory === "all" && categories[0]) {
-                      onCategoryChange(categories[0].id);
+                    if (tab.query === "") {
+                      setActiveSubFilter("");
+                      if (activeProductType === "all") {
+                        onQueryChange("");
+                      }
+                      return;
                     }
-                    onQueryChange(tab.query);
+
+                    if (activeProductType === "all") {
+                      if (tab.query === "polo" || tab.query === "henley") {
+                        onQueryChange(tab.query);
+                      } else {
+                        setActiveSubFilter(tab.query);
+                      }
+                    } else {
+                      setActiveSubFilter(tab.query);
+                    }
                   }}
                 >
                   {tab.label}
@@ -327,7 +439,7 @@ export function ShopPage({
         )}
 
         <div className="shop-results-strip reveal-up">
-          <p>{products.length} products available</p>
+          <p>{displayedProducts.length} products available</p>
           <p>Sorted by {sortLabel.toLowerCase()}</p>
         </div>
 
@@ -349,6 +461,11 @@ export function ShopPage({
                 {sortLabel}
               </button>
             )}
+            {activeSubFilter !== "" && (
+              <button type="button" onClick={() => setActiveSubFilter("")}>
+                {activeSubFilter.charAt(0).toUpperCase() + activeSubFilter.slice(1)}
+              </button>
+            )}
             <button
               type="button"
               className="shop-active-filters__reset"
@@ -356,6 +473,7 @@ export function ShopPage({
                 onCategoryChange("all");
                 onQueryChange("");
                 onSortChange("featured");
+                setActiveSubFilter("");
               }}
             >
               Reset
@@ -385,25 +503,32 @@ export function ShopPage({
               />
             ))}
           </div>
-        ) : products.length === 0 ? (
+        ) : displayedProducts.length === 0 ? (
           <article className="shop-empty-state reveal-up is-visible">
             <span className="shop-empty-state__eyebrow">No match yet</span>
-            <h2 className="font-editorial">We could not find products for this edit</h2>
-            <p>Try another keyword or clear the current category and sorting filters.</p>
+            <h2 className="font-editorial">We could not find products</h2>
+            <p>
+              {products.length === 0
+                ? "Try another keyword or clear the current category and sorting filters."
+                : "No products match the selected sub-filter. Try selecting 'All' or a different sub-tab."}
+            </p>
             <button
               type="button"
               onClick={() => {
-                onCategoryChange("all");
-                onQueryChange("");
-                onSortChange("featured");
+                if (products.length === 0) {
+                  onCategoryChange("all");
+                  onQueryChange("");
+                  onSortChange("featured");
+                }
+                setActiveSubFilter("");
               }}
             >
-              Reset filters
+              {products.length === 0 ? "Reset filters" : "Reset sub-filter"}
             </button>
           </article>
         ) : (
           <div className={`shop-product-grid ${gridClass}`}>
-            {products.map((product, index) => (
+            {displayedProducts.map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}

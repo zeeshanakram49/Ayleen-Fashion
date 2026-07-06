@@ -59,7 +59,8 @@ export function HomePage({
     .slice(0, 4);
   const categoryTiles = useMemo(
     () =>
-      products.slice(0, 4).map((product) => ({
+      products.map((product) => ({
+        id: product.id,
         label: product.title,
         categoryId: product.categoryId,
         query: product.slug,
@@ -98,7 +99,16 @@ export function HomePage({
     const query = activeMustHaveProduct.slug.toLowerCase();
 
     return products
-      .filter((product) => product.categoryId === activeMustHaveProduct.categoryId || productMatchesQuery(product, query))
+      .filter((product) => {
+        const activeTitleWords = activeMustHaveProduct.title.toLowerCase().split(/\s+/).filter((w) => w.length > 1);
+        const matchesType = activeTitleWords.some(
+          (word) =>
+            product.title.toLowerCase().includes(word) ||
+            product.slug.toLowerCase().includes(word) ||
+            product.tags.includes(word),
+        );
+        return matchesType || productMatchesQuery(product, query);
+      })
       .slice(0, 5);
   }, [activeMustHaveProduct, products]);
   const saleRailProducts = saleProducts.length ? saleProducts : featuredProducts.slice(0, 4);
@@ -117,7 +127,7 @@ export function HomePage({
     return (
       <article
         key={product.id}
-        className="group outfit-product-tile reveal-up"
+        className="group outfit-product-tile reveal-up is-visible"
         style={{ animationDelay: `${70 + index * 70}ms` }}
       >
         <div className="outfit-product-media">
@@ -215,15 +225,15 @@ export function HomePage({
 
         {heroBanners.length > 1 && (
           <div className="outfit-hero-dots" aria-label="Hero slider controls">
-          {heroBanners.map((banner, index) => (
-            <button
-              key={banner.id}
-              type="button"
-              onClick={() => setActiveHeroSlide(index)}
-              className={index === normalizedHeroSlide ? "is-active" : ""}
-              aria-label={`Show ${banner.title}`}
-            />
-          ))}
+            {heroBanners.map((banner, index) => (
+              <button
+                key={banner.id}
+                type="button"
+                onClick={() => setActiveHeroSlide(index)}
+                className={index === normalizedHeroSlide ? "is-active" : ""}
+                aria-label={`Show ${banner.title}`}
+              />
+            ))}
           </div>
         )}
 
@@ -233,7 +243,7 @@ export function HomePage({
         <div className="outfit-home-category-scroll">
           {categoryTiles.map((category, index) => (
             <button
-              key={category.label}
+              key={category.id}
               type="button"
               onClick={() => onShopCategory(category.categoryId, category.query)}
               className="outfit-category-tile reveal-up"
@@ -259,7 +269,7 @@ export function HomePage({
             <nav aria-label="Categories in focus">
               {focusLinks.map((link, index) => (
                 <button
-                  key={link.label}
+                  key={link.categoryId}
                   type="button"
                   onClick={() => onShopCategory(link.categoryId)}
                   className={index === 0 ? "is-active" : ""}
