@@ -15,6 +15,9 @@ export const API_ROUTES = {
     productBySlug: (slug: string) => `/api/products/${slug}`,
     search: "/api/products/search",
     featured: "/api/products/featured",
+    focus: "/api/products/section/focus",
+    mustHaves: "/api/products/section/must-haves",
+    saleEssentials: "/api/products/section/sale-essentials",
   },
 
   wishlist: {

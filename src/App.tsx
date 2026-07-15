@@ -11,7 +11,10 @@ import {
   fetchBanners,
   fetchCatalog,
   fetchFavoriteProductIds,
+  fetchFocusProducts,
+  fetchMustHavesProducts,
   fetchProductDetail,
+  fetchSaleEssentialsProducts,
   removeFavoriteProduct,
 } from "./api/storeApi";
 import { CartDrawer } from "./components/CartDrawer";
@@ -97,6 +100,9 @@ function App() {
   const [route, setRoute] = useState<Route>(() => parseHash());
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [focusProducts, setFocusProducts] = useState<Product[]>([]);
+  const [mustHavesProducts, setMustHavesProducts] = useState<Product[]>([]);
+  const [saleEssentialsProducts, setSaleEssentialsProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState("");
@@ -125,17 +131,28 @@ function App() {
     setCatalogError("");
 
     try {
-      const nextCatalog = await fetchCatalog();
+      const [nextCatalog, focusData, mustHavesData, saleEssentialsData] = await Promise.all([
+        fetchCatalog(),
+        fetchFocusProducts().catch(() => []),
+        fetchMustHavesProducts().catch(() => []),
+        fetchSaleEssentialsProducts().catch(() => []),
+      ]);
       if (control?.cancelled) return;
 
       setCategories(nextCatalog.categories);
       setProducts(nextCatalog.products);
+      setFocusProducts(focusData);
+      setMustHavesProducts(mustHavesData);
+      setSaleEssentialsProducts(saleEssentialsData);
     } catch (error) {
       if (control?.cancelled) return;
 
       const message = getApiErrorMessage(error);
       setCategories([]);
       setProducts([]);
+      setFocusProducts([]);
+      setMustHavesProducts([]);
+      setSaleEssentialsProducts([]);
       setCatalogError(message);
       setNotice({
         kind: "info",
@@ -848,6 +865,9 @@ function App() {
             categories={categories}
             banners={banners}
             products={products}
+            focusProducts={focusProducts}
+            mustHavesProducts={mustHavesProducts}
+            saleEssentialsProducts={saleEssentialsProducts}
             services={services}
             testimonials={testimonials}
             wishlist={wishlist}

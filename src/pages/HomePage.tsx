@@ -8,6 +8,9 @@ type HomePageProps = {
   categories: Category[];
   banners: Banner[];
   products: Product[];
+  focusProducts?: Product[];
+  mustHavesProducts?: Product[];
+  saleEssentialsProducts?: Product[];
   services: Service[];
   testimonials: Testimonial[];
   wishlist: string[];
@@ -39,6 +42,9 @@ export function HomePage({
   categories,
   banners,
   products,
+  focusProducts = [],
+  mustHavesProducts = [],
+  saleEssentialsProducts = [],
   services,
   testimonials,
   wishlist,
@@ -52,42 +58,63 @@ export function HomePage({
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [activeMustHaveProductId, setActiveMustHaveProductId] = useState("");
+  const [activeFocusProductId, setActiveFocusProductId] = useState("");
+  const [selectedFocusImage, setSelectedFocusImage] = useState<string | null>(null);
 
-  const saleProducts = products
-    .filter((product) => product.tags.includes("sale"))
-    .slice(0, 4);
-  const featuredProducts = products.slice(0, 8);
-  const focusProducts = products
-    .slice(0, 4);
+  const finalFocusProducts = useMemo(() => {
+    return focusProducts.length > 0 ? focusProducts : products.slice(0, 4);
+  }, [focusProducts, products]);
+
+  const activeFocusProduct = useMemo(() => {
+    return (
+      finalFocusProducts.find((p) => p.id === activeFocusProductId) ??
+      finalFocusProducts[0] ??
+      null
+    );
+  }, [finalFocusProducts, activeFocusProductId]);
+
+  useEffect(() => {
+    setSelectedFocusImage(null);
+  }, [activeFocusProduct?.id]);
+
+  const finalMustHavesProducts = useMemo(() => {
+    return mustHavesProducts.length > 0 ? mustHavesProducts : products;
+  }, [mustHavesProducts, products]);
+
+  const finalSaleEssentialsProducts = useMemo(() => {
+    return saleEssentialsProducts.length > 0
+      ? saleEssentialsProducts
+      : products.filter((product) => product.tags.includes("sale"));
+  }, [saleEssentialsProducts, products]);
+
+  const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
+
   const parentCategories = useMemo(() => {
     return categories.filter((category) => category.isParent === true);
   }, [categories]);
-  const focusLinks = useMemo(() => {
-    const seen = new Set<string>();
 
-    return products
-      .filter((product) => {
-        if (seen.has(product.categoryId)) return false;
-        seen.add(product.categoryId);
-        return true;
-      })
-      .slice(0, 4)
-      .map((product) => ({
-        label: product.categoryLabel,
-        categoryId: product.categoryId,
-      }));
-  }, [products]);
-  const mustHaveTabs = useMemo(() => products.slice(0, 4), [products]);
+  const focusLinks = useMemo(() => {
+    return finalFocusProducts.map((product) => ({
+      label: product.title,
+      productId: product.id,
+    }));
+  }, [finalFocusProducts]);
+
+  const mustHaveTabs = useMemo(() => finalMustHavesProducts.slice(0, 4), [finalMustHavesProducts]);
+
   const heroBanners = useMemo(
     () => banners.filter((banner) => banner.image).slice(0, 6),
     [banners],
   );
+
   const normalizedHeroSlide = heroBanners.length > 0 ? activeHeroSlide % heroBanners.length : 0;
   const activeHeroBanner = heroBanners[normalizedHeroSlide] ?? null;
+
   const activeMustHaveProduct =
     mustHaveTabs.find((product) => product.id === activeMustHaveProductId) ??
     mustHaveTabs[0] ??
     null;
+
   const mustHaveProducts = useMemo(() => {
     if (!activeMustHaveProduct) return products.slice(0, 5);
     const query = activeMustHaveProduct.slug.toLowerCase();
@@ -105,7 +132,11 @@ export function HomePage({
       })
       .slice(0, 5);
   }, [activeMustHaveProduct, products]);
-  const saleRailProducts = saleProducts.length ? saleProducts : featuredProducts.slice(0, 4);
+
+  const saleRailProducts = useMemo(() => {
+    const list = finalSaleEssentialsProducts.slice(0, 4);
+    return list.length ? list : featuredProducts.slice(0, 4);
+  }, [finalSaleEssentialsProducts, featuredProducts]);
 
   useEffect(() => {
     if (heroBanners.length < 2) return undefined;
@@ -253,20 +284,20 @@ export function HomePage({
       <section className="outfit-focus-section">
         <div className="outfit-focus-image reveal-up">
           <ImageWithFallback
-            src={focusProducts[0]?.image}
-            alt={focusProducts[0]?.title ?? "Featured product"}
+            src={selectedFocusImage ?? activeFocusProduct?.image}
+            alt={activeFocusProduct?.title ?? "Featured product"}
           />
         </div>
         <div className="outfit-focus-content">
           <div className="outfit-focus-copy reveal-up">
             <h2>Categories in Focus</h2>
             <nav aria-label="Categories in focus">
-              {focusLinks.map((link, index) => (
+              {focusLinks.map((link) => (
                 <button
-                  key={link.categoryId}
+                  key={link.productId}
                   type="button"
-                  onClick={() => onShopCategory(link.categoryId)}
-                  className={index === 0 ? "is-active" : ""}
+                  onClick={() => setActiveFocusProductId(link.productId)}
+                  className={link.productId === activeFocusProduct?.id ? "is-active" : ""}
                 >
                   {link.label}
                 </button>
@@ -274,7 +305,32 @@ export function HomePage({
             </nav>
           </div>
           <div className="outfit-focus-products">
-            {focusProducts.map((product, index) => renderProductTile(product, index))}
+            {activeFocusProduct?.gallery.map((img, index) => {
+              const isActive = selectedFocusImage === img || (!selectedFocusImage && img === activeFocusProduct.image);
+              return (
+                <article
+                  key={`${activeFocusProduct.id}-img-${index}`}
+                  className={`group outfit-product-tile focus-gallery-card reveal-up is-visible cursor-pointer ${isActive ? "is-active" : ""}`}
+                  style={{ 
+                    animationDelay: `${70 + index * 70}ms`,
+                  }}
+                >
+                  <div className="outfit-product-media">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFocusImage(img)}
+                      className="block h-full w-full"
+                    >
+                      <ImageWithFallback
+                        src={img}
+                        alt={`${activeFocusProduct.title} view ${index + 1}`}
+                        className="outfit-product-image w-full object-cover"
+                      />
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>

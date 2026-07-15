@@ -1026,18 +1026,38 @@ textarea:focus-visible {
 
 .outfit-focus-products {
   display: grid;
-  grid-template-columns: repeat(4, minmax(170px, 1fr));
-  gap: clamp(0.75rem, 1vw, 1rem);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 1fr);
+  grid-template-columns: none;
+  gap: clamp(0.75rem, 1vw, 1.25rem);
   overflow-x: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  padding-bottom: 0.8rem;
 }
 
 .outfit-focus-products::-webkit-scrollbar {
-  display: none;
+  display: block;
+  height: 4px;
 }
 
-.outfit-focus-products .outfit-product-image {
-  height: clamp(15.5rem, 20vw, 22.5rem);
+.outfit-focus-products::-webkit-scrollbar-track {
+  background: #f5f5f1;
+  border-radius: 2px;
+}
+
+.outfit-focus-products::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.focus-gallery-card {
+  border: 2px solid transparent;
+  transition: border-color 220ms var(--ease-premium);
+}
+
+.focus-gallery-card.is-active {
+  border-color: var(--ink, #111);
 }
 
 .outfit-must-section,
@@ -2617,7 +2637,17 @@ textarea:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .outfit-focus-products,
+  .outfit-focus-products {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(210px, 30vw);
+    grid-template-columns: none;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+  }
+
   .outfit-must-products {
     grid-auto-flow: column;
     grid-auto-columns: minmax(210px, 30vw);

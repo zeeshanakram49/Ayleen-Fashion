@@ -27,3 +27,19 @@ export async function fetchFeaturedProductsApi(): Promise<ApiResponse<Product[]>
   const response = await axiosClient.get(API_ROUTES.catalog.featured);
   return response.data;
 }
+
+export async function fetchFocusProductsApi(): Promise<ApiResponse<Product[]>> {
+  const response = await axiosClient.get(API_ROUTES.catalog.focus);
+  return response.data;
+}
+
+export async function fetchMustHavesProductsApi(): Promise<ApiResponse<Product[]>> {
+  const response = await axiosClient.get(API_ROUTES.catalog.mustHaves);
+  return response.data;
+}
+
+export async function fetchSaleEssentialsProductsApi(): Promise<ApiResponse<Product[]>> {
+  const response = await axiosClient.get(API_ROUTES.catalog.saleEssentials);
+  return response.data;
+}
+

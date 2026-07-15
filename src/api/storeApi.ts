@@ -95,6 +95,11 @@ function normalizeImageUrl(value: string): string {
   const absoluteBase = "http://admin.aylee.store";
   let path = value;
 
+  if (path.startsWith("uploads/") || path.startsWith("/uploads/")) {
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${absoluteBase}${cleanPath}`;
+  }
+
   if (!path.startsWith("storage/") && !path.startsWith("/storage/")) {
     path = path.startsWith("/") ? `/storage${path}` : `/storage/${path}`;
   } else {
@@ -622,3 +627,22 @@ export async function removeFavoriteProduct(productId: string): Promise<unknown>
   const response = await axiosClient.post(API_ROUTES.wishlist.legacyRemove, formData);
   return response.data;
 }
+
+export async function fetchFocusProducts(): Promise<Product[]> {
+  const response = await axiosClient.get(API_ROUTES.catalog.focus);
+  const rawProducts = extractListData<RawProduct>(response.data);
+  return rawProducts.map((rawProduct) => mapApiProduct(rawProduct));
+}
+
+export async function fetchMustHavesProducts(): Promise<Product[]> {
+  const response = await axiosClient.get(API_ROUTES.catalog.mustHaves);
+  const rawProducts = extractListData<RawProduct>(response.data);
+  return rawProducts.map((rawProduct) => mapApiProduct(rawProduct));
+}
+
+export async function fetchSaleEssentialsProducts(): Promise<Product[]> {
+  const response = await axiosClient.get(API_ROUTES.catalog.saleEssentials);
+  const rawProducts = extractListData<RawProduct>(response.data);
+  return rawProducts.map((rawProduct) => mapApiProduct(rawProduct));
+}
+
