@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import { QuickViewModal } from "../components/QuickViewModal";
 import { money } from "../lib/store";
-import type { Banner, Product, Service, Testimonial } from "../types/store";
+import type { Banner, Category, Product, Service, Testimonial } from "../types/store";
 
 type HomePageProps = {
+  categories: Category[];
   banners: Banner[];
   products: Product[];
   services: Service[];
@@ -35,6 +36,7 @@ function productMatchesQuery(product: Product, query: string) {
 }
 
 export function HomePage({
+  categories,
   banners,
   products,
   services,
@@ -57,17 +59,9 @@ export function HomePage({
   const featuredProducts = products.slice(0, 8);
   const focusProducts = products
     .slice(0, 4);
-  const categoryTiles = useMemo(
-    () =>
-      products.map((product) => ({
-        id: product.id,
-        label: product.title,
-        categoryId: product.categoryId,
-        query: product.slug,
-        image: product.image,
-      })),
-    [products],
-  );
+  const parentCategories = useMemo(() => {
+    return categories.filter((category) => category.isParent === true);
+  }, [categories]);
   const focusLinks = useMemo(() => {
     const seen = new Set<string>();
 
@@ -241,16 +235,16 @@ export function HomePage({
 
       <section className="outfit-home-category-strip">
         <div className="outfit-home-category-scroll">
-          {categoryTiles.map((category, index) => (
+          {parentCategories.map((category, index) => (
             <button
               key={category.id}
               type="button"
-              onClick={() => onShopCategory(category.categoryId, category.query)}
+              onClick={() => onShopCategory(category.id)}
               className="outfit-category-tile reveal-up"
               style={{ animationDelay: `${90 + index * 70}ms` }}
             >
-              <ImageWithFallback src={category.image} alt={category.label} />
-              <span>{category.label}</span>
+              <ImageWithFallback src={category.image} alt={category.name} />
+              <span>{category.name}</span>
             </button>
           ))}
         </div>

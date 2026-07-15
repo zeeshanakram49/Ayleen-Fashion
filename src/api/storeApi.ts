@@ -321,13 +321,16 @@ async function fetchPaginatedItems<T extends Record<string, unknown>>(endpoint: 
 function mapRawCategory(raw: RawCategory): Category {
   const name = firstNonEmptyString(raw.title, raw.name, raw.slug, "Collection");
   const slug = slugify(firstNonEmptyString(raw.slug, name, raw.id));
+  const photoVal = Array.isArray(raw.photo) ? raw.photo[0] : raw.photo;
 
   return {
     id: slug || firstNonEmptyString(raw.id, name),
     name,
     subtitle: stripHtml(firstNonEmptyString(raw.summary, `Shop ${name}`)) || `Shop ${name}`,
     items: 0,
-    image: normalizeImageUrl(firstNonEmptyString(raw.photo)),
+    image: normalizeImageUrl(firstNonEmptyString(photoVal)),
+    isParent: raw.is_parent === "1" || raw.is_parent === 1 || raw.isParent === true,
+    parentId: raw.parent_id ? String(raw.parent_id) : null,
   };
 }
 

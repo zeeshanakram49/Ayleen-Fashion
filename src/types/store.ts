@@ -4,6 +4,8 @@ export type Category = {
   subtitle: string;
   items: number;
   image: string;
+  isParent?: boolean;
+  parentId?: string | null;
 };
 
 export type Banner = {

@@ -845,6 +845,7 @@ function App() {
       <main>
         {route.page === "home" && (
           <HomePage
+            categories={categories}
             banners={banners}
             products={products}
             services={services}
