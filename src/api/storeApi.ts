@@ -68,7 +68,7 @@ function firstFiniteNumber(...values: unknown[]): number | null {
   return null;
 }
 
-function stripHtml(value: string): string {
+export function stripHtml(value: string): string {
   return value
     .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/gi, " ")
@@ -88,7 +88,7 @@ function dedupeStrings(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-function normalizeImageUrl(value: string): string {
+export function normalizeImageUrl(value: string): string {
   if (!value) return DEFAULT_PRODUCT_IMAGE;
   if (/^(https?:)?\/\//i.test(value) || value.startsWith("data:")) return value;
 
@@ -329,7 +329,7 @@ function mapRawCategory(raw: RawCategory): Category {
   const photoVal = Array.isArray(raw.photo) ? raw.photo[0] : raw.photo;
 
   return {
-    id: slug || firstNonEmptyString(raw.id, name),
+    id: raw.id ? String(raw.id) : (slug || firstNonEmptyString(raw.id, name)),
     name,
     subtitle: stripHtml(firstNonEmptyString(raw.summary, `Shop ${name}`)) || `Shop ${name}`,
     items: 0,
@@ -337,6 +337,54 @@ function mapRawCategory(raw: RawCategory): Category {
     isParent: raw.is_parent === "1" || raw.is_parent === 1 || raw.isParent === true,
     parentId: raw.parent_id ? String(raw.parent_id) : null,
   };
+}
+
+function extractSortedImages(raw: RawProduct): string[] {
+  const photoVal = raw.photo;
+  if (!Array.isArray(photoVal)) {
+    return collectImageCandidates(raw);
+  }
+
+  const parsedPhotos = photoVal
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          url: normalizeImageUrl(item),
+          isPrimary: false,
+          sortOrder: 999,
+        };
+      }
+      if (isRecord(item)) {
+        const url = firstNonEmptyString(
+          item.url,
+          item.photo,
+          item.image,
+          item.path,
+          item.src,
+        );
+        const isPrimary = item.is_primary === true || item.is_primary === 1 || item.is_primary === "1" || item.isPrimary === true;
+        const sortOrder = toNumberValue(item.sort_order) ?? 999;
+        return {
+          url: normalizeImageUrl(url),
+          isPrimary,
+          sortOrder,
+        };
+      }
+      return null;
+    })
+    .filter((p): p is { url: string; isPrimary: boolean; sortOrder: number } => p !== null && p.url !== "");
+
+  if (parsedPhotos.length === 0) {
+    return collectImageCandidates(raw);
+  }
+
+  parsedPhotos.sort((a, b) => {
+    if (a.isPrimary && !b.isPrimary) return -1;
+    if (!a.isPrimary && b.isPrimary) return 1;
+    return a.sortOrder - b.sortOrder;
+  });
+
+  return dedupeStrings(parsedPhotos.map((p) => p.url));
 }
 
 function mapRawProduct(
@@ -373,7 +421,7 @@ function mapRawProduct(
     categoriesBySlug.get(rawCategorySlug) ??
     null;
 
-  const categoryId = matchedCategory?.id || rawCategorySlug || "all";
+  const categoryId = matchedCategory?.id || rawCategoryId || "all";
   const categoryLabel =
     matchedCategory?.name ||
     firstNonEmptyString(
@@ -383,7 +431,11 @@ function mapRawProduct(
       categoryRecord?.name,
       "Collection",
     );
-  const gallery = collectImageCandidates(raw);
+  
+  const subCategoryRecord = isRecord(raw.sub_category) ? raw.sub_category : null;
+  const subCategoryId = subCategoryRecord ? toNumberValue(subCategoryRecord.id) : null;
+
+  const gallery = extractSortedImages(raw);
   const image = gallery[0] ?? DEFAULT_PRODUCT_IMAGE;
   const fit = firstNonEmptyString(raw.fit, raw.style, raw.type, "Regular Fit");
   const basePrice = firstFiniteNumber(
@@ -482,6 +534,7 @@ function mapRawProduct(
     sizes,
     rating,
     reviews,
+    subCategoryId: subCategoryId ? String(subCategoryId) : null,
   };
 
   return product;

@@ -36,6 +36,7 @@ export type Product = {
   sizes: string[];
   rating: number;
   reviews: number;
+  subCategoryId?: string | null;
 };
 
 export type Service = {

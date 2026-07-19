@@ -130,7 +130,7 @@ export function Footer({ categories }: FooterProps) {
               </h3>
               <div className="mt-5 grid gap-3 text-sm text-[var(--muted)]">
                 {categories.map((category) => (
-                  <a key={category.id} href={getHashUrl(APP_ROUTES.shop)} className="transition hover:text-[var(--ink)]">
+                  <a key={category.id} href={getHashUrl(`${APP_ROUTES.shop}?category_id=${category.id}`)} className="transition hover:text-[var(--ink)]">
                     {category.name}
                   </a>
                 ))}

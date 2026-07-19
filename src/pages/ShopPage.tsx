@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import axios from "axios";
+import axiosClient from "../api/axiosClient";
+import { mapApiProduct, stripHtml } from "../api/storeApi";
+import { ENV } from "../config/env";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { navigateToHash } from "../routes/routeUtils";
 import { ProductCard } from "../components/ProductCard";
 import { money } from "../lib/store";
 import type { Category, Product } from "../types/store";
 
 type ShopPageProps = {
   categories: Category[];
-  products: Product[];
-  activeCategory: string;
-  query: string;
-  sortBy: string;
   wishlist: string[];
   selectedSize: Record<string, string>;
-  onCategoryChange: (category: string) => void;
-  onQueryChange: (query: string) => void;
-  onSortChange: (sortBy: string) => void;
   onPickSize: (productId: string, size: string) => void;
   onToggleWishlist: (productId: string) => void;
   onAddToCart: (
@@ -23,37 +22,53 @@ type ShopPageProps = {
     qty?: number,
   ) => void;
   onOpenProduct: (slug: string) => void;
-  isLoading?: boolean;
-  errorMessage?: string;
-  onRetryCatalog?: () => void;
+  onQueryChange: (query: string) => void;
+  onSortChange: (sortBy: string) => void;
+  activeQuery: string;
+  activeSortBy: string;
 };
 
-const POLO_SUB_TABS = [
-  { label: "All", query: "" },
-  { label: "Basics", query: "basics" },
-  { label: "Textured", query: "textured" },
-  { label: "Knit", query: "knit" },
-  { label: "Solids", query: "solids" },
-] as const;
+interface ParentCategoryData {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  photo: string[];
+  is_parent: string;
+  status: string;
+}
 
-const TSHIRT_SUB_TABS = [
-  { label: "All", query: "" },
-  { label: "Basics", query: "basics" },
-  { label: "Textured", query: "textured" },
-  { label: "Graphics", query: "graphics" },
-  { label: "Solids", query: "solids" },
-] as const;
+interface ChildCategoryData {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  photo: string[];
+  is_parent: string;
+  parent_id: string;
+  status: string;
+}
 
-const DEFAULT_SUB_TABS = [
-  { label: "All", query: "" },
-  { label: "Textured", query: "textured" },
-  { label: "Polo", query: "polo" },
-  { label: "Henley", query: "henley" },
-  { label: "Knit", query: "knit" },
-  { label: "Sand", query: "sand" },
-  { label: "Ice", query: "ice" },
-  { label: "Olive", query: "olive" },
-] as const;
+interface PaginationData {
+  total: number;
+  count: number;
+  per_page: number;
+  current_page: number;
+  total_pages: number;
+}
+
+interface CategoryProductsResponse {
+  responseCode: number;
+  message: string;
+  payload: {
+    parent_category: ParentCategoryData;
+    child_categories: ChildCategoryData[];
+    products: {
+      data: Record<string, unknown>[];
+      pagination: PaginationData;
+    };
+  };
+}
 
 const sortOptions = [
   { label: "Featured", value: "featured" },
@@ -114,81 +129,192 @@ function IconFilter() {
 
 export function ShopPage({
   categories,
-  products,
-  activeCategory,
-  query,
-  sortBy,
   wishlist,
   selectedSize,
-  onCategoryChange,
-  onQueryChange,
-  onSortChange,
   onPickSize,
   onToggleWishlist,
   onAddToCart,
   onOpenProduct,
-  isLoading = false,
-  errorMessage = "",
-  onRetryCatalog,
+  onQueryChange,
+  onSortChange,
+  activeQuery,
+  activeSortBy,
 }: ShopPageProps) {
   const pageRef = useRef<HTMLElement | null>(null);
   const [gridLayout, setGridLayout] = useState<GridLayout>("quad");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeSubFilter, setActiveSubFilter] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
 
-  const activeProductType = useMemo(() => {
-    const q = query.toLowerCase();
-    if (q.includes("polo")) return "polo";
-    if (
-      q.includes("t-shirt") ||
-      q.includes("t shirt") ||
-      q.includes("tee") ||
-      q.includes("v-neck")
-    )
-      return "t-shirt";
-    return "all";
-  }, [query]);
+  // Parse hash search params
+  const hash = typeof window !== "undefined" ? window.location.hash : "";
+  const params = useMemo(() => {
+    const queryIndex = hash.indexOf("?");
+    return new URLSearchParams(queryIndex === -1 ? "" : hash.slice(queryIndex + 1));
+  }, [hash]);
 
-  const [prevQuery, setPrevQuery] = useState(query);
-  const [prevCategory, setPrevCategory] = useState(activeCategory);
+  const categoryId = params.get("category_id") || "";
+  const subCategoryId = params.get("sub_category_id") || "";
+  const page = Number(params.get("page")) || 1;
+  const urlQuery = params.get("q") || "";
+  const urlSort = params.get("sort_by") || "featured";
 
-  if (query !== prevQuery || activeCategory !== prevCategory) {
-    setPrevQuery(query);
-    setPrevCategory(activeCategory);
-    setActiveSubFilter("");
+  // Category and products state
+  const [parentCategory, setParentCategory] = useState<ParentCategoryData | null>(null);
+  const [childCategories, setChildCategories] = useState<ChildCategoryData[]>([]);
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<PaginationData | null>(null);
+  const [pageLoading, setPageLoading] = useState(false);
+  const [pageError, setPageError] = useState("");
+  const [lastLoadedCategoryId, setLastLoadedCategoryId] = useState("");
+
+  // Sync route params to App.tsx root state
+  useEffect(() => {
+    onQueryChange(urlQuery);
+  }, [urlQuery, onQueryChange]);
+
+  useEffect(() => {
+    onSortChange(urlSort);
+  }, [urlSort, onSortChange]);
+
+  // Clear products/pagination when parent category switches to prevent screen flash
+  useEffect(() => {
+    if (categoryId !== lastLoadedCategoryId) {
+      setParentCategory(null);
+      setChildCategories([]);
+      setApiProducts([]);
+      setPagination(null);
+    }
+  }, [categoryId, lastLoadedCategoryId]);
+
+  // Fetch Category Products from API
+  useEffect(() => {
+    if (!categoryId) return;
+
+    const controller = new AbortController();
+
+    async function loadCategoryData() {
+      setPageLoading(true);
+      setPageError("");
+      try {
+        const fetchParams: Record<string, unknown> = { page };
+        if (subCategoryId && subCategoryId !== "all") {
+          fetchParams.sub_category_id = subCategoryId;
+        }
+
+        const response = await axiosClient.get<CategoryProductsResponse>(`/api/fetch/${categoryId}/products`, {
+          params: fetchParams,
+          signal: controller.signal,
+        });
+
+        const data = response.data;
+        if (data.responseCode === 200 && data.payload) {
+          setParentCategory(data.payload.parent_category);
+          setChildCategories(data.payload.child_categories || []);
+
+          const rawProducts = data.payload.products?.data || [];
+          const mapped = rawProducts.map((raw: Record<string, unknown>) => mapApiProduct(raw));
+          setApiProducts(mapped);
+          setPagination(data.payload.products?.pagination || null);
+          setLastLoadedCategoryId(categoryId);
+        } else {
+          setPageError(data.message || "Failed to retrieve category products.");
+        }
+      } catch (err: unknown) {
+        if (axios.isCancel(err)) {
+          return;
+        }
+        const error = err as { message?: string };
+        setPageError(error.message || "Something went wrong while fetching products.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setPageLoading(false);
+        }
+      }
+    }
+
+    void loadCategoryData();
+
+    return () => {
+      controller.abort();
+    };
+  }, [categoryId, subCategoryId, page, retryCount]);
+
+  // Handle URL change updates
+  function updateSearchParams(newParams: Record<string, string | null>) {
+    const nextParams = new URLSearchParams(params);
+    Object.entries(newParams).forEach(([key, val]) => {
+      if (val === null) {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, val);
+      }
+    });
+    const queryString = nextParams.toString();
+    navigateToHash(queryString ? `${APP_ROUTES.shop}?${queryString}` : APP_ROUTES.shop);
   }
 
-  const subTabs = useMemo(() => {
-    if (activeProductType === "polo") return POLO_SUB_TABS;
-    if (activeProductType === "t-shirt") return TSHIRT_SUB_TABS;
-    return DEFAULT_SUB_TABS;
-  }, [activeProductType]);
+  function handleSubCategoryChange(subId: string) {
+    updateSearchParams({
+      sub_category_id: subId === "all" ? null : subId,
+      page: "1", // reset to page 1
+    });
+  }
 
-  const activeCategoryData = useMemo(
-    () => categories.find((category) => category.id === activeCategory) ?? null,
-    [activeCategory, categories],
-  );
-  const sortLabel = useMemo(
-    () => sortOptions.find((option) => option.value === sortBy)?.label ?? "Featured",
-    [sortBy],
-  );
+  function handlePageChange(newPage: number) {
+    updateSearchParams({ page: String(newPage) });
+  }
 
+  function handleQueryChange(newQuery: string) {
+    updateSearchParams({
+      q: newQuery || null,
+      page: "1", // reset to page 1
+    });
+  }
+
+  function handleSortChange(newSort: string) {
+    updateSearchParams({
+      sort_by: newSort === "featured" ? null : newSort,
+      page: "1", // reset to page 1
+    });
+  }
+
+  // Client-side filtering & sorting on API products (handles search + backup filtering)
   const displayedProducts = useMemo(() => {
-    if (!activeSubFilter) return products;
-    const cleanFilter = activeSubFilter.toLowerCase();
-    return products.filter((product) => {
+    const q = activeQuery.trim().toLowerCase();
+    let list = apiProducts.filter((product) => {
+      // client-side subcategory fallback filter
+      if (subCategoryId && subCategoryId !== "all") {
+        if (product.subCategoryId && String(product.subCategoryId) !== subCategoryId) {
+          return false;
+        }
+      }
+
       return (
-        product.title.toLowerCase().includes(cleanFilter) ||
-        product.description.toLowerCase().includes(cleanFilter) ||
-        product.categoryLabel.toLowerCase().includes(cleanFilter) ||
-        product.fit.toLowerCase().includes(cleanFilter) ||
-        product.material.toLowerCase().includes(cleanFilter) ||
-        product.badge.toLowerCase().includes(cleanFilter) ||
-        product.colors.some((color) => color.toLowerCase().includes(cleanFilter)) ||
-        product.tags.some((tag) => tag.toLowerCase().includes(cleanFilter))
+        q.length === 0 ||
+        product.title.toLowerCase().includes(q) ||
+        product.description.toLowerCase().includes(q) ||
+        product.categoryLabel.toLowerCase().includes(q) ||
+        product.fit.toLowerCase().includes(q) ||
+        product.material.toLowerCase().includes(q) ||
+        product.badge.toLowerCase().includes(q) ||
+        product.colors.some((color) => color.toLowerCase().includes(q)) ||
+        product.tags.some((tag) => tag.toLowerCase().includes(q))
       );
     });
-  }, [products, activeSubFilter]);
+
+    // Client-side sort fallback
+    if (activeSortBy === "price-low") {
+      list = [...list].sort((a, b) => a.price - b.price);
+    } else if (activeSortBy === "price-high") {
+      list = [...list].sort((a, b) => b.price - a.price);
+    } else if (activeSortBy === "rating") {
+      list = [...list].sort((a, b) => b.rating - a.rating);
+    } else if (activeSortBy === "newest") {
+      list = [...list].reverse();
+    }
+
+    return list;
+  }, [apiProducts, subCategoryId, activeQuery, activeSortBy]);
 
   const priceRange = useMemo(() => {
     if (displayedProducts.length === 0) return null;
@@ -202,6 +328,7 @@ export function ShopPage({
     ).size;
   }, [displayedProducts]);
 
+  // Set stagger animations when products update
   useEffect(() => {
     const cards = pageRef.current?.querySelectorAll<HTMLElement>(".product-card.reveal-up");
     if (!cards?.length) return;
@@ -219,63 +346,110 @@ export function ShopPage({
         ? "shop-product-grid--double"
         : "shop-product-grid--quad";
 
-  const collectionTitle = useMemo(() => {
-    if (activeCategoryData) {
-      return `${activeCategoryData.name} Knit Edit`;
-    }
-    if (query) {
-      const cleanType =
-        activeProductType === "polo"
-          ? "Polo"
-          : activeProductType === "t-shirt"
-            ? "T-Shirt"
-            : query;
-      const formatted = cleanType.replace(/(^\w|\s\w)/g, (match) => match.toUpperCase());
-      return `${formatted} Knit Edit`;
-    }
-    return "All Collections";
-  }, [activeCategoryData, query, activeProductType]);
+  // Category Banner construction
+  const categoryPhoto = parentCategory?.photo
+    ? (Array.isArray(parentCategory.photo) ? parentCategory.photo[0] : parentCategory.photo)
+    : "";
+  const categoryPhotoUrl = categoryPhoto
+    ? (/^(https?:)?\/\//i.test(categoryPhoto) || categoryPhoto.startsWith("data:")
+      ? categoryPhoto
+      : `${ENV.API_BASE_URL}/${categoryPhoto.startsWith("/") ? categoryPhoto.slice(1) : categoryPhoto}`)
+    : "";
 
-  const breadcrumbTitle = useMemo(() => {
-    if (activeCategoryData) {
-      return activeCategoryData.name;
-    }
-    if (query) {
-      const cleanType =
-        activeProductType === "polo"
-          ? "Polo"
-          : activeProductType === "t-shirt"
-            ? "T-Shirt"
-            : query;
-      return cleanType.replace(/(^\w|\s\w)/g, (match) => match.toUpperCase());
-    }
-    return "All Collections";
-  }, [activeCategoryData, query, activeProductType]);
+  const collectionTitle = parentCategory?.title || "All Collections";
+  const categoryDescription = parentCategory?.summary ? stripHtml(parentCategory.summary) : "";
+
+  // Dynamic Product count
+  const totalAvailable = !subCategoryId || subCategoryId === "all"
+    ? (pagination?.total ?? displayedProducts.length)
+    : displayedProducts.length;
+
+  const productCountText = totalAvailable === 1
+    ? "1 PRODUCT AVAILABLE"
+    : `${totalAvailable} PRODUCTS AVAILABLE`;
+
+  const sortLabel = useMemo(
+    () => sortOptions.find((option) => option.value === activeSortBy)?.label ?? "Featured",
+    [activeSortBy],
+  );
 
   const hasActiveFilters =
-    activeCategory !== "all" ||
-    query.trim().length > 0 ||
-    sortBy !== "featured" ||
-    activeSubFilter !== "";
+    categoryId !== "" ||
+    activeQuery.trim().length > 0 ||
+    activeSortBy !== "featured" ||
+    subCategoryId !== "";
+
+  // Category Selection fallback screen
+  if (!categoryId) {
+    return (
+      <section className="shop-page">
+        <div className="shop-page__shell">
+          <header className="shop-header reveal-up">
+            <div className="shop-header__intro">
+              <h1 className="shop-header__title">Collections</h1>
+              <p className="shop-header__description">
+                Please select a collection to explore our catalog.
+              </p>
+            </div>
+          </header>
+
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 reveal-up mt-8">
+            {categories.filter((c) => c.isParent).map((category, index) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => {
+                  navigateToHash(`${APP_ROUTES.shop}?category_id=${category.id}`);
+                }}
+                className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] aspect-[4/3] bg-[var(--panel)] transition-all hover:border-[var(--ink)] cursor-pointer text-left"
+                style={{ animationDelay: `${70 + index * 70}ms` }}
+              >
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-end p-6">
+                  <span className="font-editorial text-2xl text-white uppercase">{category.name}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={pageRef} className="shop-page">
       <div className="shop-page__shell">
+        
+        {/* Category Photo Banner */}
+        {categoryPhotoUrl && (
+          <div className="shop-category-banner reveal-up">
+            <img
+              src={categoryPhotoUrl}
+              alt={collectionTitle}
+              className="shop-category-banner__image"
+            />
+            <div className="shop-category-banner__overlay" />
+          </div>
+        )}
+
         <header className="shop-header reveal-up">
           <div className="shop-header__intro">
             <nav className="shop-breadcrumb" aria-label="Breadcrumb">
               <span>Home</span>
               <span>/</span>
-              <span>{activeCategoryData?.name ?? "Collections"}</span>
+              <span>Collections</span>
               <span>/</span>
-              <strong>{breadcrumbTitle}</strong>
+              <strong>{collectionTitle}</strong>
             </nav>
 
             <h1 className="shop-header__title">{collectionTitle}</h1>
-            <p className="shop-header__description">
-              Clean silhouettes, breathable textures, and a refined catalog layout inspired
-              by modern retail storefronts.
-            </p>
+            {categoryDescription && (
+              <p className="shop-header__description">{categoryDescription}</p>
+            )}
           </div>
 
           <div className="shop-header__utility">
@@ -285,8 +459,8 @@ export function ShopPage({
               </span>
               <input
                 type="search"
-                value={query}
-                onChange={(event) => onQueryChange(event.target.value)}
+                value={activeQuery}
+                onChange={(event) => handleQueryChange(event.target.value)}
                 placeholder="Search"
                 aria-label="Search products"
               />
@@ -300,38 +474,26 @@ export function ShopPage({
           </div>
         </header>
 
+        {/* Dynamic child category tabs */}
         <section className="shop-collection-bar reveal-up" aria-label="Collection controls">
           <nav className="shop-tabs" aria-label="Collection tags">
-            {subTabs.map((tab) => {
-              const active =
-                activeSubFilter === tab.query ||
-                (activeSubFilter === "" && tab.query === "");
+            <button
+              type="button"
+              className={!subCategoryId || subCategoryId === "all" ? "is-active" : ""}
+              onClick={() => handleSubCategoryChange("all")}
+            >
+              ALL
+            </button>
+            {childCategories.map((child) => {
+              const active = String(child.id) === subCategoryId;
               return (
                 <button
-                  key={tab.label}
+                  key={child.id}
                   type="button"
                   className={active ? "is-active" : ""}
-                  onClick={() => {
-                    if (tab.query === "") {
-                      setActiveSubFilter("");
-                      if (activeProductType === "all") {
-                        onQueryChange("");
-                      }
-                      return;
-                    }
-
-                    if (activeProductType === "all") {
-                      if (tab.query === "polo" || tab.query === "henley") {
-                        onQueryChange(tab.query);
-                      } else {
-                        setActiveSubFilter(tab.query);
-                      }
-                    } else {
-                      setActiveSubFilter(tab.query);
-                    }
-                  }}
+                  onClick={() => handleSubCategoryChange(String(child.id))}
                 >
-                  {tab.label}
+                  {child.title.toUpperCase()}
                 </button>
               );
             })}
@@ -370,7 +532,7 @@ export function ShopPage({
 
             <label className="shop-sort-field">
               <span className="sr-only">Sort products</span>
-              <select value={sortBy} onChange={(event) => onSortChange(event.target.value)}>
+              <select value={activeSortBy} onChange={(event) => handleSortChange(event.target.value)}>
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -402,17 +564,21 @@ export function ShopPage({
               <div className="shop-pill-row">
                 <button
                   type="button"
-                  className={activeCategory === "all" ? "is-active" : ""}
-                  onClick={() => onCategoryChange("all")}
+                  className={categoryId === "" ? "is-active" : ""}
+                  onClick={() => {
+                    updateSearchParams({ category_id: null, sub_category_id: null, page: "1" });
+                  }}
                 >
                   All Collections
                 </button>
-                {categories.map((category) => (
+                {categories.filter(c => c.isParent).map((category) => (
                   <button
                     key={category.id}
                     type="button"
-                    className={activeCategory === category.id ? "is-active" : ""}
-                    onClick={() => onCategoryChange(category.id)}
+                    className={categoryId === category.id ? "is-active" : ""}
+                    onClick={() => {
+                      updateSearchParams({ category_id: category.id, sub_category_id: null, page: "1" });
+                    }}
                   >
                     {category.name}
                   </button>
@@ -427,8 +593,8 @@ export function ShopPage({
                   <button
                     key={option.value}
                     type="button"
-                    className={sortBy === option.value ? "is-active" : ""}
-                    onClick={() => onSortChange(option.value)}
+                    className={activeSortBy === option.value ? "is-active" : ""}
+                    onClick={() => handleSortChange(option.value)}
                   >
                     {option.label}
                   </button>
@@ -439,41 +605,43 @@ export function ShopPage({
         )}
 
         <div className="shop-results-strip reveal-up">
-          <p>{displayedProducts.length} products available</p>
+          <p>{productCountText}</p>
           <p>Sorted by {sortLabel.toLowerCase()}</p>
         </div>
 
         {hasActiveFilters && (
           <div className="shop-active-filters reveal-up is-visible" aria-label="Applied filters">
             <span className="shop-active-filters__label">Active</span>
-            {activeCategory !== "all" && (
-              <button type="button" onClick={() => onCategoryChange("all")}>
-                {activeCategoryData?.name ?? activeCategory}
+            {categoryId !== "" && (
+              <button
+                type="button"
+                onClick={() => {
+                  updateSearchParams({ category_id: null, sub_category_id: null, page: "1" });
+                }}
+              >
+                {collectionTitle}
               </button>
             )}
-            {query.trim().length > 0 && (
-              <button type="button" onClick={() => onQueryChange("")}>
-                {query}
+            {activeQuery.trim().length > 0 && (
+              <button type="button" onClick={() => handleQueryChange("")}>
+                {activeQuery}
               </button>
             )}
-            {sortBy !== "featured" && (
-              <button type="button" onClick={() => onSortChange("featured")}>
+            {activeSortBy !== "featured" && (
+              <button type="button" onClick={() => handleSortChange("featured")}>
                 {sortLabel}
               </button>
             )}
-            {activeSubFilter !== "" && (
-              <button type="button" onClick={() => setActiveSubFilter("")}>
-                {activeSubFilter.charAt(0).toUpperCase() + activeSubFilter.slice(1)}
+            {subCategoryId !== "" && (
+              <button type="button" onClick={() => handleSubCategoryChange("all")}>
+                {childCategories.find((c) => String(c.id) === subCategoryId)?.title || subCategoryId}
               </button>
             )}
             <button
               type="button"
               className="shop-active-filters__reset"
               onClick={() => {
-                onCategoryChange("all");
-                onQueryChange("");
-                onSortChange("featured");
-                setActiveSubFilter("");
+                updateSearchParams({ category_id: null, sub_category_id: null, page: "1", q: null, sort_by: null });
               }}
             >
               Reset
@@ -481,20 +649,19 @@ export function ShopPage({
           </div>
         )}
 
-        {errorMessage && (
+        {pageError && (
           <article className="shop-empty-state reveal-up is-visible">
             <span className="shop-empty-state__eyebrow">Catalog notice</span>
             <h2 className="font-editorial">Live catalog is unavailable</h2>
-            <p>{errorMessage}</p>
-            {onRetryCatalog && (
-              <button type="button" onClick={onRetryCatalog}>
-                Retry catalog
-              </button>
-            )}
+            <p>{pageError}</p>
+            <button type="button" onClick={() => setRetryCount((c) => c + 1)}>
+              Retry catalog
+            </button>
           </article>
         )}
 
-        {isLoading ? (
+        {/* loading / error / list states */}
+        {pageLoading && !parentCategory ? (
           <div className={`shop-product-grid ${gridClass}`} aria-label="Loading products">
             {Array.from({ length: 8 }, (_, index) => (
               <div
@@ -503,46 +670,76 @@ export function ShopPage({
               />
             ))}
           </div>
-        ) : displayedProducts.length === 0 ? (
+        ) : !pageError && displayedProducts.length === 0 ? (
           <article className="shop-empty-state reveal-up is-visible">
             <span className="shop-empty-state__eyebrow">No match yet</span>
             <h2 className="font-editorial">We could not find products</h2>
-            <p>
-              {products.length === 0
-                ? "Try another keyword or clear the current category and sorting filters."
-                : "No products match the selected sub-filter. Try selecting 'All' or a different sub-tab."}
-            </p>
+            <p>No products found in this category.</p>
             <button
               type="button"
               onClick={() => {
-                if (products.length === 0) {
-                  onCategoryChange("all");
-                  onQueryChange("");
-                  onSortChange("featured");
-                }
-                setActiveSubFilter("");
+                handleSubCategoryChange("all");
+                handleQueryChange("");
               }}
             >
-              {products.length === 0 ? "Reset filters" : "Reset sub-filter"}
+              Clear subcategory or search
             </button>
           </article>
         ) : (
-          <div className={`shop-product-grid ${gridClass}`}>
-            {displayedProducts.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={index}
-                liked={wishlist.includes(product.id)}
-                pickedSize={selectedSize[product.id]}
-                onPickSize={onPickSize}
-                onToggleWishlist={onToggleWishlist}
-                onAddToCart={onAddToCart}
-                onOpenProduct={onOpenProduct}
-                variant="catalog"
-              />
-            ))}
-          </div>
+          <>
+            <div className={`shop-product-grid ${gridClass} ${pageLoading ? "opacity-50 pointer-events-none" : ""}`}>
+              {displayedProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  liked={wishlist.includes(product.id)}
+                  pickedSize={selectedSize[product.id]}
+                  onPickSize={onPickSize}
+                  onToggleWishlist={onToggleWishlist}
+                  onAddToCart={onAddToCart}
+                  onOpenProduct={onOpenProduct}
+                  variant="catalog"
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {pagination && pagination.total_pages > 1 && (
+              <nav className="shop-pagination reveal-up is-visible" aria-label="Pagination">
+                <button
+                  type="button"
+                  className="shop-pagination__arrow"
+                  disabled={pagination.current_page === 1}
+                  onClick={() => handlePageChange(pagination.current_page - 1)}
+                >
+                  &larr; Previous
+                </button>
+                {Array.from({ length: pagination.total_pages }, (_, i) => {
+                  const pageNum = i + 1;
+                  const active = pageNum === pagination.current_page;
+                  return (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      className={`shop-pagination__number ${active ? "is-active" : ""}`}
+                      onClick={() => handlePageChange(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  className="shop-pagination__arrow"
+                  disabled={pagination.current_page === pagination.total_pages}
+                  onClick={() => handlePageChange(pagination.current_page + 1)}
+                >
+                  Next &rarr;
+                </button>
+              </nav>
+            )}
+          </>
         )}
       </div>
     </section>

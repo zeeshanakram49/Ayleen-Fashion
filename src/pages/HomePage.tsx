@@ -73,9 +73,12 @@ export function HomePage({
     );
   }, [finalFocusProducts, activeFocusProductId]);
 
-  useEffect(() => {
+  const [prevActiveProductId, setPrevActiveProductId] = useState("");
+
+  if (activeFocusProduct && activeFocusProduct.id !== prevActiveProductId) {
+    setPrevActiveProductId(activeFocusProduct.id);
     setSelectedFocusImage(null);
-  }, [activeFocusProduct?.id]);
+  }
 
   const finalMustHavesProducts = useMemo(() => {
     return mustHavesProducts.length > 0 ? mustHavesProducts : products;

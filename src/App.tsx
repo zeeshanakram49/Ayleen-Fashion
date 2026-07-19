@@ -105,7 +105,6 @@ function App() {
   const [saleEssentialsProducts, setSaleEssentialsProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
-  const [catalogError, setCatalogError] = useState("");
   const [productDetailLoading, setProductDetailLoading] = useState(false);
   const [fetchedProduct, setFetchedProduct] = useState<Product | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -128,7 +127,6 @@ function App() {
 
   const loadCatalog = useCallback(async (control?: { cancelled: boolean }) => {
     setCatalogLoading(true);
-    setCatalogError("");
 
     try {
       const [nextCatalog, focusData, mustHavesData, saleEssentialsData] = await Promise.all([
@@ -153,7 +151,6 @@ function App() {
       setFocusProducts([]);
       setMustHavesProducts([]);
       setSaleEssentialsProducts([]);
-      setCatalogError(message);
       setNotice({
         kind: "info",
         message,
@@ -234,10 +231,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (activeCategory === "all") return;
-    if (categories.some((category) => category.id === activeCategory)) return;
-    setActiveCategory("all");
-  }, [activeCategory, categories]);
+    const hash = window.location.hash;
+    const queryIndex = hash.indexOf("?");
+    const params = new URLSearchParams(queryIndex === -1 ? "" : hash.slice(queryIndex + 1));
+    
+    if (route.page === "shop") {
+      const catId = params.get("category_id") || "all";
+      const qVal = params.get("q") || "";
+      const sortVal = params.get("sort_by") || "featured";
+      
+      setActiveCategory(catId);
+      setQuery(qVal);
+      setSortBy(sortVal);
+    } else {
+      if (route.page !== "home") {
+        setQuery("");
+      }
+    }
+  }, [route]);
 
   useEffect(() => {
     const titles: Record<Route["page"], string> = {
@@ -412,34 +423,6 @@ function App() {
     [cart],
   );
 
-  const filteredProducts = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const visible = products.filter((product) => {
-      const categoryMatch =
-        activeCategory === "all" || product.categoryId === activeCategory;
-      const queryMatch =
-        q.length === 0 ||
-        product.title.toLowerCase().includes(q) ||
-        product.description.toLowerCase().includes(q) ||
-        product.categoryLabel.toLowerCase().includes(q) ||
-        product.fit.toLowerCase().includes(q) ||
-        product.material.toLowerCase().includes(q) ||
-        product.badge.toLowerCase().includes(q) ||
-        product.colors.some((color) => color.toLowerCase().includes(q)) ||
-        product.tags.some((tag) => tag.toLowerCase().includes(q));
-      return categoryMatch && queryMatch;
-    });
-
-    if (sortBy === "price-low")
-      return [...visible].sort((a, b) => a.price - b.price);
-    if (sortBy === "price-high")
-      return [...visible].sort((a, b) => b.price - a.price);
-    if (sortBy === "rating")
-      return [...visible].sort((a, b) => b.rating - a.rating);
-    if (sortBy === "newest") return [...visible].reverse();
-
-    return visible;
-  }, [activeCategory, products, query, sortBy]);
 
   const wishlistProducts = useMemo(
     () => products.filter((product) => wishlist.includes(product.id)),
@@ -648,10 +631,15 @@ function App() {
   }
 
   function navigateToShop(categoryId = "all", nextQuery = "") {
-    setActiveCategory(categoryId);
-    setQuery(nextQuery);
-    setSortBy("featured");
-    navigateToHash(APP_ROUTES.shop);
+    const params = new URLSearchParams();
+    if (categoryId && categoryId !== "all") {
+      params.set("category_id", categoryId);
+    }
+    if (nextQuery) {
+      params.set("q", nextQuery);
+    }
+    const queryString = params.toString();
+    navigateToHash(queryString ? `${APP_ROUTES.shop}?${queryString}` : APP_ROUTES.shop);
   }
 
   function onCheckoutChange(field: keyof CheckoutState, value: string) {
@@ -883,22 +871,16 @@ function App() {
         {route.page === "shop" && (
           <ShopPage
             categories={categories}
-            products={filteredProducts}
-            activeCategory={activeCategory}
-            query={query}
-            sortBy={sortBy}
             wishlist={wishlist}
             selectedSize={selectedSize}
-            onCategoryChange={setActiveCategory}
-            onQueryChange={setQuery}
-            onSortChange={setSortBy}
-            isLoading={catalogLoading}
-            errorMessage={catalogError}
-            onRetryCatalog={() => void loadCatalog()}
             onPickSize={pickSize}
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
+            onQueryChange={setQuery}
+            onSortChange={setSortBy}
+            activeQuery={query}
+            activeSortBy={sortBy}
           />
         )}
 
