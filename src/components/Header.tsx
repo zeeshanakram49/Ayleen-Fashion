@@ -31,23 +31,7 @@ type DesktopLink = {
   items: MegaMenuItem[];
 };
 
-const desktopLinks: DesktopLink[] = [
-  {
-    id: "men",
-    label: "MEN",
-    categoryId: "men",
-    query: "polo",
-    title: "MEN",
-    items: [
-      { label: "TEXTURED POLOS", categoryId: "men", query: "polo" },
-      { label: "KNIT HENLEYS", categoryId: "men", query: "henley" },
-      { label: "NEW IN", categoryId: "men", query: "new-in" },
-      { label: "TEXTURED", categoryId: "men", query: "textured" },
-      { label: "SAND", categoryId: "men", query: "sand" },
-      { label: "ICE", categoryId: "men", query: "ice" },
-      { label: "OLIVE", categoryId: "men", query: "olive" },
-    ],
-  },
+const staticDesktopLinks: DesktopLink[] = [
   {
     id: "sale",
     label: "SALE",
@@ -55,9 +39,7 @@ const desktopLinks: DesktopLink[] = [
     query: "sale",
     title: "SALE",
     items: [
-      { label: "TEXTURED POLO SALE", categoryId: "all", query: "sale" },
-      { label: "SAND SALE", categoryId: "men", query: "sand" },
-      { label: "OLIVE SALE", categoryId: "men", query: "olive" },
+      { label: "SHOP ALL SALE", categoryId: "all", query: "sale" },
     ],
   },
 ];
@@ -179,6 +161,29 @@ export function Header({
     return activeCategory === categoryId && !activeQuery;
   }
 
+  const menCategories = categories.filter((category) => {
+    const gender = category.gender?.toLowerCase();
+    return category.isParent === true && (!gender || gender === "male" || gender === "men");
+  });
+  const menMenuItems: MegaMenuItem[] =
+    menCategories.length > 0
+      ? menCategories.map((category) => ({
+          label: category.name,
+          categoryId: category.id,
+        }))
+      : [{ label: "SHOP ALL", categoryId: "all" }];
+  const menMenu: DesktopLink = {
+    id: "men",
+    label: "MEN",
+    categoryId: menCategories[0]?.id ?? "all",
+    title: "MEN",
+    items: menMenuItems,
+  };
+  const desktopLinks = [menMenu, ...staticDesktopLinks];
+  const menMenuIsActive =
+    route.page === "shop" &&
+    menCategories.some((category) => category.id === activeCategory);
+
   const activeDesktopMenu =
     desktopLinks.find((link) => link.id === activeMenu) ?? null;
   const activeDesktopCategory =
@@ -213,11 +218,19 @@ export function Header({
               onMouseEnter={() => openDesktopMenu(link.id)}
               onFocus={() => openDesktopMenu(link.id)}
               onClick={() => {
+                if (link.id === "men") {
+                  openDesktopMenu(link.id);
+                  return;
+                }
                 closeDesktopMenuNow();
                 onShopCategory(link.categoryId, link.query);
               }}
               className={`site-nav-link-minimal ${
-                isDesktopLinkActive(link.categoryId, link.query) ? "is-active" : ""
+                (link.id === "men"
+                  ? menMenuIsActive
+                  : isDesktopLinkActive(link.categoryId, link.query))
+                  ? "is-active"
+                  : ""
               }`}
             >
               {link.label}
@@ -373,7 +386,24 @@ export function Header({
       {menuOpen && (
         <div className="border-t border-black/8 bg-white/98 px-4 py-4 shadow-[0_24px_50px_-40px_rgba(0,0,0,0.5)] backdrop-blur lg:hidden sm:px-6">
           <div className="grid gap-2 text-[11px] font-semibold tracking-[0.18em] sm:grid-cols-2">
-            {desktopLinks.map((link) => (
+            {menCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => {
+                  closeMenu();
+                  onShopCategory(category.id);
+                }}
+                className={`rounded-[var(--radius-sm)] border px-4 py-3 text-center transition-colors ${
+                  isDesktopLinkActive(category.id)
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+                    : "border-black/10 bg-white"
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+            {staticDesktopLinks.map((link) => (
               <button
                 key={link.id}
                 type="button"

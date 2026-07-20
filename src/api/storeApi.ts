@@ -336,6 +336,7 @@ function mapRawCategory(raw: RawCategory): Category {
     image: normalizeImageUrl(firstNonEmptyString(photoVal)),
     isParent: raw.is_parent === "1" || raw.is_parent === 1 || raw.isParent === true,
     parentId: raw.parent_id ? String(raw.parent_id) : null,
+    gender: firstNonEmptyString(raw.gender),
   };
 }
 
@@ -698,4 +699,3 @@ export async function fetchSaleEssentialsProducts(): Promise<Product[]> {
   const rawProducts = extractListData<RawProduct>(response.data);
   return rawProducts.map((rawProduct) => mapApiProduct(rawProduct));
 }
-

@@ -58,6 +58,12 @@ export function normalizeError(error: unknown): ApiError {
 axiosClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
+    // Keep aborted requests as Axios cancellations so consuming screens can
+    // silently ignore route changes and React development-mode cleanups.
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const response = error.response;
     const data = response?.data as Record<string, unknown> | undefined;
     const unauthorizedByStatus = response?.status === 401;

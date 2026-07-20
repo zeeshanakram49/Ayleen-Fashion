@@ -12,6 +12,8 @@ export const API_ROUTES = {
     products: "/api/products",
     categories: "/api/categories",
     banners: "/api/banners",
+    categoryWithProducts: (categoryId: string | number) =>
+      `/api/fetch/${categoryId}/products`,
     productBySlug: (slug: string) => `/api/products/${slug}`,
     search: "/api/products/search",
     featured: "/api/products/featured",
@@ -54,5 +56,4 @@ export const API_ROUTES = {
     paymentStatus: (orderId: string) => `/api/payments/status/${orderId}`,
   },
 };
-
 

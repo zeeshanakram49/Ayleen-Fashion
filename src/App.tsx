@@ -556,6 +556,18 @@ function App() {
     }
   }
 
+  const mergeCatalogProducts = useCallback((loadedProducts: Product[]) => {
+    if (loadedProducts.length === 0) return;
+
+    setProducts((currentProducts) => {
+      const productsById = new Map(
+        currentProducts.map((product) => [product.id, product]),
+      );
+      loadedProducts.forEach((product) => productsById.set(product.id, product));
+      return Array.from(productsById.values());
+    });
+  }, []);
+
   function addToCart(
     productId: string,
     fallbackSize?: string,
@@ -877,6 +889,7 @@ function App() {
             onToggleWishlist={toggleWishlist}
             onAddToCart={addToCart}
             onOpenProduct={openProduct}
+            onProductsLoaded={mergeCatalogProducts}
             onQueryChange={setQuery}
             onSortChange={setSortBy}
             activeQuery={query}

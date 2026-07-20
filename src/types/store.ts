@@ -6,6 +6,7 @@ export type Category = {
   image: string;
   isParent?: boolean;
   parentId?: string | null;
+  gender?: string;
 };
 
 export type Banner = {

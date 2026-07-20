@@ -58,27 +58,11 @@ export function HomePage({
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [activeMustHaveProductId, setActiveMustHaveProductId] = useState("");
-  const [activeFocusProductId, setActiveFocusProductId] = useState("");
-  const [selectedFocusImage, setSelectedFocusImage] = useState<string | null>(null);
+  const [activeFocusCategoryId, setActiveFocusCategoryId] = useState("");
 
   const finalFocusProducts = useMemo(() => {
     return focusProducts.length > 0 ? focusProducts : products.slice(0, 4);
   }, [focusProducts, products]);
-
-  const activeFocusProduct = useMemo(() => {
-    return (
-      finalFocusProducts.find((p) => p.id === activeFocusProductId) ??
-      finalFocusProducts[0] ??
-      null
-    );
-  }, [finalFocusProducts, activeFocusProductId]);
-
-  const [prevActiveProductId, setPrevActiveProductId] = useState("");
-
-  if (activeFocusProduct && activeFocusProduct.id !== prevActiveProductId) {
-    setPrevActiveProductId(activeFocusProduct.id);
-    setSelectedFocusImage(null);
-  }
 
   const finalMustHavesProducts = useMemo(() => {
     return mustHavesProducts.length > 0 ? mustHavesProducts : products;
@@ -96,12 +80,37 @@ export function HomePage({
     return categories.filter((category) => category.isParent === true);
   }, [categories]);
 
-  const focusLinks = useMemo(() => {
-    return finalFocusProducts.map((product) => ({
-      label: product.title,
-      productId: product.id,
-    }));
-  }, [finalFocusProducts]);
+  const activeFocusCategory =
+    parentCategories.find((category) => category.id === activeFocusCategoryId) ??
+    parentCategories[0] ??
+    null;
+
+  const activeFocusProducts = useMemo(() => {
+    if (!activeFocusCategory) return finalFocusProducts.slice(0, 6);
+
+    const directlyAssigned = products.filter(
+      (product) => product.categoryId === activeFocusCategory.id,
+    );
+    if (directlyAssigned.length > 0) return directlyAssigned.slice(0, 6);
+
+    const categoryTerms = activeFocusCategory.name
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .map((term) => term.replace(/s$/, ""))
+      .filter((term) => term.length > 1);
+    const titleMatches = finalFocusProducts.filter((product) => {
+      const searchable = `${product.title} ${product.slug} ${product.tags.join(" ")}`.toLowerCase();
+      return categoryTerms.some((term) => searchable.includes(term));
+    });
+
+    return (titleMatches.length > 0 ? titleMatches : finalFocusProducts).slice(0, 6);
+  }, [activeFocusCategory, finalFocusProducts, products]);
+
+  const activeFocusImage =
+    activeFocusCategory?.image ||
+    activeFocusProducts[0]?.image ||
+    finalFocusProducts[0]?.image ||
+    "";
 
   const mustHaveTabs = useMemo(() => finalMustHavesProducts.slice(0, 4), [finalMustHavesProducts]);
 
@@ -189,7 +198,7 @@ export function HomePage({
             onClick={() => setQuickViewProduct(product)}
             className="outfit-quick-button"
           >
-            Quick view
+            Quick shop
           </button>
         </div>
 
@@ -204,7 +213,7 @@ export function HomePage({
           <span>
             {product.fit} | {product.categoryLabel}
           </span>
-          <p>{money(product.price).replace("PKR ", "Rs. ")}</p>
+          <p>{money(product.price)}</p>
         </div>
       </article>
     );
@@ -285,56 +294,71 @@ export function HomePage({
       </section>
 
       <section className="outfit-focus-section">
-        <div className="outfit-focus-image reveal-up">
+        <button
+          type="button"
+          className="outfit-focus-image reveal-up"
+          onClick={() => {
+            if (activeFocusCategory) onShopCategory(activeFocusCategory.id);
+          }}
+          aria-label={
+            activeFocusCategory
+              ? `Shop ${activeFocusCategory.name}`
+              : "Shop featured category"
+          }
+        >
           <ImageWithFallback
-            src={selectedFocusImage ?? activeFocusProduct?.image}
-            alt={activeFocusProduct?.title ?? "Featured product"}
+            src={activeFocusImage}
+            alt={activeFocusCategory?.name ?? "Featured category"}
           />
-        </div>
+          <span className="outfit-focus-image-shade" />
+          <span className="outfit-focus-image-copy">
+            <small>Selected edit</small>
+            <strong>{activeFocusCategory?.name ?? "New arrivals"}</strong>
+            <em>Explore collection</em>
+          </span>
+        </button>
+
         <div className="outfit-focus-content">
           <div className="outfit-focus-copy reveal-up">
-            <h2>Categories in Focus</h2>
-            <nav aria-label="Categories in focus">
-              {focusLinks.map((link) => (
+            <div className="outfit-focus-heading">
+              <h2>Categories in Focus</h2>
+              {activeFocusCategory && (
                 <button
-                  key={link.productId}
                   type="button"
-                  onClick={() => setActiveFocusProductId(link.productId)}
-                  className={link.productId === activeFocusProduct?.id ? "is-active" : ""}
+                  className="outfit-focus-view-all"
+                  onClick={() => onShopCategory(activeFocusCategory.id)}
                 >
-                  {link.label}
+                  View collection
+                </button>
+              )}
+            </div>
+            <nav aria-label="Categories in focus">
+              {parentCategories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => setActiveFocusCategoryId(category.id)}
+                  className={category.id === activeFocusCategory?.id ? "is-active" : ""}
+                >
+                  {category.name}
                 </button>
               ))}
             </nav>
           </div>
-          <div className="outfit-focus-products">
-            {activeFocusProduct?.gallery.map((img, index) => {
-              const isActive = selectedFocusImage === img || (!selectedFocusImage && img === activeFocusProduct.image);
-              return (
-                <article
-                  key={`${activeFocusProduct.id}-img-${index}`}
-                  className={`group outfit-product-tile focus-gallery-card reveal-up is-visible cursor-pointer ${isActive ? "is-active" : ""}`}
-                  style={{ 
-                    animationDelay: `${70 + index * 70}ms`,
-                  }}
-                >
-                  <div className="outfit-product-media">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedFocusImage(img)}
-                      className="block h-full w-full"
-                    >
-                      <ImageWithFallback
-                        src={img}
-                        alt={`${activeFocusProduct.title} view ${index + 1}`}
-                        className="outfit-product-image w-full object-cover"
-                      />
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          {activeFocusProducts.length > 0 ? (
+            <div
+              className="outfit-focus-products"
+              key={activeFocusCategory?.id ?? "featured"}
+            >
+              {activeFocusProducts.map((product, index) =>
+                renderProductTile(product, index),
+              )}
+            </div>
+          ) : (
+            <div className="outfit-focus-empty">
+              Products for this category will appear here.
+            </div>
+          )}
         </div>
       </section>
 

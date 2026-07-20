@@ -10,6 +10,7 @@ type ProductCardProps = {
   pickedSize?: string;
   compact?: boolean;
   variant?: "default" | "catalog";
+  catalogAudience?: string;
   onPickSize: (productId: string, size: string) => void;
   onToggleWishlist: (productId: string) => void;
   onAddToCart: (
@@ -28,6 +29,7 @@ export function ProductCard({
   pickedSize,
   compact = false,
   variant = "default",
+  catalogAudience,
   onPickSize,
   onToggleWishlist,
   onAddToCart,
@@ -45,7 +47,9 @@ export function ProductCard({
   const swatches = product.colors.slice(0, 3).map((color) => ({
     label: color,
     value: colorToSwatch(color),
-  }));
+  })).filter((swatch) => swatch.label.toLowerCase() !== "default");
+  const catalogMeta = `${product.fit || "Regular Fit"} | ${catalogAudience || product.categoryLabel}`;
+  const hasSizeOptions = product.sizes.length > 1;
 
   if (isCatalog) {
     return (
@@ -77,18 +81,20 @@ export function ProductCard({
 
           <button
             type="button"
-            onClick={() => onAddToCart(product.id, pickedSize, true)}
+            onClick={() => {
+              if (hasSizeOptions && !pickedSize) {
+                onOpenProduct(product.slug);
+                return;
+              }
+              onAddToCart(product.id, pickedSize, false);
+            }}
             className="catalog-product-quickview btn-ripple"
           >
-            Add to Basket
+            {hasSizeOptions && !pickedSize ? "Choose options" : "Add to Basket"}
           </button>
         </div>
 
         <div className="catalog-product-body">
-          <p className="catalog-product-meta">
-            {product.fit} | {product.categoryLabel}
-          </p>
-
           <button
             type="button"
             onClick={() => onOpenProduct(product.slug)}
@@ -97,23 +103,34 @@ export function ProductCard({
             {product.title}
           </button>
 
+          <p className="catalog-product-meta">
+            {catalogMeta}
+          </p>
+
           <div className="catalog-product-pricing">
-            <span className="catalog-product-old-price">{money(product.oldPrice)}</span>
+            {salePercent > 0 && (
+              <span className="catalog-product-old-price">{money(product.oldPrice)}</span>
+            )}
             <span className="catalog-product-price">{money(product.price)}</span>
             {salePercent > 0 && (
               <span className="catalog-product-discount">-{salePercent}%</span>
             )}
+            {product.stock > 0 && product.stock <= 3 && (
+              <span className="catalog-product-stock">Only {product.stock} left</span>
+            )}
           </div>
 
-          <div className="catalog-swatches" aria-label="Available colors">
-            {swatches.map((swatch) => (
-              <span
-                key={swatch.label}
-                title={swatch.label}
-                style={{ backgroundColor: swatch.value }}
-              />
-            ))}
-          </div>
+          {swatches.length > 0 && (
+            <div className="catalog-swatches" aria-label="Available colors">
+              {swatches.map((swatch) => (
+                <span
+                  key={swatch.label}
+                  title={swatch.label}
+                  style={{ backgroundColor: swatch.value }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </article>
     );
