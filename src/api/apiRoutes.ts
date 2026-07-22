@@ -40,7 +40,7 @@ export const API_ROUTES = {
   },
 
   orders: {
-    create: "/api/orders",
+    create: "/api/checkout/place-order",
     list: "/api/orders",
     detail: (orderId: string) => `/api/orders/${orderId}`,
     cancel: (orderId: string) => `/api/orders/${orderId}/cancel`,
@@ -56,4 +56,3 @@ export const API_ROUTES = {
     paymentStatus: (orderId: string) => `/api/payments/status/${orderId}`,
   },
 };
-

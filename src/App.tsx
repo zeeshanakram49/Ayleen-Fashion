@@ -661,6 +661,15 @@ function App() {
   async function placeOrder(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
+    if (!isAuthenticated) {
+      setNotice({
+        kind: "info",
+        message: "Please sign in before placing your order.",
+      });
+      navigateToHash(APP_ROUTES.login);
+      return;
+    }
+
     if (
       !checkout.fullName ||
       !checkout.phone ||
@@ -712,26 +721,11 @@ function App() {
 
     try {
       const orderPayload = {
-        customerDetails: {
-          fullName: checkout.fullName,
-          email: checkout.email || undefined,
-          phone: checkout.phone,
+        shipping_address: {
+          name: checkout.fullName.trim(),
+          phone: cleanPhone,
+          address: `${checkout.address.trim()}, ${checkout.city.trim()}`,
         },
-        shippingDetails: {
-          address: checkout.address,
-          city: checkout.city,
-        },
-        items: cart.map((line) => ({
-          productId: line.productId,
-          size: line.size,
-          qty: line.qty,
-        })),
-        subtotal: cartSubtotal,
-        shipping: shipping,
-        tax: tax,
-        total: total,
-        paymentMethod: checkout.payment,
-        notes: checkout.note || undefined,
       };
 
       const response = await createOrderApi(orderPayload);
@@ -749,9 +743,15 @@ function App() {
         setLatestCartLine(null);
         setNotice({
           kind: "success",
-          message: `Order ${orderId} placed successfully.`,
+          message: orderId
+            ? `Order ${orderId} placed successfully.`
+            : response.message || "Order placed successfully.",
         });
-        navigateToHash(`${APP_ROUTES.orderSuccess}/${orderId}`);
+        navigateToHash(
+          orderId
+            ? `${APP_ROUTES.orderSuccess}/${encodeURIComponent(orderId)}`
+            : APP_ROUTES.orderSuccess,
+        );
       } else if (checkout.payment === "CARD") {
         const stripeItems = cartRows.map((row) => ({
           productId: row.product.id,

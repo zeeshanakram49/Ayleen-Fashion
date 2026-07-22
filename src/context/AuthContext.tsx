@@ -18,6 +18,9 @@ import type { AuthContextType } from "./authContextValue";
 function extractPayload(response: unknown): Record<string, unknown> | null {
   if (response && typeof response === "object") {
     const resObj = response as Record<string, unknown>;
+    if (resObj.payload && typeof resObj.payload === "object") {
+      return resObj.payload as Record<string, unknown>;
+    }
     if (resObj.data && typeof resObj.data === "object") {
       return resObj.data as Record<string, unknown>;
     }
@@ -33,9 +36,12 @@ function extractToken(response: unknown): string | null {
   const token = payload.token ?? payload.access_token;
   if (typeof token === "string") return token;
 
-  const dataPayload = payload.data as Record<string, unknown> | undefined;
-  if (dataPayload && typeof dataPayload.token === "string") {
-    return dataPayload.token;
+  const nestedPayload = (payload.data ?? payload.payload) as
+    | Record<string, unknown>
+    | undefined;
+  if (nestedPayload) {
+    const nestedToken = nestedPayload.token ?? nestedPayload.access_token;
+    if (typeof nestedToken === "string") return nestedToken;
   }
 
   return null;
@@ -50,9 +56,15 @@ function extractUser(response: unknown): User | null {
     return user as User;
   }
 
-  const dataPayload = payload.data as Record<string, unknown> | undefined;
-  if (dataPayload && dataPayload.user && typeof dataPayload.user === "object") {
-    return dataPayload.user as User;
+  const nestedPayload = (payload.data ?? payload.payload) as
+    | Record<string, unknown>
+    | undefined;
+  if (
+    nestedPayload &&
+    nestedPayload.user &&
+    typeof nestedPayload.user === "object"
+  ) {
+    return nestedPayload.user as User;
   }
 
   return null;
