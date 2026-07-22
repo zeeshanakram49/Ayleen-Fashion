@@ -2,6 +2,7 @@ import axiosClient from "./axiosClient";
 import { API_ROUTES } from "./apiRoutes";
 import type { Order } from "./apiTypes";
 import type { ApiResponse } from "./apiTypes";
+import { getOrCreateGuestToken } from "../services/guestTokenService";
 
 export interface CreateOrderPayload {
   shipping_address: {
@@ -60,7 +61,11 @@ function firstNumber(
 }
 
 export async function createOrderApi(payload: CreateOrderPayload): Promise<ApiResponse<{ orderId: string; total: number }>> {
-  const response = await axiosClient.post(API_ROUTES.orders.create, payload);
+  const response = await axiosClient.post(API_ROUTES.orders.create, payload, {
+    headers: {
+      "X-Guest-Token": getOrCreateGuestToken(),
+    },
+  });
   const root = asRecord(response.data) ?? {};
   const responsePayload = asRecord(root.payload);
   const responseData = asRecord(root.data);

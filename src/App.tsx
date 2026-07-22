@@ -384,8 +384,9 @@ function App() {
 
   async function syncRemoteCart(
     request: () => Promise<{ payload?: CartItem[]; data?: CartItem[] }>,
+    options?: { allowGuest?: boolean },
   ) {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated && !options?.allowGuest) return;
 
     try {
       const response = await request();
@@ -609,7 +610,9 @@ function App() {
     });
     setCartDrawerOpen(true);
 
-    void syncRemoteCart(() => addToCartApi(productId, finalSize, qty));
+    void syncRemoteCart(() => addToCartApi(productId, qty), {
+      allowGuest: true,
+    });
   }
 
   function updateCartQty(productId: string, size: string, qty: number) {

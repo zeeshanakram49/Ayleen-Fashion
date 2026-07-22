@@ -193,13 +193,16 @@ export function ShopPage({
       setPageLoading(true);
       setPageError("");
       try {
+        const hasSelectedChild = Boolean(
+          subCategoryId && subCategoryId !== "all",
+        );
         const fetchParams: Record<string, unknown> = { page };
-        if (subCategoryId && subCategoryId !== "all") {
-          fetchParams.sub_category_id = subCategoryId;
-        }
+        const endpoint = hasSelectedChild
+          ? API_ROUTES.catalog.productsByCategory(subCategoryId)
+          : API_ROUTES.catalog.categoryWithProducts(categoryId);
 
         const response = await axiosClient.get<CategoryProductsResponse>(
-          API_ROUTES.catalog.categoryWithProducts(categoryId),
+          endpoint,
           {
             params: fetchParams,
             signal: controller.signal,
@@ -210,14 +213,14 @@ export function ShopPage({
         if (data.responseCode === 200 && data.payload) {
           const productPayload = data.payload.products;
           const rawProducts = productPayload?.data ?? data.payload.data ?? [];
-          const nextChildCategories = data.payload.child_categories || [];
+          const nextChildCategories = data.payload.child_categories ?? [];
           const childCategoryIds = new Set(
             nextChildCategories.map((child) => String(child.id)),
           );
-          const mappedProducts = rawProducts
-            .map((raw) => mapApiProduct(raw))
-            .filter(
-              (product) => {
+          const mappedProducts = rawProducts.map((raw) => mapApiProduct(raw));
+          const productsForSelectedCategory = hasSelectedChild
+            ? mappedProducts
+            : mappedProducts.filter((product) => {
                 const belongsToSelectedParent =
                   product.categoryId === "all" ||
                   product.categoryId === categoryId;
@@ -228,13 +231,16 @@ export function ShopPage({
                     childCategoryIds.has(String(product.subCategoryId)));
 
                 return belongsToSelectedParent || belongsToSelectedChild;
-              },
-            );
+              });
 
-          setParentCategory(data.payload.parent_category ?? null);
-          setChildCategories(nextChildCategories);
-          setApiProducts(mappedProducts);
-          onProductsLoaded(mappedProducts);
+          // The child-category endpoint only returns products and pagination.
+          // Keep the parent endpoint's metadata so the tabs remain visible.
+          if (!hasSelectedChild) {
+            setParentCategory(data.payload.parent_category ?? null);
+            setChildCategories(nextChildCategories);
+          }
+          setApiProducts(productsForSelectedCategory);
+          onProductsLoaded(productsForSelectedCategory);
           setPagination(productPayload?.pagination ?? data.payload.pagination ?? null);
           setLastLoadedCategoryId(categoryId);
         } else {
@@ -361,6 +367,31 @@ export function ShopPage({
         : "shop-product-grid--quad";
 
   const selectedCategory = categories.find((category) => category.id === categoryId);
+  const fallbackChildCategories = useMemo<ChildCategoryData[]>(
+    () =>
+      categories
+        .filter((category) => category.parentId === categoryId)
+        .map((category) => ({
+          id: Number(category.id),
+          title: category.name,
+          slug: "",
+          summary: category.subtitle,
+          photo: category.image ? [category.image] : [],
+          is_parent: "0",
+          parent_id: categoryId,
+          status: "active",
+        }))
+        .filter((category) => Number.isFinite(category.id)),
+    [categories, categoryId],
+  );
+  const visibleChildCategories = useMemo(() => {
+    const matchingApiChildren = childCategories.filter(
+      (child) => String(child.parent_id) === categoryId,
+    );
+    return matchingApiChildren.length > 0
+      ? matchingApiChildren
+      : fallbackChildCategories;
+  }, [childCategories, fallbackChildCategories, categoryId]);
   const collectionTitle = parentCategory?.title || selectedCategory?.name || "Collection";
   const normalizedGender = parentCategory?.gender?.toLowerCase();
   const audienceLabel =
@@ -478,7 +509,7 @@ export function ShopPage({
             >
               ALL
             </button>
-            {childCategories.map((child) => {
+            {visibleChildCategories.map((child) => {
               const active = String(child.id) === subCategoryId;
               return (
                 <button

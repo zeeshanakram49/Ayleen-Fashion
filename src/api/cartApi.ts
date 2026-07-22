@@ -2,14 +2,23 @@ import axiosClient from "./axiosClient";
 import { API_ROUTES } from "./apiRoutes";
 import type { CartItem } from "../types/store";
 import type { ApiResponse } from "./apiTypes";
+import { getOrCreateGuestToken } from "../services/guestTokenService";
 
 export async function fetchCartApi(): Promise<ApiResponse<CartItem[]>> {
   const response = await axiosClient.get(API_ROUTES.cart.list);
   return response.data;
 }
 
-export async function addToCartApi(productId: string, size: string, qty: number): Promise<ApiResponse<CartItem[]>> {
-  const response = await axiosClient.post(API_ROUTES.cart.add, { productId, size, qty });
+export async function addToCartApi(productId: string, qty: number): Promise<ApiResponse<CartItem[]>> {
+  const formData = new FormData();
+  formData.append("product_id", productId);
+  formData.append("quantity", String(qty));
+
+  const response = await axiosClient.post(API_ROUTES.cart.add, formData, {
+    headers: {
+      "X-Guest-Token": getOrCreateGuestToken(),
+    },
+  });
   return response.data;
 }
 

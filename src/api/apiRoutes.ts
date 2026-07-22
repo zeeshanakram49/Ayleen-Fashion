@@ -14,6 +14,8 @@ export const API_ROUTES = {
     banners: "/api/banners",
     categoryWithProducts: (categoryId: string | number) =>
       `/api/fetch/${categoryId}/products`,
+    productsByCategory: (categoryId: string | number) =>
+      `/api/category/product/${categoryId}`,
     productBySlug: (slug: string) => `/api/products/${slug}`,
     search: "/api/products/search",
     featured: "/api/products/featured",
@@ -33,7 +35,7 @@ export const API_ROUTES = {
 
   cart: {
     list: "/api/cart",
-    add: "/api/cart/add",
+    add: "/api/add/to/cart",
     update: "/api/cart/update",
     remove: "/api/cart/remove",
     clear: "/api/cart/clear",
