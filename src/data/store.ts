@@ -54,7 +54,10 @@ export const initialCheckout: CheckoutState = {
   email: "",
   phone: "",
   address: "",
+  address2: "",
   city: "",
+  country: "Pakistan",
+  postCode: "54000",
   payment: "COD",
   note: "",
 };

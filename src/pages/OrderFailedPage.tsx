@@ -79,7 +79,8 @@ export function OrderFailedPage({
           <button
             type="button"
             onClick={() => navigateToHash(APP_ROUTES.checkout)}
-            className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--ink)] bg-[var(--ink)] px-8 py-4 text-xs font-semibold tracking-[0.2em] text-[var(--champagne)] transition-opacity hover:opacity-90 uppercase"
+            style={{ color: "#ffffff", backgroundColor: "var(--ink)" }}
+            className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--ink)] px-8 py-4 text-xs font-semibold tracking-[0.2em] text-white transition-opacity hover:opacity-90 uppercase"
           >
             Retry Payment
           </button>

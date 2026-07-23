@@ -43,7 +43,7 @@ import { PaymentProcessingPage } from "./pages/PaymentProcessingPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { APP_ROUTES } from "./routes/appRoutes";
 import { getHashUrl, navigateToHash } from "./routes/routeUtils";
-import { createOrderApi } from "./api/orderApi";
+import { createOrderApi, type CreateOrderPayload } from "./api/orderApi";
 import {
   processStripePayment,
   processJazzCashPayment,
@@ -664,15 +664,6 @@ function App() {
   async function placeOrder(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!isAuthenticated) {
-      setNotice({
-        kind: "info",
-        message: "Please sign in before placing your order.",
-      });
-      navigateToHash(APP_ROUTES.login);
-      return;
-    }
-
     if (
       !checkout.fullName ||
       !checkout.phone ||
@@ -723,11 +714,16 @@ function App() {
     setIsProcessing(true);
 
     try {
-      const orderPayload = {
+      const orderPayload: CreateOrderPayload = {
         shipping_address: {
           name: checkout.fullName.trim(),
           phone: cleanPhone,
-          address: `${checkout.address.trim()}, ${checkout.city.trim()}`,
+          address: checkout.address.trim(),
+          city: checkout.city.trim(),
+          country: checkout.country?.trim() || "Pakistan",
+          email: checkout.email.trim(),
+          post_code: checkout.postCode?.trim() || "54000",
+          address2: checkout.address2?.trim() || "",
         },
       };
 

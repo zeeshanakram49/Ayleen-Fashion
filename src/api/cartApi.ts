@@ -17,6 +17,7 @@ export async function addToCartApi(productId: string, qty: number): Promise<ApiR
   const response = await axiosClient.post(API_ROUTES.cart.add, formData, {
     headers: {
       "X-Guest-Token": getOrCreateGuestToken(),
+      Accept: "application/json",
     },
   });
   return response.data;

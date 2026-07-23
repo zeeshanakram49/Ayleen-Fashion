@@ -66,12 +66,16 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
     };
   }, [resolvedOrderId, sessionId]);
 
-  // Fallbacks if backend doesn't load or returned blank
-  const displayId = order?.orderNumber || resolvedOrderId || "AY-726481";
-  const displayMethod = order?.paymentMethod === "COD" ? "Cash on Delivery" : order?.paymentMethod || "Credit / Debit Card";
+  // Display helpers from normalized backend order response
+  const displayId = order?.orderNumber || resolvedOrderId || "ORD-FS5HE43ASH";
+  const displayCustomer = order?.customerName || "Valued Customer";
+  const displayAddress = order?.shippingAddress || "";
+  const displayMethod = order?.paymentMethod === "COD" ? "Cash on Delivery" : order?.paymentMethod || "Cash on Delivery";
+  const displayPaymentStatus = order?.paymentStatus || "unpaid";
   const displayAmount = order?.total || 0;
-  const displayPhone = order?.customerPhone || "Provided Phone Number";
-  const displayEmail = order?.customerEmail || "Provided Email Address";
+  const displayPhone = order?.customerPhone || "";
+  const displayEmail = order?.customerEmail || "";
+  const items = order?.items || [];
 
   return (
     <section className="mx-auto max-w-3xl px-5 py-16 sm:px-6 md:py-20 lg:py-24">
@@ -100,34 +104,77 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
           Thank you for choosing Aylee
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
-          Your order has been placed successfully and is being processed. Confirmation is sent to <span className="font-semibold text-[var(--ink)]">{displayEmail}</span>.
+          Your order has been placed successfully and is being processed. Confirmation is sent to <span className="font-semibold text-[var(--ink)]">{displayEmail || displayPhone || "your contact"}</span>.
         </p>
 
         {loading ? (
           <div className="mt-10 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6 h-28 animate-shimmer"></div>
         ) : (
-          <div className="mt-10 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6 text-left sm:p-8">
-            <h2 className="text-xs font-semibold tracking-[0.2em] text-[var(--ink)] uppercase border-b border-[var(--line-strong)] pb-3">
-              Summary Details
-            </h2>
-            <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-              <div>
-                <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Order Number</span>
-                <span className="mt-1 block font-mono font-bold text-[var(--ink)]">{displayId}</span>
-              </div>
-              <div>
-                <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Payment Method</span>
-                <span className="mt-1 block font-medium text-[var(--ink)]">{displayMethod}</span>
-              </div>
-              <div>
-                <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Total Amount</span>
-                <span className="mt-1 block font-semibold text-[var(--ink)]">{money(displayAmount)}</span>
-              </div>
-              <div>
-                <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Delivery Contact</span>
-                <span className="mt-1 block font-medium text-[var(--ink)]">{displayPhone}</span>
+          <div className="mt-10 space-y-6 text-left">
+            <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6 sm:p-8">
+              <h2 className="text-xs font-semibold tracking-[0.2em] text-[var(--ink)] uppercase border-b border-[var(--line-strong)] pb-3">
+                Order Summary Details
+              </h2>
+              <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+                <div>
+                  <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Order Number</span>
+                  <span className="mt-1 block font-mono font-bold text-[var(--ink)]">{displayId}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Customer Name</span>
+                  <span className="mt-1 block font-medium text-[var(--ink)]">{displayCustomer}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Total Amount</span>
+                  <span className="mt-1 block font-semibold text-[var(--ink)]">{money(displayAmount)}</span>
+                </div>
+                <div>
+                  <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Payment Status</span>
+                  <span className="mt-1 block font-medium capitalize text-[var(--ink)]">{displayMethod} ({displayPaymentStatus})</span>
+                </div>
+                {displayPhone && (
+                  <div>
+                    <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Phone</span>
+                    <span className="mt-1 block font-medium text-[var(--ink)]">{displayPhone}</span>
+                  </div>
+                )}
+                {displayEmail && (
+                  <div>
+                    <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Email</span>
+                    <span className="mt-1 block font-medium text-[var(--ink)]">{displayEmail}</span>
+                  </div>
+                )}
+                {displayAddress && (
+                  <div className="sm:col-span-2">
+                    <span className="block text-[11px] tracking-wider text-[var(--muted)] uppercase">Shipping Address</span>
+                    <span className="mt-1 block font-medium text-[var(--ink)]">{displayAddress}</span>
+                  </div>
+                )}
               </div>
             </div>
+
+            {items.length > 0 && (
+              <div className="rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--panel)] p-6 sm:p-8">
+                <h2 className="text-xs font-semibold tracking-[0.2em] text-[var(--ink)] uppercase border-b border-[var(--line-strong)] pb-3">
+                  Ordered Items ({items.length})
+                </h2>
+                <div className="mt-4 divide-y divide-[var(--line)]">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-3">
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--ink)]">{item.productTitle}</p>
+                        <p className="text-xs text-[var(--muted)]">
+                          Qty: {item.qty} &middot; Price: {money(item.price)}
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold text-[var(--ink)]">
+                        {money(item.price * item.qty)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -155,7 +202,8 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
         <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
           <a
             href={getHashUrl(APP_ROUTES.shop)}
-            className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--ink)] bg-[var(--ink)] px-8 py-4 text-xs font-semibold tracking-[0.2em] text-[var(--champagne)] transition-opacity hover:opacity-90 uppercase"
+            style={{ color: "#ffffff", backgroundColor: "var(--ink)" }}
+            className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--ink)] px-8 py-4 text-xs font-semibold tracking-[0.2em] text-white transition-opacity hover:opacity-90 uppercase"
           >
             Continue Shopping
           </a>

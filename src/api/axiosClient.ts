@@ -3,6 +3,7 @@ import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { ENV } from "../config/env";
 import { APP_ROUTES } from "../routes/appRoutes";
 import { getToken, removeToken, removeUser } from "../services/tokenService";
+import { getOrCreateGuestToken } from "../services/guestTokenService";
 import type { ApiError } from "./apiTypes";
 
 const axiosClient = axios.create({
@@ -16,6 +17,12 @@ axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const guestToken = getOrCreateGuestToken();
+  if (guestToken) {
+    config.headers = config.headers ?? {};
+    config.headers["X-Guest-Token"] = guestToken;
   }
 
   return config;

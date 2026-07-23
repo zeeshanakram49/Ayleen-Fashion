@@ -62,7 +62,10 @@ export type CheckoutState = {
   email: string;
   phone: string;
   address: string;
+  address2?: string;
   city: string;
+  country?: string;
+  postCode?: string;
   payment: 'COD' | 'JAZZCASH' | 'EASYPAISA' | 'CARD';
   note: string;
 };

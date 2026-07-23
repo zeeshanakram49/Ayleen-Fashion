@@ -365,6 +365,8 @@ export function ShopPage({
       : gridLayout === "double"
         ? "shop-product-grid--double"
         : "shop-product-grid--quad";
+  const skeletonCount =
+    gridLayout === "single" ? 1 : gridLayout === "double" ? 2 : 5;
 
   const selectedCategory = categories.find((category) => category.id === categoryId);
   const fallbackChildCategories = useMemo<ChildCategoryData[]>(
@@ -526,11 +528,16 @@ export function ShopPage({
         </header>
 
         {/* loading / error / list states */}
-        {pageLoading && apiProducts.length === 0 ? (
-          <div className={`shop-product-grid ${gridClass}`} aria-label="Loading products">
-            {Array.from({ length: 5 }, (_, index) => (
+        {pageLoading ? (
+          <div
+            className={`shop-product-grid ${gridClass}`}
+            role="status"
+            aria-live="polite"
+            aria-label="Loading products"
+          >
+            {Array.from({ length: skeletonCount }, (_, index) => (
               <div
-                key={index}
+                key={`${subCategoryId || "all"}-${index}`}
                 className="shop-product-skeleton animate-shimmer"
               />
             ))}

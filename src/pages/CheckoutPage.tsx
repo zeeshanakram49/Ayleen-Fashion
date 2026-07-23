@@ -341,8 +341,8 @@ export function CheckoutPage({
 
           <a
             href={getHashUrl(APP_ROUTES.shop)}
-            style={{ color: '#fff', backgroundColor: 'var(--ink)' }}
-            className="mt-8 inline-flex rounded-[var(--radius-sm)] px-6 py-3 text-xs font-semibold tracking-[0.18em] transition-opacity hover:opacity-90"
+            style={{ color: '#ffffff', backgroundColor: 'var(--ink)' }}
+            className="mt-8 inline-flex rounded-[var(--radius-sm)] px-6 py-3 text-xs font-semibold tracking-[0.18em] text-white transition-opacity hover:opacity-90"
           >
             CONTINUE SHOPPING
           </a>
@@ -424,19 +424,38 @@ export function CheckoutPage({
                     className="sm:col-span-2"
                   />
                   <FloatingInput
+                    id="address2"
+                    label="Address Line 2 / Landmark (optional)"
+                    value={checkout.address2 || ''}
+                    onChange={(v) => onCheckoutChange('address2', v)}
+                    className="sm:col-span-2"
+                  />
+                  <FloatingInput
                     id="city"
                     label="City"
                     required
                     list="checkout-city-list"
                     value={checkout.city}
                     onChange={(v) => onCheckoutChange('city', v)}
-                    className="sm:col-span-2"
+                  />
+                  <FloatingInput
+                    id="postCode"
+                    label="Postal Code (optional)"
+                    value={checkout.postCode || ''}
+                    onChange={(v) => onCheckoutChange('postCode', v)}
                   />
                   <datalist id="checkout-city-list">
                     {pakistaniCities.map((city) => (
                       <option key={city} value={city} />
                     ))}
                   </datalist>
+                  <FloatingInput
+                    id="country"
+                    label="Country"
+                    value={checkout.country || 'Pakistan'}
+                    onChange={(v) => onCheckoutChange('country', v)}
+                    className="sm:col-span-2"
+                  />
                   <div className="flex items-center gap-2 text-xs text-[var(--muted)] sm:col-span-2">
                     <span className="inline-flex h-5 items-center rounded-full border border-[var(--line-strong)] px-2 text-[10px] font-semibold tracking-[0.12em] text-[var(--ink)]">
                       PK
