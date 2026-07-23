@@ -1,6 +1,7 @@
 import axiosClient from "./axiosClient";
 import type { Banner, Category, Product } from "../types/store";
 import { API_ROUTES } from "./apiRoutes";
+import { ENV } from "../config/env";
 
 type RawCategory = Record<string, unknown>;
 type RawProduct = Record<string, unknown>;
@@ -92,7 +93,7 @@ export function normalizeImageUrl(value: string): string {
   if (!value) return DEFAULT_PRODUCT_IMAGE;
   if (/^(https?:)?\/\//i.test(value) || value.startsWith("data:")) return value;
 
-  const absoluteBase = "http://admin.aylee.store";
+  const absoluteBase = ENV.API_BASE_URL;
   let path = value;
 
   if (path.startsWith("uploads/") || path.startsWith("/uploads/")) {
