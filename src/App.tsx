@@ -5,10 +5,7 @@ import { Header } from "./components/Header";
 import {
   categories,
   initialCheckout,
-  navLinks,
   products,
-  services,
-  testimonials,
 } from "./data/store";
 import { orderTotal, parseHash, shippingFee, taxAmount } from "./lib/store";
 import { AboutPage } from "./pages/AboutPage";
@@ -20,6 +17,7 @@ import { HomePage } from "./pages/HomePage";
 import { ProductPage } from "./pages/ProductPage";
 import { ShopPage } from "./pages/ShopPage";
 import { WishlistPage } from "./pages/WishlistPage";
+import { TrackOrderPage } from "./pages/TrackOrderPage";
 import type {
   CartItem,
   CartRow,
@@ -57,90 +55,73 @@ function App() {
   const [checkout, setCheckout] = useState<CheckoutState>(initialCheckout);
   const [placedOrder, setPlacedOrder] = useState("");
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
-  const [latestCartLine, setLatestCartLine] = useState<{
-    productId: string;
-    size: string;
-  } | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
 
+  // Sync cart to local storage
   useEffect(() => {
     localStorage.setItem("ayleen_cart_v1", JSON.stringify(cart));
   }, [cart]);
 
+  // Sync wishlist to local storage
   useEffect(() => {
     localStorage.setItem("ayleen_wishlist_v1", JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // Notice auto-dismiss
   useEffect(() => {
     if (!notice) return;
     const timer = window.setTimeout(() => setNotice(null), 2200);
     return () => window.clearTimeout(timer);
   }, [notice]);
 
+  // Hash change listener
   useEffect(() => {
     const onHash = () => setRoute(parseHash());
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  // Sync category & query states based on route
   useEffect(() => {
-    const titles: Record<Route["page"], string> = {
-      home: "AYLEEN | Premium Fashion",
-      shop: "Shop | AYLEEN",
-      product: "Product | AYLEEN",
-      wishlist: "Wishlist | AYLEEN",
-      cart: "Cart | AYLEEN",
-      checkout: "Checkout | AYLEEN",
-      account: "Account | AYLEEN",
-      about: "About | AYLEEN",
-      contact: "Contact | AYLEEN",
-    };
-    document.title = titles[route.page];
+    if (route.page === "men") {
+      setActiveCategory("men");
+      setQuery("");
+    } else if (route.page === "women") {
+      setActiveCategory("women");
+      setQuery("");
+    } else if (route.page === "juniors") {
+      setActiveCategory("juniors");
+      setQuery("");
+    } else if (route.page === "new-arrivals") {
+      setActiveCategory("all");
+      setQuery("new-in");
+    } else if (route.page === "sale") {
+      setActiveCategory("all");
+      setQuery("sale");
+    }
   }, [route]);
 
+  // Set page titles
   useEffect(() => {
-    const sections = Array.from(
-      document.querySelectorAll<HTMLElement>("main section"),
-    );
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (prefersReducedMotion) {
-      sections.forEach((section) => {
-        const targets = section.querySelectorAll<HTMLElement>(
-          ".reveal-up, .reveal-scale",
-        );
-        targets.forEach((target) => target.classList.add("is-visible"));
-      });
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-
-          const section = entry.target as HTMLElement;
-          const targets = section.querySelectorAll<HTMLElement>(
-            ".reveal-up, .reveal-scale",
-          );
-          targets.forEach((target, index) => {
-            target.style.setProperty(
-              "--section-stagger",
-              `${Math.min(index * 70, 420)}ms`,
-            );
-            target.classList.add("is-visible");
-          });
-
-          observer.unobserve(section);
-        });
-      },
-      { threshold: 0.2, rootMargin: "0px 0px -12% 0px" },
-    );
-
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    const titles: Record<Route["page"], string> = {
+      home: "AYLEEN | Premium Fashion Brand",
+      shop: "Catalogue | AYLEEN",
+      men: "Men | AYLEEN",
+      women: "Women | AYLEEN",
+      juniors: "Juniors | AYLEEN",
+      "new-arrivals": "New Arrivals | AYLEEN",
+      sale: "Exclusive Sale | AYLEEN",
+      product: "Garment Details | AYLEEN",
+      wishlist: "Curated Wishlist | AYLEEN",
+      cart: "Shopping Bag | AYLEEN",
+      checkout: "Secure Checkout | AYLEEN",
+      account: "Membership Account | AYLEEN",
+      about: "Our Story | AYLEEN",
+      contact: "Contact Us | AYLEEN",
+      "track-order": "Track Shipment | AYLEEN",
+      search: "Search | AYLEEN",
+    };
+    document.title = titles[route.page] || "AYLEEN";
   }, [route]);
 
   const cartRows = useMemo<CartRow[]>(() => {
@@ -165,28 +146,21 @@ function App() {
     [cart],
   );
 
-  const storefrontProducts = useMemo(
-    () =>
-      products.filter(
-        (product) =>
-          product.categoryId !== "women" && !product.tags.includes("shoes"),
-      ),
-    [],
-  );
+  // Expose all products including women's
+  const storefrontProducts = useMemo(() => products, []);
 
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
     const visible = storefrontProducts.filter((product) => {
       const categoryMatch =
-        activeCategory === "all" || product.categoryId === activeCategory;
+        activeCategory === "all" ||
+        product.categoryId === activeCategory ||
+        product.tags.includes(activeCategory);
       const queryMatch =
         q.length === 0 ||
         product.title.toLowerCase().includes(q) ||
         product.description.toLowerCase().includes(q) ||
         product.categoryLabel.toLowerCase().includes(q) ||
-        product.fit.toLowerCase().includes(q) ||
-        product.material.toLowerCase().includes(q) ||
-        product.badge.toLowerCase().includes(q) ||
         product.colors.some((color) => color.toLowerCase().includes(q)) ||
         product.tags.some((tag) => tag.toLowerCase().includes(q));
       return categoryMatch && queryMatch;
@@ -207,6 +181,7 @@ function App() {
     () => storefrontProducts.filter((product) => wishlist.includes(product.id)),
     [storefrontProducts, wishlist],
   );
+
   const productRoute = useMemo(
     () =>
       route.page === "product"
@@ -214,6 +189,7 @@ function App() {
         : null,
     [route, storefrontProducts],
   );
+
   const relatedProducts = useMemo(() => {
     if (!productRoute) return [];
     return storefrontProducts
@@ -224,16 +200,6 @@ function App() {
       )
       .slice(0, 4);
   }, [productRoute, storefrontProducts]);
-  const latestCartRow = useMemo(() => {
-    if (!latestCartLine) return null;
-    return (
-      cartRows.find(
-        (row) =>
-          row.productId === latestCartLine.productId &&
-          row.size === latestCartLine.size,
-      ) ?? null
-    );
-  }, [cartRows, latestCartLine]);
 
   function toggleWishlist(productId: string) {
     setWishlist((prev) =>
@@ -285,10 +251,12 @@ function App() {
             : line,
         );
       }
-      return [...prev, { productId, size: finalSize, qty: Math.min(qty, product.stock) }];
+      return [
+        ...prev,
+        { productId, size: finalSize, qty: Math.min(qty, product.stock) },
+      ];
     });
 
-    setLatestCartLine({ productId, size: finalSize });
     setNotice({
       kind: "success",
       message: `${product.title} added to your bag.`,
@@ -327,7 +295,7 @@ function App() {
     setActiveCategory(categoryId);
     setQuery(nextQuery);
     setSortBy("featured");
-    window.location.hash = "/shop";
+    window.location.hash = `/shop`;
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -361,7 +329,6 @@ function App() {
     setCart([]);
     setCheckout(initialCheckout);
     setCartDrawerOpen(false);
-    setLatestCartLine(null);
     setNotice({
       kind: "success",
       message: `Order ${orderId} placed successfully.`,
@@ -370,9 +337,8 @@ function App() {
   }
 
   return (
-    <div className="premium-scene min-h-screen text-[var(--ink)]">
+    <div className="min-h-screen text-[var(--ink)]">
       <Header
-        navLinks={navLinks}
         route={route}
         activeCategory={activeCategory}
         activeQuery={query}
@@ -382,9 +348,10 @@ function App() {
         onShopCategory={navigateToShop}
       />
 
+      {/* Floating Notice Toast */}
       {notice && (
-        <div className="fixed right-4 top-24 z-[60] max-w-sm rounded-2xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm shadow-xl">
-          <p className="font-medium">{notice.message}</p>
+        <div className="fixed right-4 z-[250] max-w-sm border border-black/5 bg-white/95 backdrop-blur-md px-5 py-3.5 text-xs font-semibold tracking-wide shadow-xl" style={{ top: 'calc(var(--total-header) + 12px)' }}>
+          <p className="font-medium text-[var(--ink)]">{notice.message}</p>
         </div>
       )}
 
@@ -392,8 +359,6 @@ function App() {
         {route.page === "home" && (
           <HomePage
             products={storefrontProducts}
-            services={services}
-            testimonials={testimonials}
             wishlist={wishlist}
             selectedSize={selectedSize}
             onPickSize={pickSize}
@@ -404,9 +369,13 @@ function App() {
           />
         )}
 
-        {route.page === "shop" && (
+        {(route.page === "shop" ||
+          route.page === "men" ||
+          route.page === "women" ||
+          route.page === "juniors" ||
+          route.page === "new-arrivals" ||
+          route.page === "sale") && (
           <ShopPage
-            categories={categories}
             products={filteredProducts}
             activeCategory={activeCategory}
             query={query}
@@ -443,11 +412,11 @@ function App() {
 
         {route.page === "product" && !productRoute && (
           <section className="mx-auto max-w-7xl px-6 py-16">
-            <article className="rounded-3xl border border-[var(--line)] bg-[var(--panel)] p-10 text-center">
+            <article className="rounded-3xl border border-black/5 bg-[var(--panel)] p-10 text-center">
               <h1 className="font-editorial text-4xl">Product not found</h1>
               <a
                 href="#/shop"
-                className="mt-5 inline-flex rounded-full border border-[var(--line-strong)] px-5 py-2 text-xs tracking-[0.18em]"
+                className="mt-5 inline-flex rounded-full border border-black/15 px-5 py-2 text-xs tracking-[0.18em]"
               >
                 BACK TO SHOP
               </a>
@@ -477,6 +446,12 @@ function App() {
             total={total}
             onUpdateQty={updateCartQty}
             onRemoveLine={removeCartLine}
+            wishlist={wishlist}
+            selectedSize={selectedSize}
+            onPickSize={pickSize}
+            onToggleWishlist={toggleWishlist}
+            onAddToCart={addToCart}
+            onOpenProduct={openProduct}
           />
         )}
 
@@ -497,16 +472,19 @@ function App() {
         {route.page === "about" && <AboutPage />}
         {route.page === "account" && <AccountPage />}
         {route.page === "contact" && <ContactPage />}
+        {route.page === "track-order" && <TrackOrderPage />}
       </main>
 
       <Footer categories={categories} />
 
       <CartDrawer
         open={cartDrawerOpen}
-        latestItem={latestCartRow}
+        rows={cartRows}
         cartCount={cartCount}
         subtotal={cartSubtotal}
         onClose={() => setCartDrawerOpen(false)}
+        onUpdateQty={updateCartQty}
+        onRemoveLine={removeCartLine}
       />
     </div>
   );

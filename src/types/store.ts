@@ -52,20 +52,36 @@ export type CheckoutState = {
   phone: string;
   address: string;
   city: string;
-  payment: 'COD' | 'CARD';
+  payment: 'COD' | 'CARD' | 'JAZZCASH' | 'EASYPAISA' | 'BANK';
   note: string;
+  jazzcashMobile?: string;
+  cnicLast6?: string;
+  easypaisaMobile?: string;
+  easypaisaName?: string;
+  cardName?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCvv?: string;
+  bankScreenshot?: string | null; // Base64 or filename placeholder
 };
 
 export type Route =
   | { page: 'home' }
   | { page: 'shop' }
+  | { page: 'men' }
+  | { page: 'women' }
+  | { page: 'juniors' }
+  | { page: 'new-arrivals' }
+  | { page: 'sale' }
   | { page: 'product'; slug: string }
   | { page: 'wishlist' }
   | { page: 'cart' }
   | { page: 'checkout' }
   | { page: 'account' }
   | { page: 'about' }
-  | { page: 'contact' };
+  | { page: 'contact' }
+  | { page: 'track-order' }
+  | { page: 'search' };
 
 export type CartRow = CartItem & { product: Product };
 
@@ -73,3 +89,4 @@ export type Notice = {
   kind: 'success' | 'info';
   message: string;
 };
+

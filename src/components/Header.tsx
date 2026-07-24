@@ -1,8 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  IoSearchOutline,
+  IoHeartOutline,
+  IoBagOutline,
+  IoPersonOutline,
+  IoMenuOutline,
+  IoCloseOutline,
+} from "react-icons/io5";
+import { SearchOverlay } from "./SearchOverlay";
 import type { Route } from "../types/store";
 
 type HeaderProps = {
-  navLinks: { href: string; label: string }[];
   route: Route;
   activeCategory: string;
   activeQuery: string;
@@ -12,91 +21,144 @@ type HeaderProps = {
   onShopCategory: (categoryId: string, query?: string) => void;
 };
 
-type MegaMenuItem = {
-  label: string;
-  categoryId: string;
-  query?: string;
-};
+type MegaItem = { label: string; categoryId: string; query?: string };
 
-type DesktopLink = {
+type NavLink = {
   id: string;
   label: string;
   categoryId: string;
   query?: string;
-  hero: string;
-  title: string;
-  items: MegaMenuItem[];
+  sale?: boolean;
+  mega?: {
+    cols: { title: string; items: MegaItem[] }[];
+  };
 };
 
-const desktopLinks: DesktopLink[] = [
+const navLinks: NavLink[] = [
   {
-    id: "man",
-    label: "MAN",
+    id: "men",
+    label: "MEN",
     categoryId: "men",
-    hero: "/men-knit-khaki-front.png",
-    title: "MAN",
-    items: [
-      { label: "NEW IN", categoryId: "men" },
-      { label: "TEXTURED KNITS", categoryId: "men", query: "knit" },
-      { label: "POLO SHIRTS", categoryId: "men", query: "polo" },
-      { label: "HENLEYS", categoryId: "men", query: "henley" },
-      { label: "SMART CASUAL", categoryId: "men", query: "linen" },
-      { label: "TAILORING", categoryId: "men", query: "formal" },
-    ],
+    mega: {
+      cols: [
+        {
+          title: "",
+          items: [
+            { label: "New In", categoryId: "men", query: "new-in" },
+            { label: "Summer Sale Upto 50% Off", categoryId: "men", query: "sale" },
+          ],
+        },
+        {
+          title: "Shop by Categories",
+          items: [
+            { label: "View All", categoryId: "men" },
+            { label: "T-Shirts", categoryId: "men", query: "tshirt" },
+            { label: "Polos", categoryId: "men", query: "polo" },
+            { label: "Shirts", categoryId: "men", query: "shirt" },
+            { label: "Activewear", categoryId: "men", query: "active" },
+            { label: "Trousers", categoryId: "men", query: "trouser" },
+            { label: "Shorts", categoryId: "men", query: "short" },
+            { label: "Jeans", categoryId: "men", query: "denim" },
+            { label: "Footwear", categoryId: "men", query: "footwear" },
+            { label: "Accessories", categoryId: "men", query: "accessories" },
+          ],
+        },
+        {
+          title: "Shop by Collection",
+          items: [
+            { label: "Essentials", categoryId: "men", query: "essentials" },
+            { label: "Knit Collection", categoryId: "men", query: "knit" },
+            { label: "Summer Edit", categoryId: "men", query: "summer" },
+          ],
+        },
+      ],
+    },
   },
   {
-    id: "accessories",
-    label: "ACCESSORIES",
-    categoryId: "accessories",
-    query: "bags",
-    hero: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1600&auto=format&fit=crop",
-    title: "ACCESSORIES",
-    items: [
-      { label: "BLACK LUXURY BAGS", categoryId: "accessories", query: "bags" },
-      { label: "TOTES", categoryId: "accessories", query: "tote" },
-      { label: "BACKPACKS", categoryId: "accessories", query: "backpack" },
-      { label: "GIFT EDIT", categoryId: "accessories", query: "bags" },
-    ],
+    id: "women",
+    label: "WOMEN",
+    categoryId: "women",
+    mega: {
+      cols: [
+        {
+          title: "",
+          items: [
+            { label: "New In", categoryId: "women", query: "new-in" },
+            { label: "Summer Sale Upto 50% Off", categoryId: "women", query: "sale" },
+          ],
+        },
+        {
+          title: "Shop by Categories",
+          items: [
+            { label: "View All", categoryId: "women" },
+            { label: "Tops", categoryId: "women", query: "top" },
+            { label: "Co-Ords", categoryId: "women", query: "silk" },
+            { label: "Abayas", categoryId: "women", query: "abaya" },
+            { label: "Dresses", categoryId: "women", query: "dress" },
+            { label: "Trousers", categoryId: "women", query: "trouser" },
+            { label: "Activewear", categoryId: "women", query: "active" },
+            { label: "Accessories", categoryId: "women", query: "accessories" },
+          ],
+        },
+        {
+          title: "Shop by Collection",
+          items: [
+            { label: "Silk Edit", categoryId: "women", query: "silk" },
+            { label: "Linen Blend", categoryId: "women", query: "linen" },
+            { label: "Summer Resort", categoryId: "women", query: "summer" },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "juniors",
+    label: "KIDS",
+    categoryId: "juniors",
+    mega: {
+      cols: [
+        {
+          title: "Shop by Categories",
+          items: [
+            { label: "View All Kids", categoryId: "juniors" },
+            { label: "T-Shirts", categoryId: "juniors", query: "tshirt" },
+            { label: "Shorts", categoryId: "juniors", query: "short" },
+            { label: "Sets", categoryId: "juniors", query: "set" },
+            { label: "Accessories", categoryId: "juniors", query: "accessories" },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "new-arrivals",
+    label: "NEW ARRIVALS",
+    categoryId: "all",
+    query: "new-in",
+  },
+  {
+    id: "sale",
+    label: "SALE",
+    categoryId: "all",
+    query: "sale",
+    sale: true,
+    mega: {
+      cols: [
+        {
+          title: "SALE",
+          items: [
+            { label: "Shop All Sale", categoryId: "all", query: "sale" },
+            { label: "Men's Sale", categoryId: "men", query: "sale" },
+            { label: "Women's Sale", categoryId: "women", query: "sale" },
+            { label: "Kids' Sale", categoryId: "juniors", query: "sale" },
+          ],
+        },
+      ],
+    },
   },
 ];
 
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="6.7" />
-      <path d="M16.2 16.2 20 20" />
-    </svg>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 20.4 4.9 13.6a4.6 4.6 0 0 1 6.5-6.5L12 7.7l.6-.6a4.6 4.6 0 0 1 6.5 6.5Z" />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="8.2" r="3.7" />
-      <path d="M5.2 20c.9-3.5 3.1-5.3 6.8-5.3s5.9 1.8 6.8 5.3" />
-    </svg>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 8.4h14l-.9 11.4H5.9z" />
-      <path d="M9 8.4V7a3 3 0 0 1 6 0v1.4" />
-    </svg>
-  );
-}
-
 export function Header({
-  navLinks,
   route,
   activeCategory,
   activeQuery,
@@ -105,261 +167,270 @@ export function Header({
   onOpenCart,
   onShopCategory,
 }: HeaderProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function isActive(href: string) {
-    return (
-      (route.page === "home" && href === "#/") ||
-      (route.page !== "home" && href === `#/${route.page}`)
-    );
-  }
+  useEffect(() => {
+    const handler = () => setIsScrolled(window.scrollY > 80);
+    handler(); // run on mount
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
-  function closeMenu() {
-    setMenuOpen(false);
-  }
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen || searchOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen, searchOpen]);
 
-  function isDesktopLinkActive(categoryId: string, query?: string) {
-    if (route.page !== "shop") return false;
-    if (query) return activeCategory === categoryId && activeQuery === query;
-    return activeCategory === categoryId && !activeQuery;
-  }
+  const openMega = (id: string) => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setOpenMenu(id);
+  };
+  const closeMega = () => {
+    hoverTimerRef.current = setTimeout(() => setOpenMenu(null), 80);
+  };
+  const stayOpen = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+  };
 
-  const activeDesktopMenu =
-    desktopLinks.find((link) => link.id === activeMenu) ?? null;
+  const isActive = (link: NavLink) => {
+    if (route.page === link.id) return true;
+    if (link.query && activeQuery === link.query) return true;
+    if (!link.query && activeCategory === link.categoryId && link.id !== "sale") return true;
+    return false;
+  };
 
   return (
-    <header
-      className={`site-header sticky top-0 z-50 border-b border-black/8 bg-white/95 backdrop-blur-xl ${
-        route.page === "home" ? "site-header-home" : ""
-      }`}
-    >
-      <div className="site-announcement-bar">
-        FREE SHIPPING ON ORDERS ABOVE RS. 2500
-      </div>
-
-      <div
-        className="relative mx-auto hidden min-h-[92px] max-w-[1700px] items-center gap-10 px-8 lg:flex xl:px-12"
-        onMouseLeave={() => setActiveMenu(null)}
-      >
-        <a href="#/" className="site-wordmark shrink-0">
-          AYLEEN
-        </a>
-
-        <nav className="site-desktop-nav" aria-label="Primary navigation">
-          {desktopLinks.map((link) => (
-            <button
-              key={link.id}
-              type="button"
-              onMouseEnter={() => setActiveMenu(link.id)}
-              onFocus={() => setActiveMenu(link.id)}
-              onClick={() => onShopCategory(link.categoryId, link.query)}
-              className={`site-nav-link-minimal ${
-                isDesktopLinkActive(link.categoryId, link.query) ? "is-active" : ""
-              }`}
-            >
-              {link.label}
-            </button>
-          ))}
-          <a href="#/about" className="site-nav-link-minimal">
-            ABOUT
-          </a>
-          <a href="#/contact" className="site-nav-link-minimal">
-            CONTACT
-          </a>
-        </nav>
-
-        <div className="flex shrink-0 items-center gap-2">
-          <a
-            href="#/shop"
-            className="site-icon-link"
-            aria-label="Search products"
-          >
-            <SearchIcon />
-          </a>
-          <a
-            href="#/wishlist"
-            className="site-icon-link"
-            aria-label={`Wishlist, ${wishlistCount} items`}
-          >
-            <HeartIcon />
-            {wishlistCount > 0 && (
-              <span className="site-icon-badge">{wishlistCount}</span>
-            )}
-          </a>
-          <a
-            href="#/account"
-            className="site-icon-link"
-            aria-label="Account login and sign up"
-          >
-            <UserIcon />
-          </a>
-          <button
-            type="button"
-            onClick={onOpenCart}
-            className="site-icon-link"
-            aria-label={`Open bag, ${cartCount} items`}
-          >
-            <BagIcon />
-            {cartCount > 0 && <span className="site-icon-badge">{cartCount}</span>}
-          </button>
-        </div>
-
-        {activeDesktopMenu && (
-          <div className="site-mega-menu">
-            <div className="site-mega-menu-grid">
-              <div className="site-mega-list">
-                {activeDesktopMenu.items.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => onShopCategory(item.categoryId, item.query)}
-                    className="site-mega-link"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  onShopCategory(
-                    activeDesktopMenu.categoryId,
-                    activeDesktopMenu.query,
-                  )
-                }
-                className="site-mega-preview"
-              >
-                <img
-                  src={activeDesktopMenu.hero}
-                  alt={activeDesktopMenu.title}
-                  className="site-mega-preview-image"
-                />
-                <div className="site-mega-preview-overlay" />
-                <div className="site-mega-preview-copy">
-                  <p className="site-mega-preview-label">{activeDesktopMenu.title}</p>
-                  <span className="site-mega-preview-cta">SHOP NOW</span>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-3 px-4 lg:hidden sm:px-6">
-        <a href="#/" className="site-wordmark text-[1.7rem] tracking-[0.16em]">
-          AYLEEN
-        </a>
-
-        <div className="flex items-center gap-1.5">
-          <a
-            href="#/wishlist"
-            className="site-mobile-icon"
-            aria-label={`Wishlist, ${wishlistCount} items`}
-          >
-            <HeartIcon />
-            {wishlistCount > 0 && (
-              <span className="site-icon-badge">{wishlistCount}</span>
-            )}
-          </a>
-          <button
-            type="button"
-            onClick={onOpenCart}
-            className="site-mobile-icon"
-            aria-label={`Open bag, ${cartCount} items`}
-          >
-            <BagIcon />
-            {cartCount > 0 && <span className="site-icon-badge">{cartCount}</span>}
-          </button>
-          <button
-            type="button"
-            aria-label="Toggle menu"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            className="site-mobile-icon"
-          >
-            <span className="space-y-1.5">
-              <span className="site-menu-bar block h-0.5 w-5" />
-              <span className="site-menu-bar block h-0.5 w-5" />
-              <span className="site-menu-bar block h-0.5 w-5" />
+    <>
+      {/* ── ANNOUNCEMENT BAR ── */}
+      <div className="ot-announce-bar">
+        <div className="animate-marquee-infinite">
+          {["FREE SHIPPING ON ORDERS OVER RS. 3,000", "SUMMER SALE — UPTO 50% OFF", "EASY RETURNS WITHIN 7 DAYS", "SHOP MEN · WOMEN · KIDS"].concat(
+            ["FREE SHIPPING ON ORDERS OVER RS. 3,000", "SUMMER SALE — UPTO 50% OFF", "EASY RETURNS WITHIN 7 DAYS", "SHOP MEN · WOMEN · KIDS"]
+          ).map((item, i) => (
+            <span key={i} className="ot-announce-item">
+              {item}
+              <span className="ot-announce-dot">★</span>
             </span>
-          </button>
+          ))}
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="border-t border-black/8 bg-white px-6 py-5 lg:hidden">
-          <div className="grid gap-3 text-[11px] font-semibold tracking-[0.22em]">
-            {desktopLinks.map((link) => (
-              <button
+      {/* ── MAIN HEADER ── */}
+      <header className={`ot-header ${isScrolled ? "ot-header--solid" : "ot-header--transparent"}`}>
+        <div className="ot-header-inner">
+
+          {/* LOGO */}
+          <a href="#/" className={`ot-logo ${isScrolled ? "" : "ot-logo--light"}`} onClick={(e) => { e.preventDefault(); onShopCategory("all"); }}>
+            AYLEEN
+          </a>
+
+          {/* DESKTOP NAV */}
+          <nav className={`ot-desktop-nav ${!isScrolled ? "ot-desktop-nav--light" : ""}`}>
+            {navLinks.map((link) => (
+              <div
                 key={link.id}
-                type="button"
-                onClick={() => {
-                  closeMenu();
-                  onShopCategory(link.categoryId, link.query);
-                }}
-                className={`rounded-full border px-4 py-3 text-center transition-colors ${
-                  isDesktopLinkActive(link.categoryId, link.query)
-                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
-                    : "border-black/10 bg-white"
-                }`}
+                className="ot-nav-item"
+                onMouseEnter={() => link.mega && openMega(link.id)}
+                onMouseLeave={() => link.mega && closeMega()}
               >
-                {link.label}
-              </button>
-            ))}
-            {navLinks
-              .filter((link) => link.href !== "#/shop")
-              .map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMenu}
-                  className={`rounded-full border px-4 py-3 text-center transition-colors ${
-                    isActive(link.href)
-                      ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
-                      : "border-black/10 bg-white"
-                  }`}
+                <button
+                  onClick={() => onShopCategory(link.categoryId, link.query)}
+                  className={`ot-nav-link ${isActive(link) ? "ot-nav-link--active" : ""} ${link.sale ? "ot-nav-link--sale" : ""}`}
                 >
                   {link.label}
-                </a>
-              ))}
-          </div>
+                </button>
 
-          <div className="mt-4 grid gap-3 text-[11px] font-semibold tracking-[0.18em]">
-            <a
-              href="#/shop"
-              onClick={closeMenu}
-              className="rounded-full border border-black/10 bg-white px-4 py-3 text-center"
+                {/* Mega Menu */}
+                {link.mega && (
+                  <AnimatePresence>
+                    {openMenu === link.id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        className="ot-mega"
+                        onMouseEnter={stayOpen}
+                        onMouseLeave={closeMega}
+                      >
+                        <div className="ot-mega-inner">
+                          {link.mega.cols.map((col, ci) => (
+                            <div key={ci} className="ot-mega-col">
+                              {col.title && (
+                                <p className="ot-mega-col-title">{col.title}</p>
+                              )}
+                              <ul className="ot-mega-list">
+                                {col.items.map((item, ii) => (
+                                  <li key={ii}>
+                                    <button
+                                      onClick={() => {
+                                        onShopCategory(item.categoryId, item.query);
+                                        setOpenMenu(null);
+                                      }}
+                                      className={`ot-mega-link ${
+                                        ci === 0 && ii === 1 ? "ot-mega-link--sale" : ""
+                                      }`}
+                                    >
+                                      {item.label}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
+              </div>
+            ))}
+          </nav>
+
+          {/* ICONS */}
+          <div className={`ot-header-icons ${!isScrolled ? "ot-header-icons--light" : ""}`}>
+            <button
+              className="ot-icon-btn"
+              aria-label="Search"
+              onClick={() => setSearchOpen(true)}
             >
-              SEARCH PRODUCTS
+              <IoSearchOutline size={21} />
+            </button>
+            <a href="#/account" className="ot-icon-btn" aria-label="Account">
+              <IoPersonOutline size={21} />
             </a>
-            <a
-              href="#/account"
-              onClick={closeMenu}
-              className="rounded-full border border-black/10 px-4 py-3 text-center"
-            >
-              LOGIN / SIGN UP
-            </a>
-            <a
-              href="#/wishlist"
-              onClick={closeMenu}
-              className="rounded-full border border-black/10 px-4 py-3 text-center"
-            >
-              SAVED {wishlistCount}
+            <a href="#/wishlist" className="ot-icon-btn ot-icon-btn--badge" aria-label="Wishlist" data-count={wishlistCount || undefined}>
+              <IoHeartOutline size={21} />
+              {wishlistCount > 0 && <span className="ot-badge">{wishlistCount}</span>}
             </a>
             <button
-              type="button"
-              onClick={() => {
-                closeMenu();
-                onOpenCart();
-              }}
-              className="rounded-full border border-black/10 px-4 py-3 text-center"
+              className="ot-icon-btn ot-icon-btn--badge"
+              aria-label="Cart"
+              onClick={onOpenCart}
             >
-              BAG {cartCount}
+              <IoBagOutline size={21} />
+              {cartCount > 0 && <span className="ot-badge">{cartCount}</span>}
+            </button>
+            <button
+              className="ot-icon-btn ot-mobile-menu-btn"
+              aria-label="Menu"
+              onClick={() => setMobileOpen(true)}
+            >
+              <IoMenuOutline size={24} />
             </button>
           </div>
         </div>
-      )}
-    </header>
+      </header>
+
+      {/* ── MOBILE DRAWER ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="ot-mobile-backdrop"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              className="ot-mobile-drawer"
+            >
+              {/* Drawer Header */}
+              <div className="ot-drawer-head">
+                <span className="ot-logo">AYLEEN</span>
+                <button onClick={() => setMobileOpen(false)} className="ot-icon-btn">
+                  <IoCloseOutline size={24} />
+                </button>
+              </div>
+
+              {/* Links */}
+              <nav className="ot-drawer-nav">
+                {navLinks.map((link) => (
+                  <div key={link.id} className="ot-drawer-item">
+                    <button
+                      className={`ot-drawer-link ${link.sale ? "ot-drawer-link--sale" : ""}`}
+                      onClick={() => {
+                        if (link.mega) {
+                          setMobileExpanded(mobileExpanded === link.id ? null : link.id);
+                        } else {
+                          onShopCategory(link.categoryId, link.query);
+                          setMobileOpen(false);
+                        }
+                      }}
+                    >
+                      <span>{link.label}</span>
+                      {link.mega && (
+                        <span className={`ot-drawer-chevron ${mobileExpanded === link.id ? "ot-drawer-chevron--open" : ""}`}>
+                          +
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Sub-links */}
+                    <AnimatePresence>
+                      {link.mega && mobileExpanded === link.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.28 }}
+                          className="overflow-hidden"
+                        >
+                          {link.mega.cols.flatMap((col) => col.items).map((item, ii) => (
+                            <button
+                              key={ii}
+                              onClick={() => {
+                                onShopCategory(item.categoryId, item.query);
+                                setMobileOpen(false);
+                              }}
+                              className="ot-drawer-sublink"
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </nav>
+
+              {/* Footer Links */}
+              <div className="ot-drawer-footer">
+                <a href="#/account" onClick={() => setMobileOpen(false)} className="ot-drawer-foot-link">
+                  <IoPersonOutline size={18} /> Account
+                </a>
+                <a href="#/wishlist" onClick={() => setMobileOpen(false)} className="ot-drawer-foot-link">
+                  <IoHeartOutline size={18} /> Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+                </a>
+                <a href="#/track-order" onClick={() => setMobileOpen(false)} className="ot-drawer-foot-link">
+                  Track Order
+                </a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── SEARCH OVERLAY ── */}
+      <SearchOverlay
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onOpenProduct={(slug) => {
+          setSearchOpen(false);
+          window.location.hash = `/product/${slug}`;
+        }}
+      />
+    </>
   );
 }

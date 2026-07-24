@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { IoMailOutline, IoLockClosedOutline, IoPersonOutline, IoCallOutline } from "react-icons/io5";
 
 type AccountMode = "login" | "signup";
 
@@ -20,120 +22,206 @@ export function AccountPage() {
     event.preventDefault();
     setMessage(
       isLogin
-        ? "Welcome back. Your AYLEEN account is ready."
-        : "Your AYLEEN account has been created.",
+        ? "Welcome back! You have successfully signed in to your AYLEEN account."
+        : "Welcome to AYLEEN! Your premium membership account has been created."
     );
   }
 
   return (
-    <section className="bg-white px-5 py-8 md:px-8 md:py-12">
-      <div className="mx-auto grid max-w-[1500px] overflow-hidden border border-[var(--line)] bg-white lg:min-h-[760px] lg:grid-cols-[1.04fr_0.96fr]">
-        <div className="relative min-h-[420px] overflow-hidden bg-[#ede5da] lg:min-h-full">
+    <section className="mx-auto max-w-[1400px] px-6 py-24 md:px-12 md:py-32">
+      <div className="overflow-hidden border border-black/5 rounded-[32px] bg-white shadow-xl grid lg:grid-cols-12 min-h-[680px]">
+        {/* Left Visual Column */}
+        <div className="relative min-h-[350px] lg:col-span-6 lg:min-h-full overflow-hidden">
           <img
             src={accountImage}
-            alt="AYLEEN fashion edit"
-            className="h-full w-full object-cover"
+            alt="AYLEEN fashion brand portrait"
+            className="absolute inset-0 h-full w-full object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-10">
-            <p className="text-xs font-semibold tracking-[0.34em] text-white/75">
-              AYLEEN MEMBERS
-            </p>
-            <h1 className="font-editorial mt-4 max-w-xl text-4xl leading-tight sm:text-6xl">
-              Your wardrobe, kept beautifully close.
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute bottom-8 left-8 right-8 text-white">
+            <span className="text-[10px] font-bold tracking-[0.3em] text-white/70 block mb-2 uppercase">
+              AYLEEN MEMBERSHIP
+            </span>
+            <h1 className="font-editorial text-4xl sm:text-5xl font-bold leading-tight max-w-md">
+              Your curated wardrobe, kept beautifully close.
             </h1>
           </div>
         </div>
 
-        <article className="flex items-center justify-center px-6 py-12 sm:px-10 lg:px-16">
-          <div className="w-full max-w-xl">
+        {/* Right Form Column */}
+        <article className="flex items-center justify-center px-6 py-12 sm:px-12 lg:col-span-6 lg:px-16 bg-black/[0.005]">
+          <div className="w-full max-w-md space-y-8">
             <div className="text-center">
-              <p className="text-xs font-semibold tracking-[0.32em] text-[var(--gold-deep)]">
-                MEMBER ACCESS
-              </p>
-              <h2 className="mt-5 text-xl font-medium tracking-[0.08em]">
-                {isLogin ? "SIGN IN" : "CREATE ACCOUNT"}
+              <span className="text-[10px] font-bold tracking-[0.3em] text-[var(--gold-deep)] uppercase">
+                Member Area
+              </span>
+              <h2 className="font-editorial text-3xl font-bold text-[var(--ink)] mt-3">
+                Account access
               </h2>
-              <p className="mt-8 text-sm tracking-[0.04em] text-[var(--ink)]">
-                {isLogin ? "Not a member yet?" : "Already a member?"}{" "}
+
+              {/* Tab Selector */}
+              <div className="flex bg-black/5 p-1 rounded-xl mt-6 relative">
                 <button
-                  type="button"
-                  onClick={() => switchMode(isLogin ? "signup" : "login")}
-                  className="font-semibold text-[var(--ink)] underline-offset-4 hover:underline"
+                  onClick={() => switchMode("login")}
+                  className={`flex-1 py-2 text-xs font-bold tracking-wider relative z-10 transition duration-300 ${
+                    isLogin ? "text-[var(--ink)]" : "text-[var(--muted)]"
+                  }`}
                 >
-                  {isLogin ? "Create Account" : "Sign in"}
+                  SIGN IN
                 </button>
-              </p>
+                <button
+                  onClick={() => switchMode("signup")}
+                  className={`flex-1 py-2 text-xs font-bold tracking-wider relative z-10 transition duration-300 ${
+                    !isLogin ? "text-[var(--ink)]" : "text-[var(--muted)]"
+                  }`}
+                >
+                  CREATE ACCOUNT
+                </button>
+                <motion.div
+                  layoutId="activeAccountTab"
+                  className="absolute inset-y-1 left-1 rounded-lg bg-white shadow-sm"
+                  style={{
+                    width: "calc(50% - 4px)",
+                    x: isLogin ? 0 : "100%",
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+              </div>
             </div>
 
-            <form className="mt-10 grid gap-7" onSubmit={submitAccount}>
-              {!isLogin && (
-                <div className="grid gap-7 sm:grid-cols-2">
-                  <label className="account-field">
-                    <span>First name</span>
-                    <input required name="firstName" autoComplete="given-name" />
-                  </label>
-                  <label className="account-field">
-                    <span>Last name</span>
-                    <input required name="lastName" autoComplete="family-name" />
-                  </label>
-                </div>
-              )}
+            {/* Form */}
+            <form className="space-y-4" onSubmit={submitAccount}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={mode}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-4"
+                >
+                  {!isLogin && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-[var(--muted)] tracking-wider uppercase">
+                          First Name
+                        </label>
+                        <div className="relative">
+                          <IoPersonOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--muted)]" />
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Ali"
+                            className="h-11 w-full rounded-xl border border-black/10 bg-white pl-9 pr-3 text-xs outline-none focus:border-[var(--ink)]"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-[var(--muted)] tracking-wider uppercase">
+                          Last Name
+                        </label>
+                        <div className="relative">
+                          <IoPersonOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--muted)]" />
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Khan"
+                            className="h-11 w-full rounded-xl border border-black/10 bg-white pl-9 pr-3 text-xs outline-none focus:border-[var(--ink)]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-              {!isLogin && (
-                <label className="account-field">
-                  <span>Phone</span>
-                  <input required name="phone" type="tel" autoComplete="tel" />
-                </label>
-              )}
+                  {!isLogin && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-[var(--muted)] tracking-wider uppercase">
+                        Phone Number
+                      </label>
+                      <div className="relative">
+                        <IoCallOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--muted)]" />
+                        <input
+                          type="tel"
+                          required
+                          placeholder="e.g. 03001234567"
+                          className="h-11 w-full rounded-xl border border-black/10 bg-white pl-9 pr-3 text-xs outline-none focus:border-[var(--ink)]"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-              <label className="account-field">
-                <span>Email</span>
-                <input required name="email" type="email" autoComplete="email" />
-              </label>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-[var(--muted)] tracking-wider uppercase">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <IoMailOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--muted)]" />
+                      <input
+                        type="email"
+                        required
+                        placeholder="you@example.com"
+                        className="h-11 w-full rounded-xl border border-black/10 bg-white pl-9 pr-3 text-xs outline-none focus:border-[var(--ink)]"
+                      />
+                    </div>
+                  </div>
 
-              <label className="account-field">
-                <span>Password</span>
-                <input
-                  required
-                  name="password"
-                  type="password"
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                />
-              </label>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-[var(--muted)] tracking-wider uppercase">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <IoLockClosedOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--muted)]" />
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        className="h-11 w-full rounded-xl border border-black/10 bg-white pl-9 pr-3 text-xs outline-none focus:border-[var(--ink)]"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
 
               {isLogin ? (
-                <div className="flex justify-end text-sm">
-                  <a href="#/account" className="font-medium hover:underline">
+                <div className="flex justify-end pt-1">
+                  <a
+                    href="#/account"
+                    className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] transition"
+                  >
                     Forgot your password?
                   </a>
                 </div>
               ) : (
-                <label className="flex items-start gap-3 text-sm leading-7 text-[var(--muted)]">
-                  <input
-                    required
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-[var(--line-strong)] accent-[var(--ink)]"
-                  />
-                  <span>
-                    I agree to the AYLEEN Terms and Conditions and confirm that I
-                    have read the Privacy Policy.
-                  </span>
-                </label>
+                <div className="pt-2">
+                  <label className="flex items-start gap-2.5 text-[11px] text-[var(--muted)] leading-relaxed">
+                    <input
+                      type="checkbox"
+                      required
+                      className="mt-1 h-4 w-4 rounded border-black/10 accent-[var(--ink)]"
+                    />
+                    <span>
+                      I agree to the AYLEEN Terms of Service and confirm that I have read and accepted the Privacy Policy.
+                    </span>
+                  </label>
+                </div>
               )}
 
               <button
                 type="submit"
-                className="account-submit mt-6 h-14 w-full text-xs font-semibold tracking-[0.28em]"
+                className="h-12 w-full rounded-xl bg-[var(--ink)] text-white text-xs font-bold tracking-[0.2em] transition hover:bg-[var(--gold-deep)] shadow-md mt-4"
               >
-                {isLogin ? "SIGN IN" : "CREATE"}
+                {isLogin ? "SIGN IN" : "CREATE MEMBERSHIP"}
               </button>
             </form>
 
             {message && (
-              <p className="mt-6 border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-center text-sm text-[var(--muted)]">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="rounded-xl border border-black/5 bg-white p-4 text-center text-xs text-[var(--gold-deep)] font-semibold shadow-sm"
+              >
                 {message}
-              </p>
+              </motion.div>
             )}
           </div>
         </article>

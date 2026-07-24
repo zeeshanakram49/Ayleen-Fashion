@@ -1,18 +1,25 @@
-@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;700;800&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap");
 @import "tailwindcss";
 
 :root {
   --ink: #111111;
+  --ink-mid: #3d3d3d;
   --muted: #626262;
   --paper: #ffffff;
   --panel: #f5f5f3;
-  --line: #deded8;
-  --line-strong: #9d9d94;
+  --panel-dark: #f0efed;
+  --line: #e8e8e5;
+  --line-strong: #c0c0b8;
   --gold: #c4a064;
   --gold-deep: #816236;
   --champagne: #f7f0e4;
-  --signal: #c91f2d;
+  --signal: #fc0b0b;         /* Outfitters red for SALE */
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Header heights */
+  --announce-h: 34px;
+  --header-h: 60px;
+  --total-header: calc(var(--announce-h) + var(--header-h));
 }
 
 *,
@@ -1687,4 +1694,1057 @@ button {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Outfitters Pakistan Premium Styles & Animations */
+
+/* 1. Seamless Marquee */
+@keyframes marquee-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 25s linear infinite;
+}
+
+/* 2. Premium Nav Link Hover Underline */
+.outfitters-nav-link {
+  position: relative;
+  text-decoration: none;
+}
+.outfitters-nav-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1.5px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--ink);
+  transform-origin: bottom right;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.outfitters-nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* 3. Luxury Fill Button */
+.btn-fill-hover {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: color 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.btn-fill-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ink);
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.btn-fill-hover:hover {
+  color: var(--paper) !important;
+}
+.btn-fill-hover:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* 4. Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink);
+}
+
+/* 5. Smooth Entrance Reveal */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =====================================================
+   OUTFITTERS-STYLE DESIGN SYSTEM
+   ===================================================== */
+
+/* PAGE WRAPPER — no padding since header is transparent over hero */
+.ot-page {
+  /* No top padding needed — header is transparent and overlaps hero */
+}
+
+/* ── ANNOUNCEMENT BAR ── */
+.ot-announce-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: var(--announce-h);
+  background: #111111;
+  color: #ffffff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.ot-announce-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 2rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.ot-announce-dot {
+  font-size: 8px;
+  opacity: 0.5;
+}
+
+/* ── HEADER ── */
+.ot-header {
+  position: fixed;
+  top: var(--announce-h);
+  left: 0;
+  right: 0;
+  z-index: 190;
+  height: var(--header-h);
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Transparent state — over hero image */
+.ot-header--transparent {
+  background: transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  box-shadow: none;
+}
+
+/* Solid state — after scrolling past hero */
+.ot-header--solid {
+  background: #fff;
+  border-bottom: 1px solid #e8e8e5;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+.ot-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  gap: 20px;
+}
+
+/* LOGO */
+.ot-logo {
+  font-family: "League Spartan", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #111111;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: color 0.3s ease;
+}
+/* White logo on transparent header */
+.ot-logo--light {
+  color: #ffffff;
+}
+
+/* White nav links on transparent header */
+.ot-desktop-nav--light .ot-nav-link {
+  color: #ffffff;
+}
+.ot-desktop-nav--light .ot-nav-link::after {
+  background: #ffffff;
+}
+.ot-desktop-nav--light .ot-nav-link--sale {
+  color: rgba(255,200,200,1) !important;
+}
+.ot-desktop-nav--light .ot-nav-link--sale::after {
+  background: rgba(255,200,200,1);
+}
+
+/* DESKTOP NAV */
+.ot-desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 100%;
+}
+.ot-nav-item {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.ot-nav-link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #111111;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+.ot-nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: #111;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-premium);
+}
+.ot-nav-link:hover::after,
+.ot-nav-link--active::after {
+  transform: scaleX(1);
+}
+.ot-nav-link--sale {
+  color: var(--signal) !important;
+}
+.ot-nav-link--sale::after {
+  background: var(--signal);
+}
+
+/* White icons on transparent header */
+.ot-header-icons--light .ot-icon-btn {
+  color: #ffffff;
+}
+.ot-header-icons--light .ot-badge {
+  background: #fff;
+  color: #111;
+}
+
+/* HEADER ICONS */
+.ot-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.ot-icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #111111;
+  border-radius: 0;
+  transition: opacity 0.2s;
+}
+.ot-icon-btn:hover {
+  opacity: 0.6;
+}
+.ot-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #111;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ot-mobile-menu-btn {
+  display: none;
+}
+
+/* ── MEGA MENU ── */
+.ot-mega {
+  position: fixed;
+  top: var(--total-header);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e5;
+  z-index: 180;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.ot-mega-inner {
+  display: flex;
+  gap: 48px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
+.ot-mega-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 160px;
+}
+.ot-mega-col-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8e8e5;
+}
+.ot-mega-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.ot-mega-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: #333;
+  transition: color 0.2s, padding-left 0.2s;
+  letter-spacing: 0.02em;
+}
+.ot-mega-link:hover {
+  color: #111;
+  padding-left: 4px;
+}
+.ot-mega-link--sale {
+  color: var(--signal) !important;
+  font-weight: 600;
+}
+
+/* ── MOBILE DRAWER ── */
+.ot-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+}
+.ot-mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(85vw, 360px);
+  background: #fff;
+  z-index: 310;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.ot-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e8e8e5;
+}
+.ot-drawer-nav {
+  flex: 1;
+  padding: 12px 0;
+}
+.ot-drawer-item {
+  border-bottom: 1px solid #f0efed;
+}
+.ot-drawer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #111;
+  text-align: left;
+}
+.ot-drawer-link--sale {
+  color: var(--signal);
+}
+.ot-drawer-chevron {
+  font-size: 18px;
+  font-weight: 300;
+  transition: transform 0.24s;
+  line-height: 1;
+}
+.ot-drawer-chevron--open {
+  transform: rotate(45deg);
+}
+.ot-drawer-sublink {
+  display: block;
+  width: 100%;
+  padding: 10px 20px 10px 32px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #555;
+  background: #f8f8f7;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+}
+.ot-drawer-sublink:hover {
+  color: #111;
+}
+.ot-drawer-footer {
+  padding: 20px;
+  border-top: 1px solid #e8e8e5;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ot-drawer-foot-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  text-decoration: none;
+}
+
+/* ── HERO SECTION ── */
+.ot-hero-section {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - var(--total-header));
+  min-height: 520px;
+  background: #111;
+  overflow: hidden;
+}
+.ot-hero-swiper {
+  width: 100%;
+  height: 100%;
+}
+.ot-hero-slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.ot-hero-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+.ot-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.ot-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.15) 60%,
+    rgba(0,0,0,0) 100%
+  );
+}
+.ot-hero-copy {
+  position: absolute;
+  bottom: 60px;
+  left: 48px;
+  z-index: 10;
+  color: #fff;
+  max-width: 540px;
+}
+.ot-hero-copy--right {
+  left: auto;
+  right: 48px;
+  text-align: right;
+}
+.ot-hero-badge {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 14px;
+}
+.ot-hero-title {
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(44px, 7vw, 90px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin: 0 0 24px;
+}
+.ot-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+.ot-hero-btn:hover {
+  background: #111;
+  color: #fff;
+}
+.ot-hero-controls {
+  position: absolute;
+  bottom: 24px;
+  right: 40px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ot-hero-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  backdrop-filter: blur(4px);
+}
+.ot-hero-arrow:hover {
+  background: #fff;
+  color: #111;
+  border-color: #fff;
+}
+.ot-hero-pagination {
+  display: flex;
+  gap: 6px;
+}
+.ot-hero-pagination .swiper-pagination-bullet {
+  width: 24px;
+  height: 2px;
+  border-radius: 0;
+  background: rgba(255,255,255,0.5);
+  opacity: 1;
+  transition: background 0.3s, width 0.3s;
+}
+.ot-hero-pagination .swiper-pagination-bullet-active {
+  background: #fff;
+  width: 40px;
+}
+
+/* ── SECTION COMMON ── */
+.ot-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 24px 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.ot-section-heading {
+  font-family: "League Spartan", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #111;
+  margin: 0;
+}
+.ot-scroll-arrows {
+  display: flex;
+  gap: 8px;
+}
+.ot-scroll-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e8e8e5;
+  background: none;
+  cursor: pointer;
+  color: #111;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+.ot-scroll-arrow:hover {
+  background: #111;
+  color: #fff;
+}
+
+/* ── CATEGORY TILES ── */
+.ot-categories-section {
+  padding-bottom: 48px;
+}
+.ot-categories-track {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ot-categories-track::-webkit-scrollbar {
+  display: none;
+}
+.ot-category-tile {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  width: 200px;
+}
+.ot-category-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: #f5f5f3;
+}
+.ot-category-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.6s var(--ease-premium);
+}
+.ot-category-tile:hover .ot-category-img {
+  transform: scale(1.04);
+}
+.ot-category-sale-tag {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  background: var(--signal);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+.ot-category-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ot-category-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #111;
+}
+.ot-category-sub {
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.04em;
+}
+
+/* ── EDITORIAL BANNERS ── */
+.ot-editorial-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 24px 48px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.ot-editorial-card {
+  width: 100%;
+}
+.ot-editorial-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.ot-editorial-img-wrap {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: #f0efed;
+}
+.ot-editorial-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 0.7s var(--ease-premium);
+}
+.ot-editorial-btn:hover .ot-editorial-img {
+  transform: scale(1.04);
+}
+.ot-editorial-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+  pointer-events: none;
+}
+.ot-editorial-copy {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 20px;
+  color: #fff;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ot-editorial-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.ot-editorial-title {
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(22px, 3.5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  line-height: 0.95;
+  margin: 0;
+}
+.ot-editorial-sub {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+.ot-editorial-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-top: 12px;
+  transition: gap 0.25s;
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+  padding-bottom: 2px;
+}
+
+/* ── PRODUCTS TABS ── */
+.ot-products-section {
+  padding: 0 0 56px;
+  border-top: 1px solid #e8e8e5;
+}
+.ot-products-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 32px 24px 0;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.ot-tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e8e8e5;
+  padding-bottom: 0;
+}
+.ot-tab {
+  position: relative;
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #999;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.ot-tab--active {
+  color: #111;
+}
+.ot-tab-line {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #111;
+  display: block;
+}
+.ot-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #111;
+  transition: opacity 0.2s;
+  margin-bottom: 4px;
+}
+.ot-view-all-link:hover {
+  opacity: 0.6;
+}
+
+/* Product scroll track */
+.ot-product-scroll {
+  overflow-x: auto;
+  padding: 28px 24px 0;
+  scrollbar-width: none;
+}
+.ot-product-scroll::-webkit-scrollbar { display: none; }
+.ot-product-scroll-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  min-width: 0;
+}
+.ot-product-tile {
+  min-width: 0;
+}
+
+/* ── BRAND STRIP ── */
+.ot-brand-strip {
+  background: #111;
+  overflow: hidden;
+  padding: 14px 0;
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+}
+.ot-brand-strip-inner {
+  width: max-content;
+  animation: marquee-scroll 18s linear infinite;
+}
+.ot-brand-strip-title {
+  font-family: "League Spartan", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  margin: 0;
+  padding-right: 60px;
+  opacity: 0.7;
+}
+
+/* ── LOOKBOOK ── */
+.ot-lookbook-section {
+  padding: 48px 0 0;
+}
+.ot-lookbook-header {
+  text-align: center;
+  padding: 0 24px 28px;
+}
+.ot-lookbook-sub {
+  font-size: 13px;
+  color: #888;
+  margin: 8px 0 0;
+}
+.ot-lookbook-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.ot-lookbook-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  cursor: pointer;
+}
+.ot-lookbook-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-premium);
+}
+.ot-lookbook-item:hover .ot-lookbook-img {
+  transform: scale(1.06);
+}
+.ot-lookbook-hover {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.ot-lookbook-item:hover .ot-lookbook-hover {
+  opacity: 1;
+}
+
+/* ── SERVICE STRIP ── */
+.ot-service-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #e8e8e5;
+  border-bottom: 1px solid #e8e8e5;
+  margin: 0;
+}
+.ot-service-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+  border-right: 1px solid #e8e8e5;
+}
+.ot-service-item:last-child {
+  border-right: none;
+}
+.ot-service-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.ot-service-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  margin: 0 0 3px;
+}
+.ot-service-sub {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+/* ── MARQUEE (global) ── */
+@keyframes marquee-scroll {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 24s linear infinite;
+}
+.ot-marquee-bar {
+  background: #111;
+  color: #fff;
+  overflow: hidden;
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+.ot-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.ot-marquee-dot {
+  font-size: 8px;
+  opacity: 0.4;
+}
+
+/* ── MEDIA QUERIES ── */
+@media (max-width: 1100px) {
+  .ot-desktop-nav { display: none; }
+  .ot-mobile-menu-btn { display: flex !important; }
+  .ot-editorial-section { grid-template-columns: 1fr; }
+  .ot-product-scroll-inner { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .ot-hero-copy { left: 24px; bottom: 40px; }
+  .ot-hero-copy--right { right: 24px; left: auto; }
+  .ot-hero-controls { display: none; }
+  .ot-category-tile { width: 160px; }
+  .ot-lookbook-grid { grid-template-columns: repeat(3, 1fr); }
+  .ot-service-strip { grid-template-columns: repeat(2, 1fr); }
+  .ot-service-item:nth-child(2) { border-right: none; }
+  .ot-service-item:nth-child(3) { border-top: 1px solid #e8e8e5; }
+  .ot-service-item:nth-child(4) { border-top: 1px solid #e8e8e5; }
+}
+
+@media (max-width: 480px) {
+  .ot-hero-title { font-size: 36px; }
+  .ot-product-scroll-inner { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .ot-lookbook-grid { grid-template-columns: repeat(2, 1fr); }
+  .ot-service-strip { grid-template-columns: 1fr; }
+  .ot-service-item { border-right: none; border-bottom: 1px solid #e8e8e5; }
+  .ot-category-tile { width: 140px; }
 }
