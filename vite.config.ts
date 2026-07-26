@@ -8,8 +8,9 @@ export default defineConfig({
   server: {
     proxy: {
       "/backend-api": {
-        target: "http://admin.aylee.store",
+        target: "https://admin.aylee.store",
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/backend-api/, ""),
       },
     },

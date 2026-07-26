@@ -5,8 +5,12 @@ import type { ApiResponse } from "./apiTypes";
 import { getOrCreateGuestToken } from "../services/guestTokenService";
 
 export async function fetchCartApi(): Promise<ApiResponse<CartItem[]>> {
-  const response = await axiosClient.get(API_ROUTES.cart.list);
-  return response.data;
+  try {
+    const response = await axiosClient.get(API_ROUTES.cart.list);
+    return response.data;
+  } catch {
+    return { success: false, data: [] };
+  }
 }
 
 export async function addToCartApi(productId: string, qty: number): Promise<ApiResponse<CartItem[]>> {

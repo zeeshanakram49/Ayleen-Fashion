@@ -657,14 +657,18 @@ function extractFavoriteProductId(item: unknown): string {
 }
 
 export async function fetchFavoriteProductIds(): Promise<string[]> {
-  const response = await axiosClient.get(API_ROUTES.wishlist.legacyList);
-  const favorites = extractListData<unknown>(response.data);
+  try {
+    const response = await axiosClient.get(API_ROUTES.wishlist.legacyList);
+    const favorites = extractListData<unknown>(response.data);
 
-  return dedupeStrings(
-    favorites
-      .map((item) => extractFavoriteProductId(item))
-      .filter(Boolean),
-  );
+    return dedupeStrings(
+      favorites
+        .map((item) => extractFavoriteProductId(item))
+        .filter(Boolean),
+    );
+  } catch {
+    return [];
+  }
 }
 
 export async function addFavoriteProduct(productId: string): Promise<unknown> {
