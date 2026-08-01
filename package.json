@@ -7,11 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && rsync -avz --progress -e \"ssh -p 21098\" dist/ ayleezhb@server395.web-hosting.com:/home/ayleezhb/public_html/"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.8.0",
     "axios": "^1.18.0",
+    "framer-motion": "^12.43.0",
+    "lucide-react": "^1.28.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

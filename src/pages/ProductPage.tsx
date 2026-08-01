@@ -1,6 +1,9 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { Heart, Maximize2, Ruler, Truck, RefreshCw, ChevronDown, Check } from 'lucide-react';
 import { ImageWithFallback } from '../components/ImageWithFallback';
 import { ProductCard } from '../components/ProductCard';
+import { FullscreenProductGallery } from '../components/FullscreenProductGallery';
+import { SizeGuideModal } from '../components/SizeGuideModal';
 import { discountPercent, installmentAmount, money } from '../lib/store';
 import { APP_ROUTES } from '../routes/appRoutes';
 import { getHashUrl } from '../routes/routeUtils';
@@ -24,32 +27,6 @@ type ProductPageProps = {
 
 const displaySizes = ['S', 'M', 'L', 'XL', 'XXL'];
 
-function swatchTone(color: string) {
-  const tone = color.toLowerCase();
-
-  if (tone.includes('sand') || tone.includes('khaaki') || tone.includes('khaki')) {
-    return '#aa9765';
-  }
-
-  if (tone.includes('olive') || tone.includes('green')) {
-    return '#7d8561';
-  }
-
-  if (tone.includes('ice') || tone.includes('white') || tone.includes('cream')) {
-    return '#f1ead8';
-  }
-
-  if (tone.includes('grey') || tone.includes('gray')) {
-    return '#d7d7d2';
-  }
-
-  if (tone.includes('black')) {
-    return '#121212';
-  }
-
-  return '#cfc8bb';
-}
-
 export function ProductPage({
   product,
   relatedProducts,
@@ -65,257 +42,305 @@ export function ProductPage({
   onCardPickSize,
   onCardToggleWishlist,
 }: ProductPageProps) {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const [addedNotice, setAddedNotice] = useState(false);
+  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
+    desc: true,
+    fit: false,
+    shipping: false,
+  });
+
   const salePercent = discountPercent(product.price, product.oldPrice);
   const galleryImages = useMemo(
     () => Array.from(new Set([product.image, ...product.gallery])),
-    [product],
+    [product]
   );
-  const colorVariants = useMemo(() => {
-    const seen = new Set<string>();
-    return [product, ...relatedProducts].filter((item) => {
-      const key = (item.colors[0] ?? item.title).toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [product, relatedProducts]);
   const installment = money(installmentAmount(product.price)).replace('PKR ', 'Rs. ');
-  const currentColor = product.colors[0] ?? 'Selected tone';
-  const detailPanels = [
-    {
-      title: 'PRODUCT DESCRIPTION',
-      defaultOpen: true,
-      body: (
-        <>
-          <p>{product.description}</p>
-          <p className="mt-5">
-            Model Details: Relaxed everyday silhouette with a clean drape and easy movement.
-          </p>
-        </>
-      ),
-    },
-    {
-      title: 'PRODUCT DETAILS & COMPOSITION',
-      defaultOpen: false,
-      body: (
-        <>
-          <p>{product.details}</p>
-          <p className="mt-5">Material: {product.material}</p>
-          <p className="mt-2">Fit: {product.fit}</p>
-          <p className="mt-2">Stock available: {product.stock} pieces</p>
-        </>
-      ),
-    },
-    {
-      title: 'DELIVERIES & RETURNS',
-      defaultOpen: false,
-      body: (
-        <>
-          <p>Nationwide delivery in 2 to 5 working days.</p>
-          <p className="mt-5">Exchange available within 7 days for unused articles with tags attached.</p>
-        </>
-      ),
-    },
-  ];
+
+  const toggleAccordion = (key: string) => {
+    setOpenAccordions((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleOpenGallery = (idx: number) => {
+    setGalleryInitialIndex(idx);
+    setGalleryOpen(true);
+  };
+
+  const handleAdd = () => {
+    onAddToCart();
+    setAddedNotice(true);
+    setTimeout(() => setAddedNotice(false), 1200);
+  };
 
   return (
-    <section className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <div className="reveal-up mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] pb-4 text-[11px] tracking-[0.18em] text-[var(--muted)]">
-        <div className="flex flex-wrap items-center gap-2">
-          <a href={getHashUrl(APP_ROUTES.home)} className="transition hover:text-[var(--ink)]">
-            HOME
-          </a>
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)] pb-24 lg:pb-32">
+      {/* Breadcrumb Navigation */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 py-6 border-b border-[var(--line)]">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+          <a href={getHashUrl(APP_ROUTES.home)} className="hover:text-[var(--ink)] transition">Home</a>
           <span>/</span>
-          <a href={getHashUrl(APP_ROUTES.shop)} className="transition hover:text-[var(--ink)]">
-            SHOP
-          </a>
+          <a href={getHashUrl(APP_ROUTES.shop)} className="hover:text-[var(--ink)] transition">Shop</a>
           <span>/</span>
-          <span className="text-[var(--ink)]">{product.title.toUpperCase()}</span>
+          <span className="text-[var(--ink)]">{product.categoryLabel}</span>
         </div>
-        <a href={getHashUrl(APP_ROUTES.shop)} className="transition hover:text-[var(--ink)]">
-          BACK TO SHOP
-        </a>
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.5fr)_minmax(380px,0.82fr)] xl:gap-12">
-        <div className="reveal-up grid gap-3 sm:grid-cols-2">
-          {galleryImages.map((image, index) => (
-            <div
-              key={`${product.id}-${image}`}
-              className={`group overflow-hidden bg-[#f5f5f1] text-left ${
-                index < 2 ? 'min-h-[420px] sm:min-h-[620px]' : 'min-h-[250px] sm:min-h-[320px]'
-              }`}
-            >
-              <ImageWithFallback
-                src={image}
-                alt={`${product.title} view ${index + 1}`}
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-              />
-            </div>
-          ))}
-        </div>
-
-        <article className="reveal-up delay-1 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-[1.1rem] border border-[var(--line)] bg-white p-5 shadow-[0_18px_50px_-40px_rgba(0,0,0,0.25)] sm:p-7">
-            <p className="text-[11px] tracking-[0.24em] text-[var(--muted)]">
-              {product.categoryLabel.toUpperCase()} / {product.fit.toUpperCase()}
-            </p>
-            <h1 className="mt-4 max-w-[18ch] text-[1.9rem] font-semibold uppercase leading-[1.08] text-[var(--ink)] sm:text-[2.35rem]">
-              {product.title}
-            </h1>
-
-            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--muted)] line-through">
-                {money(product.oldPrice)}
-              </span>
-              <span className="text-[1.8rem] font-semibold leading-none text-[var(--ink)]">
-                {money(product.price)}
-              </span>
-              {salePercent > 0 && (
-                <span className="text-lg font-semibold leading-none text-[var(--ink)]">-{salePercent}%</span>
-              )}
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
-              <span className="rounded-full bg-[#5f2ee8] px-3 py-1 font-semibold text-white">baadmay</span>
-              <span>
-                Pay in 3 Installments of <strong className="text-[#5f2ee8]">{installment}</strong>
-              </span>
-            </div>
-
-            <div className="mt-8">
-              <p className="text-sm text-[var(--muted)]">{currentColor}</p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {colorVariants.map((item) => {
-                  const color = item.colors[0] ?? item.title;
-                  const selected = item.id === product.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => onOpenProduct(item.slug)}
-                      aria-label={`Open ${color} variant`}
-                      className={`relative h-7 w-7 border transition ${
-                        selected ? 'border-[var(--ink)]' : 'border-[rgba(18,18,18,0.25)]'
-                      }`}
-                      title={color}
-                    >
-                      <span
-                        className="absolute inset-[3px] border border-black/10"
-                        style={{ backgroundColor: swatchTone(color) }}
-                      />
-                      {selected && <span className="absolute -bottom-2 left-0 h-[2px] w-full bg-[var(--ink)]" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-9">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-[var(--ink)]">SELECT SIZE</p>
-                {pickedSize && <p className="text-xs tracking-[0.18em] text-[var(--muted)]">SIZE {pickedSize}</p>}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-x-7 gap-y-4">
-                {displaySizes.map((size) => {
-                  const available = product.sizes.includes(size);
-                  const selected = pickedSize === size;
-
-                  return (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => available && onPickSize(size)}
-                      disabled={!available}
-                      className={`border-b pb-1 text-lg transition ${
-                        !available
-                          ? 'cursor-not-allowed border-transparent text-[rgba(18,18,18,0.32)] line-through'
-                          : selected
-                            ? 'border-[var(--ink)] font-semibold text-[var(--ink)]'
-                            : 'border-transparent text-[var(--ink)] hover:border-[rgba(18,18,18,0.3)]'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-10 space-y-3">
-              <button
-                type="button"
-                onClick={onAddToCart}
-                className="flex w-full items-center justify-center gap-3 bg-[var(--ink)] px-6 py-4 text-center text-base font-semibold tracking-[0.08em] text-white transition hover:bg-black"
-              >
-                <span>ADD TO CART</span>
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
-                  <path d="M7 8V6a5 5 0 0 1 10 0v2" />
-                  <path d="M4 8h16l-1 12H5L4 8Z" />
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                onClick={onToggleWishlist}
-                className="inline-flex items-center gap-2 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]"
-              >
-                <span className="text-lg leading-none">{liked ? '♥' : '♡'}</span>
-                <span>{liked ? 'Saved to wishlist' : 'Save this item'}</span>
-              </button>
-            </div>
-
-            <div className="mt-10 space-y-1 border-t border-[var(--line)] pt-3">
-              {detailPanels.map((panel) => (
-                <details
-                  key={panel.title}
-                  className="group border-b border-[var(--line)]"
-                  open={panel.defaultOpen}
+      {/* Main Editorial Media & Info Section (65/35) */}
+      <div className="mx-auto max-w-[1700px] px-4 sm:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+          {/* Left Media Gallery Column (65% width = 8 cols) */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* Desktop Vertical Gallery Stack */}
+            <div className="hidden sm:grid grid-cols-2 gap-4">
+              {galleryImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleOpenGallery(idx)}
+                  className="group cursor-zoom-in relative aspect-[3/4] overflow-hidden rounded-2xl bg-[var(--panel)] border border-[var(--line)] shadow-sm"
                 >
-                  <summary className="flex list-none items-center justify-between gap-4 py-5 text-[0.98rem] font-medium text-[var(--ink)]">
-                    <span>{panel.title}</span>
-                    <span className="text-xl leading-none text-[var(--muted)] transition group-open:rotate-45">+</span>
-                  </summary>
-                  <div className="pb-6 text-[0.98rem] leading-8 text-[var(--muted)]">{panel.body}</div>
-                </details>
+                  <ImageWithFallback
+                    src={img}
+                    alt={`${product.title} view ${idx + 1}`}
+                    className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition">
+                    <span className="flex items-center gap-1 rounded-full bg-black/75 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-md shadow-md">
+                      <Maximize2 size={12} /> Expand
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
 
-            <div className="mt-6 rounded-[0.9rem] bg-[var(--panel)] px-4 py-4 text-sm text-[var(--muted)]">
-              <p>Premium fabric: {product.material}</p>
-              <p className="mt-2">Customer rating: {product.rating} from {product.reviews} reviews</p>
+            {/* Mobile Swipeable Gallery (100% width, ~75vh height) */}
+            <div className="sm:hidden relative w-full aspect-[3/4] overflow-hidden rounded-2xl bg-[var(--panel)] border border-[var(--line)]">
+              <ImageWithFallback
+                src={galleryImages[0]}
+                alt={product.title}
+                onClick={() => handleOpenGallery(0)}
+                className="h-full w-full object-cover object-top"
+              />
+              <button
+                type="button"
+                onClick={() => handleOpenGallery(0)}
+                className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full bg-black/80 px-3.5 py-1.5 text-xs font-bold text-white backdrop-blur-md shadow-lg"
+              >
+                <Maximize2 size={14} /> Fullscreen Viewer
+              </button>
             </div>
           </div>
-        </article>
+
+          {/* Right Information Panel (35% width = 5 cols) - Sticky */}
+          <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6 bg-white p-6 sm:p-8 rounded-3xl border border-[var(--line)] shadow-lg">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+                <span>{product.fit}</span>
+                <span>{product.categoryLabel}</span>
+              </div>
+
+              <h1 className="font-display text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-[var(--ink)] mt-2">
+                {product.title}
+              </h1>
+
+              {/* Price & Installments */}
+              <div className="mt-4 flex flex-wrap items-baseline gap-3">
+                <span className="text-3xl font-black text-[var(--ink)]">
+                  {money(product.price).replace('PKR ', 'Rs. ')}
+                </span>
+                {product.oldPrice > product.price && (
+                  <span className="text-base font-semibold text-[var(--muted)] line-through">
+                    {money(product.oldPrice).replace('PKR ', 'Rs. ')}
+                  </span>
+                )}
+                {salePercent > 0 && (
+                  <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-xs font-bold text-white shadow-sm">
+                    SAVE {salePercent}%
+                  </span>
+                )}
+              </div>
+
+              {/* Installment payment callout */}
+              <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[var(--panel)] px-3.5 py-2 text-xs text-[var(--muted)] border border-[var(--line)]">
+                <span>Or 4 interest-free payments of <strong>{installment}</strong></span>
+              </div>
+            </div>
+
+            {/* Size Selector */}
+            <div className="border-t border-[var(--line)] pt-6">
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--ink)] mb-3">
+                <span>Select Size</span>
+                <button
+                  type="button"
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="flex items-center gap-1 text-[var(--muted)] hover:text-[var(--ink)] transition underline"
+                >
+                  <Ruler size={14} /> Size Guide
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2.5">
+                {(product.sizes.length > 0 ? product.sizes : displaySizes).map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => onPickSize(size)}
+                    className={`h-12 min-w-[48px] rounded-xl text-xs font-bold uppercase tracking-wider transition border ${
+                      pickedSize === size
+                        ? 'border-[var(--ink)] bg-[var(--ink)] text-white shadow-md'
+                        : 'border-[var(--line-strong)] bg-white text-[var(--ink)] hover:border-[var(--ink)]'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons (Add to Basket + Wishlist) */}
+            <div className="space-y-3 pt-2">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[var(--ink)] py-4 text-xs font-bold uppercase tracking-[0.18em] text-white shadow-xl hover:bg-neutral-800 transition active:scale-98"
+                >
+                  {addedNotice ? (
+                    <>
+                      <Check size={18} /> Added to Basket!
+                    </>
+                  ) : (
+                    'Add to Basket'
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggleWishlist}
+                  aria-label="Toggle Wishlist"
+                  className={`flex h-14 w-14 items-center justify-center rounded-2xl border transition ${
+                    liked ? 'bg-red-50 border-red-200 text-red-600' : 'border-[var(--line-strong)] text-[var(--ink)] hover:bg-[var(--panel)]'
+                  }`}
+                >
+                  <Heart size={22} className={liked ? 'fill-red-600 stroke-red-600' : ''} />
+                </button>
+              </div>
+            </div>
+
+            {/* Value Highlights */}
+            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--line)] text-xs text-[var(--muted)]">
+              <div className="flex items-center gap-2">
+                <Truck size={16} className="text-[var(--ink)] shrink-0" />
+                <span>Free Shipping over Rs. 2,500</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <RefreshCw size={16} className="text-[var(--ink)] shrink-0" />
+                <span>14-Day Easy Exchange</span>
+              </div>
+            </div>
+
+            {/* Collapsible Accordions */}
+            <div className="space-y-3 pt-4 border-t border-[var(--line)]">
+              <div className="border border-[var(--line)] rounded-2xl overflow-hidden bg-white">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('desc')}
+                  className="w-full flex items-center justify-between p-4 text-xs font-bold uppercase tracking-wider text-[var(--ink)] text-left"
+                >
+                  <span>Product Description</span>
+                  <ChevronDown className={`h-4 w-4 transition duration-200 ${openAccordions.desc ? 'rotate-180' : ''}`} />
+                </button>
+                {openAccordions.desc && (
+                  <div className="p-4 pt-0 text-xs leading-relaxed text-neutral-600 border-t border-[var(--line)]">
+                    <p>{product.description}</p>
+                    <p className="mt-2 font-medium">Material: {product.material || '100% Premium Cotton'}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="border border-[var(--line)] rounded-2xl overflow-hidden bg-white">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('fit')}
+                  className="w-full flex items-center justify-between p-4 text-xs font-bold uppercase tracking-wider text-[var(--ink)] text-left"
+                >
+                  <span>Fabric &amp; Care Guide</span>
+                  <ChevronDown className={`h-4 w-4 transition duration-200 ${openAccordions.fit ? 'rotate-180' : ''}`} />
+                </button>
+                {openAccordions.fit && (
+                  <div className="p-4 pt-0 text-xs leading-relaxed text-neutral-600 border-t border-[var(--line)] space-y-1">
+                    <p>• Machine wash cold inside out with like colors.</p>
+                    <p>• Tumble dry low or line dry to preserve fabric drape.</p>
+                    <p>• Warm iron if needed. Do not iron directly over prints.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* Related Products Carousel / Grid */}
       {relatedProducts.length > 0 && (
-        <div className="mt-16 border-t border-[var(--line)] pt-12">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs tracking-[0.3em] text-[var(--gold-deep)]">YOU MAY ALSO LIKE</p>
-              <h2 className="mt-3 text-3xl font-semibold uppercase sm:text-4xl">Related Picks</h2>
-            </div>
+        <section className="mx-auto max-w-7xl px-4 sm:px-8 py-16 border-t border-[var(--line)] mt-16">
+          <div className="mb-8">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--muted)]">COMPLETE THE LOOK</span>
+            <h2 className="font-display text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[var(--ink)] mt-1">
+              You May Also Like
+            </h2>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            {relatedProducts.map((item, index) => (
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {relatedProducts.slice(0, 4).map((rel, idx) => (
               <ProductCard
-                key={item.id}
-                product={item}
-                index={index}
-                liked={wishlist.includes(item.id)}
-                pickedSize={selectedSize[item.id]}
-                compact
-                onPickSize={onCardPickSize}
-                onToggleWishlist={onCardToggleWishlist}
-                onAddToCart={onCardAddToCart}
+                key={rel.id}
+                product={rel}
+                index={idx}
+                liked={wishlist.includes(rel.id)}
+                pickedSize={selectedSize[rel.id]}
+                onPickSize={(id, s) => onCardPickSize(id, s)}
+                onToggleWishlist={(id) => onCardToggleWishlist(id)}
+                onAddToCart={(id, s, req, q) => onCardAddToCart(id, s, req, q)}
                 onOpenProduct={onOpenProduct}
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
-    </section>
+
+      {/* Sticky Mobile Bottom CTA Bar (safe-area padding) */}
+      <div className="fixed bottom-0 inset-x-0 z-40 lg:hidden border-t border-[var(--line)] bg-white/95 backdrop-blur-xl p-4 pb-safe shadow-2xl">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <span className="text-[10px] uppercase font-bold text-[var(--muted)]">Total Price</span>
+            <p className="text-lg font-black text-[var(--ink)]">
+              {money(product.price).replace('PKR ', 'Rs. ')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="flex-1 max-w-xs rounded-xl bg-[var(--ink)] py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg active:scale-95 transition"
+          >
+            {addedNotice ? 'Added!' : 'Add to Basket'}
+          </button>
+        </div>
+      </div>
+
+      {/* Interactive Fullscreen Image Viewer Modal */}
+      <FullscreenProductGallery
+        isOpen={galleryOpen}
+        images={galleryImages}
+        initialIndex={galleryInitialIndex}
+        productTitle={product.title}
+        onClose={() => setGalleryOpen(false)}
+      />
+
+      {/* Size Guide Modal */}
+      <SizeGuideModal
+        isOpen={sizeGuideOpen}
+        onClose={() => setSizeGuideOpen(false)}
+      />
+    </div>
   );
 }

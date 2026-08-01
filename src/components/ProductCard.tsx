@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { Heart, Eye, Maximize2, ShoppingBag, Check } from "lucide-react";
 import { ImageWithFallback } from "./ImageWithFallback";
 import type { Product } from "../types/store";
-import { discountPercent, installmentAmount, money } from "../lib/store";
+import { discountPercent, money } from "../lib/store";
+import { Card3DTilt } from "./Card3DTilt";
+import { FullscreenProductGallery } from "./FullscreenProductGallery";
 
 type ProductCardProps = {
   product: Product;
@@ -20,270 +23,210 @@ type ProductCardProps = {
     qty?: number,
   ) => void;
   onOpenProduct: (slug: string) => void;
+  onOpenQuickView?: (product: Product) => void;
 };
 
 export function ProductCard({
   product,
-  index,
+  index: _index,
   liked,
   pickedSize,
-  compact = false,
-  variant = "default",
+  compact: _compact = false,
+  variant: _variant = "default",
   catalogAudience,
   onPickSize,
   onToggleWishlist,
   onAddToCart,
   onOpenProduct,
+  onOpenQuickView,
 }: ProductCardProps) {
-  const salePercent = discountPercent(product.price, product.oldPrice);
-  const isCatalog = variant === "catalog";
+  const [isHovered, setIsHovered] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const [heartPop, setHeartPop] = useState(false);
+  const [addedNotice, setAddedNotice] = useState(false);
 
-  function handleWishlistClick() {
+  const salePercent = discountPercent(product.price, product.oldPrice);
+  const secondImage = product.gallery && product.gallery.length > 0 ? product.gallery[0] : product.image;
+  const allImages = Array.from(new Set([product.image, ...(product.gallery || [])]));
+
+  function handleWishlistClick(e: React.MouseEvent) {
+    e.stopPropagation();
     setHeartPop(true);
     onToggleWishlist(product.id);
     setTimeout(() => setHeartPop(false), 450);
   }
-  const swatches = product.colors.slice(0, 3).map((color) => ({
-    label: color,
-    value: colorToSwatch(color),
-  })).filter((swatch) => swatch.label.toLowerCase() !== "default");
-  const catalogMeta = `${product.fit || "Regular Fit"} | ${catalogAudience || product.categoryLabel}`;
-  const hasSizeOptions = product.sizes.length > 1;
 
-  if (isCatalog) {
-    return (
-      <article
-        className="group product-card reveal-up overflow-hidden bg-white catalog-product-card"
-        style={{ animationDelay: `${80 + index * 80}ms` }}
-      >
-        <div className="catalog-product-media">
-          <button
-            type="button"
-            onClick={() => onOpenProduct(product.slug)}
-            className="block w-full"
-          >
-            <ImageWithFallback
-              src={product.image}
-              alt={product.title}
-              className="catalog-product-image"
-            />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleWishlistClick}
-            aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
-            className={`catalog-heart-button ${liked ? "heart-saved" : ""} ${heartPop ? "heart-pop" : ""}`}
-          >
-            {liked ? "♥" : "♡"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (hasSizeOptions && !pickedSize) {
-                onOpenProduct(product.slug);
-                return;
-              }
-              onAddToCart(product.id, pickedSize, false);
-            }}
-            className="catalog-product-quickview btn-ripple"
-          >
-            {hasSizeOptions && !pickedSize ? "Choose options" : "Add to Basket"}
-          </button>
-        </div>
-
-        <div className="catalog-product-body">
-          <button
-            type="button"
-            onClick={() => onOpenProduct(product.slug)}
-            className="catalog-product-title"
-          >
-            {product.title}
-          </button>
-
-          <p className="catalog-product-meta">
-            {catalogMeta}
-          </p>
-
-          <div className="catalog-product-pricing">
-            {salePercent > 0 && (
-              <span className="catalog-product-old-price">{money(product.oldPrice)}</span>
-            )}
-            <span className="catalog-product-price">{money(product.price)}</span>
-            {salePercent > 0 && (
-              <span className="catalog-product-discount">-{salePercent}%</span>
-            )}
-            {product.stock > 0 && product.stock <= 3 && (
-              <span className="catalog-product-stock">Only {product.stock} left</span>
-            )}
-          </div>
-
-          {swatches.length > 0 && (
-            <div className="catalog-swatches" aria-label="Available colors">
-              {swatches.map((swatch) => (
-                <span
-                  key={swatch.label}
-                  title={swatch.label}
-                  style={{ backgroundColor: swatch.value }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </article>
-    );
+  function handleQuickAdd(sizeToUse?: string) {
+    const targetSize = sizeToUse || pickedSize || product.sizes[0] || 'M';
+    onAddToCart(product.id, targetSize, false, 1);
+    setAddedNotice(true);
+    setTimeout(() => setAddedNotice(false), 1200);
   }
 
   return (
-    <article
-      className={`group product-card reveal-up overflow-hidden bg-white ${
-        compact
-          ? "rounded-[var(--radius-lg)] border border-[var(--line)] p-3 shadow-[var(--shadow-soft)]"
-          : "rounded-[var(--radius-lg)] border border-[var(--line)] p-3.5 shadow-[var(--shadow-soft)]"
-      }`}
-      style={{ animationDelay: `${80 + index * 80}ms` }}
-    >
-      <div className="relative overflow-hidden rounded-[var(--radius-md)]">
-        <button
-          type="button"
-          onClick={() => onOpenProduct(product.slug)}
-          className="block w-full"
+    <>
+      <Card3DTilt maxDegree={5}>
+        <article
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="group relative flex flex-col h-full rounded-2xl border border-[var(--line)] bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
         >
-          <ImageWithFallback
-            src={product.image}
-            alt={product.title}
-            className={`media-zoom w-full object-cover ${compact ? "h-[300px]" : "h-[360px]"}`}
-          />
-        </button>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/16 via-transparent to-transparent" />
-
-        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-          <span className="rounded-full bg-white/88 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-[var(--ink)] backdrop-blur">
-            {product.badge}
-          </span>
-          {salePercent > 0 && (
-            <span className="rounded-full bg-[var(--ink)] px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-[var(--paper)]">
-              SAVE {salePercent}%
-            </span>
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={handleWishlistClick}
-          className={`absolute right-3 top-3 rounded-[var(--radius-sm)] border border-white/70 bg-white/20 px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur transition-all ${liked ? "bg-white/90 text-[var(--ink)]" : ""} ${heartPop ? "heart-pop" : ""}`}
-        >
-          {liked ? "♥ SAVED" : "♡ SAVE"}
-        </button>
-      </div>
-
-      <div className={compact ? "mt-4" : "mt-5"}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className={`tracking-[0.2em] text-[var(--gold-deep)] ${compact ? "text-[10px]" : "text-[10px]"}`}>
-              {product.categoryLabel.toUpperCase()}
-            </p>
-            <button
-              type="button"
+          {/* Media Section */}
+          <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--panel)]">
+            {/* Primary & Secondary Hover Crossfade Image */}
+            <div
               onClick={() => onOpenProduct(product.slug)}
-              className={`mt-2 text-left leading-none transition hover:text-[var(--gold-deep)] ${
-                compact
-                  ? "font-editorial text-[1.9rem]"
-                  : "font-editorial text-[2.15rem]"
-              }`}
+              className="cursor-pointer h-full w-full relative"
             >
-              {product.title}
-            </button>
-          </div>
+              <ImageWithFallback
+                src={isHovered ? secondImage : product.image}
+                alt={product.title}
+                className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
 
-          {!compact && (
-            <button
-              type="button"
-              onClick={() => onAddToCart(product.id, pickedSize, true)}
-              className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-4 py-2 text-[10px] font-semibold tracking-[0.14em] transition hover:border-[var(--gold-deep)] hover:text-[var(--gold-deep)]"
-            >
-              ADD TO BAG
-            </button>
-          )}
-        </div>
+            {/* Badges */}
+            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
+              {salePercent > 0 && (
+                <span className="rounded-full bg-[var(--ink)] px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase text-white shadow-md">
+                  -{salePercent}% SALE
+                </span>
+              )}
+              {product.badge && (
+                <span className="rounded-full bg-neutral-900/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold tracking-widest uppercase text-white shadow-sm">
+                  {product.badge}
+                </span>
+              )}
+              {product.stock <= 5 && product.stock > 0 && (
+                <span className="rounded-full bg-amber-600 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase text-white shadow-sm">
+                  LOW STOCK ({product.stock})
+                </span>
+              )}
+            </div>
 
-        <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-          {product.description}
-        </p>
-
-        <div className="mt-4 flex items-center gap-2 text-sm">
-          <span className="text-[var(--muted)] line-through">
-            {money(product.oldPrice)}
-          </span>
-          <span className="font-semibold text-[var(--ink)]">
-            {money(product.price)}
-          </span>
-        </div>
-
-        <p className="mt-1 text-xs text-[var(--muted)]">
-          Pay in 3 installments of {money(installmentAmount(product.price))}
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {product.colors.slice(0, compact ? 2 : 3).map((color) => (
-            <span
-              key={color}
-              className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-3 py-1 text-[10px] tracking-[0.12em] text-[var(--muted)]"
-            >
-              {color}
-            </span>
-          ))}
-        </div>
-
-        {compact ? (
-          <button
-            type="button"
-            onClick={() => onAddToCart(product.id, pickedSize, true)}
-            className="mt-5 w-full rounded-[var(--radius-sm)] bg-[var(--ink)] px-4 py-3 text-[10px] font-semibold tracking-[0.16em] text-[var(--paper)]"
-          >
-            QUICK ADD
-          </button>
-        ) : (
-          <div className="mt-5">
-            <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--muted)]">
-              SELECT SIZE
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => onPickSize(product.id, size)}
-                  className={`size-chip px-3 py-1.5 text-[10px] font-semibold tracking-[0.14em] ${
-                    pickedSize === size
-                      ? "is-selected rounded-[var(--radius-sm)] bg-[var(--ink)] text-[var(--paper)]"
-                      : "rounded-[var(--radius-sm)] border border-[var(--line-strong)] hover:border-[var(--gold-deep)]"
+            {/* Top Right Wishlist & Fullscreen Gallery Action Buttons */}
+            <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+              <button
+                type="button"
+                onClick={handleWishlistClick}
+                aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+                className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[var(--ink)] shadow-md backdrop-blur-md transition hover:bg-white active:scale-90 ${heartPop ? "scale-125" : ""
                   }`}
+              >
+                <Heart
+                  size={18}
+                  className={liked ? "fill-red-600 stroke-red-600" : "stroke-neutral-700"}
+                />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGalleryOpen(true);
+                }}
+                aria-label="Open fullscreen gallery"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[var(--ink)] shadow-md backdrop-blur-md transition hover:bg-white active:scale-90 opacity-0 group-hover:opacity-100"
+              >
+                <Maximize2 size={16} />
+              </button>
+            </div>
+
+            {/* Desktop Quick Size Selector Bar Overlay */}
+            <div className="absolute inset-x-3 bottom-3 z-10 hidden sm:flex flex-col gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="flex items-center justify-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-md p-1.5 shadow-lg border border-black/5">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPickSize(product.id, size);
+                        handleQuickAdd(size);
+                      }}
+                      className={`h-7 min-w-[28px] rounded-lg text-[11px] font-bold uppercase transition ${pickedSize === size
+                          ? "bg-[var(--ink)] text-white shadow-sm"
+                          : "text-neutral-700 hover:bg-neutral-200"
+                        }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                {onOpenQuickView && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenQuickView(product);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/95 backdrop-blur-md py-2 text-[11px] font-bold tracking-wider uppercase text-[var(--ink)] hover:bg-white shadow-lg transition"
+                  >
+                    <Eye size={14} /> Quick View
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleQuickAdd();
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--ink)] py-2 text-[11px] font-bold tracking-wider uppercase text-white hover:bg-neutral-800 shadow-lg transition active:scale-95"
                 >
-                  {size}
+                  {addedNotice ? (
+                    <>
+                      <Check size={14} /> Added!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag size={14} /> Add
+                    </>
+                  )}
                 </button>
-              ))}
+              </div>
             </div>
           </div>
-        )}
-      </div>
-    </article>
+
+          {/* Product Body Information */}
+          <div className="flex flex-col justify-between flex-1 p-4">
+            <div>
+              <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-[var(--muted)] font-medium">
+                <span>{product.fit || "Regular Fit"}</span>
+                <span>{catalogAudience || product.categoryLabel}</span>
+              </div>
+
+              <h3
+                onClick={() => onOpenProduct(product.slug)}
+                className="mt-1 cursor-pointer font-sans text-sm font-semibold text-[var(--ink)] line-clamp-1 hover:text-neutral-600 transition"
+              >
+                {product.title}
+              </h3>
+            </div>
+
+            <div className="mt-3 flex items-baseline gap-2 pt-2 border-t border-[var(--line)]">
+              <span className="text-sm font-extrabold text-[var(--ink)]">
+                {money(product.price).replace("PKR ", "Rs. ")}
+              </span>
+              {product.oldPrice > product.price && (
+                <span className="text-xs text-[var(--muted)] line-through">
+                  {money(product.oldPrice).replace("PKR ", "Rs. ")}
+                </span>
+              )}
+            </div>
+          </div>
+        </article>
+      </Card3DTilt>
+
+      {/* Fullscreen Image Gallery Viewer */}
+      <FullscreenProductGallery
+        isOpen={galleryOpen}
+        images={allImages}
+        productTitle={product.title}
+        onClose={() => setGalleryOpen(false)}
+      />
+    </>
   );
-}
-
-function colorToSwatch(color: string) {
-  const normalized = color.toLowerCase();
-
-  if (normalized.includes("black")) return "#111111";
-  if (normalized.includes("white")) return "#f8f7f3";
-  if (normalized.includes("sand")) return "#d8c3a4";
-  if (normalized.includes("ice")) return "#e9ece8";
-  if (normalized.includes("olive")) return "#7c8561";
-  if (normalized.includes("grey") || normalized.includes("gray")) return "#b6b8bb";
-  if (normalized.includes("cream")) return "#ece2cf";
-  if (normalized.includes("beige")) return "#cdb89c";
-
-  return "#111111";
 }

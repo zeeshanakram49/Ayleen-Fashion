@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Heart, ShoppingBag, Maximize2, Check, Plus, Minus } from "lucide-react";
 import { discountPercent, money } from "../lib/store";
 import { APP_ROUTES } from "../routes/appRoutes";
 import { navigateToHash } from "../routes/routeUtils";
 import type { Product } from "../types/store";
 import { ImageWithFallback } from "./ImageWithFallback";
+import { FullscreenProductGallery } from "./FullscreenProductGallery";
 
 type QuickViewModalProps = {
   product: Product;
@@ -18,6 +21,7 @@ type QuickViewModalProps = {
     requireSelection?: boolean,
     qty?: number,
   ) => void;
+  onOpenProduct?: (slug: string) => void;
 };
 
 export function QuickViewModal({
@@ -28,20 +32,19 @@ export function QuickViewModal({
   onPickSize,
   onToggleWishlist,
   onAddToCart,
+  onOpenProduct: _onOpenProduct,
 }: QuickViewModalProps) {
-  const [activeImageByProduct, setActiveImageByProduct] = useState<
-    Record<string, string>
-  >({});
-  const [qtyByProduct, setQtyByProduct] = useState<Record<string, number>>({});
+  const [activeImage, setActiveImage] = useState(product.image);
+  const [qty, setQty] = useState(1);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [addedNotice, setAddedNotice] = useState(false);
+
   const gallery = useMemo(
     () => Array.from(new Set([product.image, ...product.gallery])),
     [product],
   );
-  const activeImage =
-    activeImageByProduct[product.id] ?? product.gallery[0] ?? product.image;
-  const qty = qtyByProduct[product.id] ?? 1;
   const salePercent = discountPercent(product.price, product.oldPrice);
-  const finalSize = pickedSize || product.sizes[0];
+  const finalSize = pickedSize || product.sizes[0] || "M";
   const needsExplicitSize = product.sizes.length > 1 && !pickedSize;
 
   useEffect(() => {
@@ -59,201 +62,222 @@ export function QuickViewModal({
     };
   }, [onClose]);
 
-  function addCurrentToCart() {
-    if (needsExplicitSize) {
-      return;
-    }
+  function handleAddToCart() {
     onAddToCart(product.id, finalSize, true, qty);
-    onClose();
+    setAddedNotice(true);
+    setTimeout(() => {
+      setAddedNotice(false);
+      onClose();
+    }, 800);
   }
 
-  function buyNow() {
-    if (needsExplicitSize) {
-      return;
-    }
+  function handleBuyNow() {
     onAddToCart(product.id, finalSize, true, qty);
     navigateToHash(APP_ROUTES.checkout);
     onClose();
   }
 
   return (
-    <div
-      className="quickview-backdrop"
-      role="presentation"
-      onClick={onClose}
-    >
-      <div
-        className="quickview-shell"
-        role="dialog"
-        aria-modal="true"
-        aria-label={`${product.title} quick view`}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
+    <>
+      <AnimatePresence>
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${product.title} Quick View`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           onClick={onClose}
-          className="quickview-close"
-          aria-label="Close quick view"
+          className="fixed inset-0 z-[9980] flex items-center justify-center bg-black/65 backdrop-blur-md p-4 sm:p-6"
         >
-          ×
-        </button>
-
-        <div className="quickview-grid">
-          <div className="quickview-gallery-strip">
-            {gallery.map((image) => (
-              <button
-                key={image}
-                type="button"
-                onClick={() =>
-                  setActiveImageByProduct((prev) => ({
-                    ...prev,
-                    [product.id]: image,
-                  }))
-                }
-                className={`quickview-thumb ${
-                  activeImage === image ? "is-active" : ""
-                }`}
-              >
-                <ImageWithFallback
-                  src={image}
-                  alt={product.title}
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
-
-          <div className="quickview-main-image">
-            <ImageWithFallback
-              src={activeImage}
-              alt={product.title}
-              className="h-full w-full object-cover"
-            />
-          </div>
-
-          <div className="quickview-content">
-            <h2 className="font-editorial text-4xl leading-[1.05] text-[var(--ink)]">
-              {product.title}
-            </h2>
-
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <p className="text-3xl text-[var(--ink)]">
-                {money(product.price).replace("PKR ", "Rs.")}
-              </p>
-              {salePercent > 0 && (
-                <span className="rounded-[var(--radius-sm)] bg-[var(--ink)] px-3 py-1 text-[0.68rem] tracking-[0.16em] text-white">
-                  SAVE {salePercent}%
-                </span>
-              )}
-            </div>
-
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Shipping calculated at checkout.
-            </p>
-            <div className="mt-6">
-              <p className="quickview-label">COLOR</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.colors.map((color) => (
-                  <span
-                    key={color}
-                    className="rounded-[var(--radius-sm)] border border-[var(--line)] px-3 py-1.5 text-[0.72rem] tracking-[0.1em]"
-                  >
-                    {color}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-7">
-              <p className="quickview-label">SIZE</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => onPickSize(product.id, size)}
-                    className={`quickview-size ${
-                      pickedSize === size ? "is-selected" : ""
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-              {needsExplicitSize && (
-                <p className="mt-3 text-sm text-[#b14c41]">
-                  Please select a size before continuing.
-                </p>
-              )}
-            </div>
-
-            <div className="mt-7">
-              <p className="quickview-label">QUANTITY</p>
-              <div className="quickview-qty mt-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQtyByProduct((prev) => ({
-                      ...prev,
-                      [product.id]: Math.max(1, qty - 1),
-                    }))
-                  }
-                >
-                  −
-                </button>
-                <span>{qty}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQtyByProduct((prev) => ({
-                      ...prev,
-                      [product.id]: Math.min(product.stock, qty + 1),
-                    }))
-                  }
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <p className="mt-7 text-[0.82rem] tracking-[0.28em] text-[var(--muted)]">
-              SIZE CHART
-            </p>
-
-            <div className="mt-8 flex gap-3">
-              <button
-                type="button"
-                onClick={addCurrentToCart}
-                className="quickview-primary"
-              >
-                ADD TO CART
-              </button>
-              <button
-                type="button"
-                onClick={() => onToggleWishlist(product.id)}
-                className="quickview-save"
-                aria-label="Save item"
-              >
-                {liked ? "♥" : "♡"}
-              </button>
-            </div>
-
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 280 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-[var(--line)] max-h-[90vh] flex flex-col md:flex-row"
+          >
+            {/* Close Modal Button */}
             <button
               type="button"
-              onClick={buyNow}
-              className="quickview-secondary"
+              onClick={onClose}
+              className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[var(--ink)] shadow-md backdrop-blur-md hover:bg-white transition"
+              aria-label="Close modal"
             >
-              BUY IT NOW
+              <X size={20} />
             </button>
 
-            <div className="mt-8 border-t border-[var(--line)] pt-5 text-sm leading-7 text-[var(--muted)]">
-              <p>{product.details}</p>
-              <p className="mt-3">Material: {product.material}</p>
-              <p>Stock available: {product.stock}</p>
+            {/* Left Media Gallery Column */}
+            <div className="w-full md:w-1/2 flex flex-col bg-[var(--panel)] p-4 sm:p-6">
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-white shadow-sm">
+                <ImageWithFallback
+                  src={activeImage}
+                  alt={product.title}
+                  className="h-full w-full object-cover object-top"
+                />
+                <button
+                  type="button"
+                  onClick={() => setGalleryOpen(true)}
+                  className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md shadow-md hover:bg-black transition"
+                >
+                  <Maximize2 size={14} /> Fullscreen
+                </button>
+              </div>
+
+              {/* Thumbnails row */}
+              {gallery.length > 1 && (
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+                  {gallery.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveImage(img)}
+                      className={`h-16 w-12 shrink-0 overflow-hidden rounded-lg border-2 transition ${
+                        activeImage === img ? "border-[var(--ink)] scale-105" : "border-transparent opacity-60"
+                      }`}
+                    >
+                      <ImageWithFallback src={img} alt={`View ${idx + 1}`} className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
+            {/* Right Information & Options Column */}
+            <div className="w-full md:w-1/2 flex flex-col justify-between p-6 sm:p-8 overflow-y-auto">
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  <span>{product.fit}</span>
+                  <span>{product.categoryLabel}</span>
+                </div>
+
+                <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-[var(--ink)]">
+                  {product.title}
+                </h2>
+
+                <div className="mt-4 flex items-baseline gap-3">
+                  <span className="text-2xl font-black text-[var(--ink)]">
+                    {money(product.price).replace("PKR ", "Rs. ")}
+                  </span>
+                  {product.oldPrice > product.price && (
+                    <span className="text-sm font-semibold text-[var(--muted)] line-through">
+                      {money(product.oldPrice).replace("PKR ", "Rs. ")}
+                    </span>
+                  )}
+                  {salePercent > 0 && (
+                    <span className="rounded-full bg-[var(--ink)] px-2.5 py-0.5 text-xs font-bold text-white">
+                      -{salePercent}%
+                    </span>
+                  )}
+                </div>
+
+                <p className="mt-4 text-xs leading-relaxed text-neutral-600 line-clamp-3">
+                  {product.description}
+                </p>
+
+                {/* Size Selector */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[var(--ink)] mb-3">
+                      <span>Select Size</span>
+                      {needsExplicitSize && <span className="text-red-600">* Required</span>}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {product.sizes.map((size) => (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => onPickSize(product.id, size)}
+                          className={`h-11 min-w-[44px] rounded-xl text-xs font-bold uppercase transition border ${
+                            pickedSize === size
+                              ? "border-[var(--ink)] bg-[var(--ink)] text-white shadow-md"
+                              : "border-[var(--line-strong)] text-[var(--ink)] hover:border-[var(--ink)]"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity Adjuster */}
+                <div className="mt-6">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--ink)] block mb-3">
+                    Quantity
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center rounded-xl border border-[var(--line-strong)] bg-[var(--panel)] p-1">
+                      <button
+                        type="button"
+                        onClick={() => setQty((q) => Math.max(q - 1, 1))}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white text-[var(--ink)] transition"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-10 text-center font-bold text-xs">{qty}</span>
+                      <button
+                        type="button"
+                        onClick={() => setQty((q) => q + 1)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white text-[var(--ink)] transition"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onToggleWishlist(product.id)}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--line-strong)] transition ${
+                        liked ? "bg-red-50 border-red-200 text-red-600" : "hover:bg-[var(--panel)] text-[var(--ink)]"
+                      }`}
+                    >
+                      <Heart size={20} className={liked ? "fill-red-600 stroke-red-600" : ""} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-8 space-y-3">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={needsExplicitSize}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--ink)] py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-xl hover:bg-neutral-800 transition active:scale-98 disabled:opacity-50"
+                >
+                  {addedNotice ? (
+                    <>
+                      <Check size={16} /> Added to Cart!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag size={16} /> Add to Basket
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  disabled={needsExplicitSize}
+                  className="w-full rounded-xl border border-[var(--ink)] py-3.5 text-xs font-bold uppercase tracking-widest text-[var(--ink)] hover:bg-[var(--panel)] transition active:scale-98 disabled:opacity-50"
+                >
+                  Buy It Now
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Fullscreen Product Gallery */}
+      <FullscreenProductGallery
+        isOpen={galleryOpen}
+        images={gallery}
+        productTitle={product.title}
+        onClose={() => setGalleryOpen(false)}
+      />
+    </>
   );
 }

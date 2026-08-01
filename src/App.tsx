@@ -850,6 +850,8 @@ function App() {
         onOpenCart={() => setCartDrawerOpen(true)}
         onShopCategory={navigateToShop}
         categories={categories}
+        products={products}
+        onOpenProduct={openProduct}
       />
 
       {notice && (

@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { ArrowRight, ChevronLeft, ChevronRight, Star, Sparkles, TrendingUp } from "lucide-react";
 import { ImageWithFallback } from "../components/ImageWithFallback";
+import { ProductCard } from "../components/ProductCard";
 import { QuickViewModal } from "../components/QuickViewModal";
-import { money } from "../lib/store";
 import type { Banner, Category, Product, Service, Testimonial } from "../types/store";
+import { APP_ROUTES } from "../routes/appRoutes";
+import { getHashUrl } from "../routes/routeUtils";
 
 type HomePageProps = {
   categories: Category[];
@@ -27,25 +31,14 @@ type HomePageProps = {
   onShopCategory: (categoryId: string, query?: string) => void;
 };
 
-function productMatchesQuery(product: Product, query: string) {
-  const normalizedQuery = query.toLowerCase();
-
-  return (
-    product.slug.toLowerCase().includes(normalizedQuery) ||
-    product.title.toLowerCase().includes(normalizedQuery) ||
-    product.description.toLowerCase().includes(normalizedQuery) ||
-    product.tags.some((tag) => tag.toLowerCase().includes(normalizedQuery))
-  );
-}
-
 export function HomePage({
   categories,
   banners,
   products,
-  focusProducts = [],
+  focusProducts: _focusProducts = [],
   mustHavesProducts = [],
   saleEssentialsProducts = [],
-  services,
+  services: _services,
   testimonials,
   wishlist,
   selectedSize,
@@ -57,394 +50,307 @@ export function HomePage({
 }: HomePageProps) {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
-  const [activeMustHaveProductId, setActiveMustHaveProductId] = useState("");
-  const [activeFocusCategoryId, setActiveFocusCategoryId] = useState("");
-
-  const finalFocusProducts = useMemo(() => {
-    return focusProducts.length > 0 ? focusProducts : products.slice(0, 4);
-  }, [focusProducts, products]);
-
-  const finalMustHavesProducts = useMemo(() => {
-    return mustHavesProducts.length > 0 ? mustHavesProducts : products;
-  }, [mustHavesProducts, products]);
-
-  const finalSaleEssentialsProducts = useMemo(() => {
-    return saleEssentialsProducts.length > 0
-      ? saleEssentialsProducts
-      : products.filter((product) => product.tags.includes("sale"));
-  }, [saleEssentialsProducts, products]);
-
-  const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
-
-  const parentCategories = useMemo(() => {
-    return categories.filter((category) => category.isParent === true);
-  }, [categories]);
-
-  const activeFocusCategory =
-    parentCategories.find((category) => category.id === activeFocusCategoryId) ??
-    parentCategories[0] ??
-    null;
-
-  const activeFocusProducts = useMemo(() => {
-    if (!activeFocusCategory) return finalFocusProducts.slice(0, 6);
-
-    const directlyAssigned = products.filter(
-      (product) => product.categoryId === activeFocusCategory.id,
-    );
-    if (directlyAssigned.length > 0) return directlyAssigned.slice(0, 6);
-
-    const categoryTerms = activeFocusCategory.name
-      .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .map((term) => term.replace(/s$/, ""))
-      .filter((term) => term.length > 1);
-    const titleMatches = finalFocusProducts.filter((product) => {
-      const searchable = `${product.title} ${product.slug} ${product.tags.join(" ")}`.toLowerCase();
-      return categoryTerms.some((term) => searchable.includes(term));
-    });
-
-    return (titleMatches.length > 0 ? titleMatches : finalFocusProducts).slice(0, 6);
-  }, [activeFocusCategory, finalFocusProducts, products]);
-
-  const activeFocusImage =
-    activeFocusCategory?.image ||
-    activeFocusProducts[0]?.image ||
-    finalFocusProducts[0]?.image ||
-    "";
-
-  const mustHaveTabs = useMemo(() => finalMustHavesProducts.slice(0, 4), [finalMustHavesProducts]);
+  const [activeTab, setActiveTab] = useState<"bestsellers" | "sale">("bestsellers");
 
   const heroBanners = useMemo(
-    () => banners.filter((banner) => banner.image).slice(0, 6),
-    [banners],
+    () => (banners.length > 0 ? banners : [
+      {
+        id: "1",
+        title: "MODERN STREETWEAR SILHOUETTES",
+        description: "Explore the new Spring/Summer collection crafted with precision tailoring & premium cotton.",
+        image: "https://pk.lamaretail.com/cdn/shop/files/LAMA_DESKTOP_BANNER_1_1800x.jpg",
+      }
+    ]),
+    [banners]
   );
 
-  const normalizedHeroSlide = heroBanners.length > 0 ? activeHeroSlide % heroBanners.length : 0;
-  const activeHeroBanner = heroBanners[normalizedHeroSlide] ?? null;
+  const activeHeroBanner = heroBanners[activeHeroSlide % heroBanners.length];
 
-  const activeMustHaveProduct =
-    mustHaveTabs.find((product) => product.id === activeMustHaveProductId) ??
-    mustHaveTabs[0] ??
-    null;
-
-  const mustHaveProducts = useMemo(() => {
-    if (!activeMustHaveProduct) return products.slice(0, 5);
-    const query = activeMustHaveProduct.slug.toLowerCase();
-
-    return products
-      .filter((product) => {
-        const activeTitleWords = activeMustHaveProduct.title.toLowerCase().split(/\s+/).filter((w) => w.length > 1);
-        const matchesType = activeTitleWords.some(
-          (word) =>
-            product.title.toLowerCase().includes(word) ||
-            product.slug.toLowerCase().includes(word) ||
-            product.tags.includes(word),
-        );
-        return matchesType || productMatchesQuery(product, query);
-      })
-      .slice(0, 5);
-  }, [activeMustHaveProduct, products]);
-
-  const saleRailProducts = useMemo(() => {
-    const list = finalSaleEssentialsProducts.slice(0, 4);
-    return list.length ? list : featuredProducts.slice(0, 4);
-  }, [finalSaleEssentialsProducts, featuredProducts]);
-
+  // Auto slide hero every 6 seconds
   useEffect(() => {
-    if (heroBanners.length < 2) return undefined;
-
-    const timer = window.setInterval(() => {
-      setActiveHeroSlide((current) => (current + 1) % heroBanners.length);
-    }, 5200);
-
-    return () => window.clearInterval(timer);
+    if (heroBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveHeroSlide((prev) => (prev + 1) % heroBanners.length);
+    }, 6000);
+    return () => clearInterval(interval);
   }, [heroBanners.length]);
 
-  function renderProductTile(product: Product, index: number) {
-    return (
-      <article
-        key={product.id}
-        className="group outfit-product-tile reveal-up is-visible"
-        style={{ animationDelay: `${70 + index * 70}ms` }}
-      >
-        <div className="outfit-product-media">
-          <button
-            type="button"
-            onClick={() => onOpenProduct(product.slug)}
-            className="block h-full w-full"
-          >
-            <ImageWithFallback
-              src={product.image}
-              alt={product.title}
-              className="outfit-product-image w-full object-cover"
-            />
-          </button>
+  const displayProducts = useMemo(() => {
+    if (activeTab === "sale") {
+      return (saleEssentialsProducts.length > 0 ? saleEssentialsProducts : products.filter((p) => p.tags.includes("sale"))).slice(0, 8);
+    }
+    if (activeTab === "bestsellers") {
+      return (mustHavesProducts.length > 0 ? mustHavesProducts : products.filter((p) => p.rating >= 4.5)).slice(0, 8);
+    }
+    return products.slice(0, 8);
+  }, [activeTab, products, saleEssentialsProducts, mustHavesProducts]);
 
-          <button
-            type="button"
-            onClick={() => onToggleWishlist(product.id)}
-            className="outfit-heart-button"
-            aria-label={
-              wishlist.includes(product.id)
-                ? `Remove ${product.title} from wishlist`
-                : `Save ${product.title} to wishlist`
-            }
-          >
-            {wishlist.includes(product.id) ? "♥" : "♡"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setQuickViewProduct(product)}
-            className="outfit-quick-button"
-          >
-            Quick shop
-          </button>
-        </div>
-
-        <div className="outfit-product-info">
-          <button
-            type="button"
-            onClick={() => onOpenProduct(product.slug)}
-            className="outfit-product-name"
-          >
-            {product.title}
-          </button>
-          <span>
-            {product.fit} | {product.categoryLabel}
-          </span>
-          <p>{money(product.price)}</p>
-        </div>
-      </article>
-    );
-  }
+  const parentCategories = useMemo(
+    () => categories.filter((c) => c.isParent === true),
+    [categories]
+  );
 
   return (
-    <>
-      <section className="outfit-hero">
-        <div
-          className="outfit-hero-slide-button"
-        >
-          {heroBanners.map((banner, index) => (
-            <span
-              key={banner.id}
-              className={`outfit-hero-slide ${index === normalizedHeroSlide ? "is-active" : ""
-                }`}
-              aria-hidden={index !== normalizedHeroSlide}
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+      {/* 1. EDITORIAL HERO SECTION */}
+      <section className="relative w-full h-screen min-h-[650px] overflow-hidden bg-neutral-900 text-white">
+        <div className="absolute inset-0">
+          <ImageWithFallback
+            src={activeHeroBanner?.image}
+            alt={activeHeroBanner?.title || "Aylee Collection"}
+            className="h-full w-full object-cover object-center filter brightness-[0.78] transition-transform duration-1000 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
+        </div>
+
+        {/* Hero Overlay Content */}
+        <div className="relative mx-auto max-w-7xl h-full flex flex-col justify-end px-6 pb-16 sm:pb-24 lg:px-12 z-10">
+          <motion.div
+            key={activeHeroSlide}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-2xl space-y-4"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
+              <Sparkles size={14} /> NEW SEASON DROPS 2026
+            </div>
+
+            <h1 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-white uppercase leading-none drop-shadow-lg">
+              {activeHeroBanner?.title || "ESSENTIAL LUXURY STREETWEAR"}
+            </h1>
+
+            <p className="text-sm sm:text-base font-light text-neutral-200 line-clamp-2 max-w-xl leading-relaxed">
+              {activeHeroBanner?.description || "Engineered for maximum drape, premium breathability, and contemporary streetwear aesthetics."}
+            </p>
+
+            <div className="pt-4 flex flex-wrap gap-4">
+              <button
+                type="button"
+                onClick={() => onShopCategory("all")}
+                className="flex items-center gap-2 rounded-full bg-white px-8 py-4 text-xs font-bold uppercase tracking-[0.16em] text-black hover:bg-neutral-200 transition shadow-2xl active:scale-95"
+              >
+                EXPLORE COLLECTION <ArrowRight size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => onShopCategory("all", "sale")}
+                className="flex items-center gap-2 rounded-full border border-white/40 bg-black/30 backdrop-blur-md px-8 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white hover:bg-white/20 transition active:scale-95"
+              >
+                SHOP SALE ESSENTIALS
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Hero Slider Dots / Navigation Controls */}
+          {heroBanners.length > 1 && (
+            <div className="absolute right-6 bottom-16 sm:right-12 hidden sm:flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveHeroSlide((prev) => (prev === 0 ? heroBanners.length - 1 : prev - 1))}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/40 transition active:scale-90"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <span className="text-xs font-mono font-bold tracking-widest">
+                0{activeHeroSlide + 1} / 0{heroBanners.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveHeroSlide((prev) => (prev + 1) % heroBanners.length)}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/40 transition active:scale-90"
+                aria-label="Next slide"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 2. SHOP BY CATEGORY SECTION */}
+      <section className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[var(--line)] pb-6 mb-10">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--muted)]">CURATED SELECTION</span>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-[var(--ink)] mt-1">
+              Shop by Category
+            </h2>
+          </div>
+          <a
+            href={getHashUrl(APP_ROUTES.shop)}
+            className="mt-4 sm:mt-0 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--ink)] hover:underline"
+          >
+            VIEW ALL CATEGORIES &rarr;
+          </a>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {parentCategories.map((cat) => (
+            <div
+              key={cat.id}
+              onClick={() => onShopCategory(cat.id)}
+              className="group cursor-pointer relative aspect-[3/4] overflow-hidden rounded-2xl bg-[var(--panel)] border border-[var(--line)] shadow-sm hover:shadow-2xl transition duration-500"
             >
               <ImageWithFallback
-                src={banner.image}
-                alt=""
-                className="outfit-hero-image"
+                src={cat.image}
+                alt={cat.name}
+                className="h-full w-full object-cover group-hover:scale-108 transition duration-700"
               />
-            </span>
-          ))}
-          <span className="outfit-hero-scrim" />
-          {activeHeroBanner ? (
-            <button
-              type="button"
-              className="outfit-hero-copy"
-              onClick={() => onShopCategory("all")}
-            >
-              <small>Featured Banner</small>
-              <span>{activeHeroBanner.title}</span>
-              {activeHeroBanner.description && <p>{activeHeroBanner.description}</p>}
-              <strong>Shop now</strong>
-            </button>
-          ) : (
-            <div className="outfit-hero-copy">
-              <small>Live Banners</small>
-              <span>Loading Slider</span>
-              <p>Banners from the API will appear here.</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end text-white">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-300">
+                  {cat.items || "12+"} ITEMS
+                </span>
+                <h3 className="font-display text-xl font-bold uppercase tracking-tight mt-0.5">
+                  {cat.name}
+                </h3>
+                <span className="mt-2 inline-flex items-center text-[11px] font-bold uppercase tracking-widest text-white/80 group-hover:translate-x-1 transition">
+                  EXPLORE &rarr;
+                </span>
+              </div>
             </div>
-          )}
-        </div>
-
-        {heroBanners.length > 1 && (
-          <div className="outfit-hero-dots" aria-label="Hero slider controls">
-            {heroBanners.map((banner, index) => (
-              <button
-                key={banner.id}
-                type="button"
-                onClick={() => setActiveHeroSlide(index)}
-                className={index === normalizedHeroSlide ? "is-active" : ""}
-                aria-label={`Show ${banner.title}`}
-              />
-            ))}
-          </div>
-        )}
-
-      </section>
-
-      <section className="outfit-home-category-strip">
-        <div className="outfit-home-category-scroll">
-          {parentCategories.map((category, index) => (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => onShopCategory(category.id)}
-              className="outfit-category-tile reveal-up"
-              style={{ animationDelay: `${90 + index * 70}ms` }}
-            >
-              <ImageWithFallback src={category.image} alt={category.name} />
-              <span>{category.name}</span>
-            </button>
           ))}
         </div>
       </section>
 
-      <section className="outfit-focus-section">
-        <button
-          type="button"
-          className="outfit-focus-image reveal-up"
-          onClick={() => {
-            if (activeFocusCategory) onShopCategory(activeFocusCategory.id);
-          }}
-          aria-label={
-            activeFocusCategory
-              ? `Shop ${activeFocusCategory.name}`
-              : "Shop featured category"
-          }
-        >
-          <ImageWithFallback
-            src={activeFocusImage}
-            alt={activeFocusCategory?.name ?? "Featured category"}
-          />
-          <span className="outfit-focus-image-shade" />
-          <span className="outfit-focus-image-copy">
-            <small>Selected edit</small>
-            <strong>{activeFocusCategory?.name ?? "New arrivals"}</strong>
-            <em>Explore collection</em>
-          </span>
-        </button>
-
-        <div className="outfit-focus-content">
-          <div className="outfit-focus-copy reveal-up">
-            <div className="outfit-focus-heading">
-              <h2>Categories in Focus</h2>
-              {activeFocusCategory && (
-                <button
-                  type="button"
-                  className="outfit-focus-view-all"
-                  onClick={() => onShopCategory(activeFocusCategory.id)}
-                >
-                  View collection
-                </button>
-              )}
-            </div>
-            <nav aria-label="Categories in focus">
-              {parentCategories.map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => setActiveFocusCategoryId(category.id)}
-                  className={category.id === activeFocusCategory?.id ? "is-active" : ""}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </nav>
-          </div>
-          {activeFocusProducts.length > 0 ? (
-            <div
-              className="outfit-focus-products"
-              key={activeFocusCategory?.id ?? "featured"}
-            >
-              {activeFocusProducts.map((product, index) =>
-                renderProductTile(product, index),
-              )}
-            </div>
-          ) : (
-            <div className="outfit-focus-empty">
-              Products for this category will appear here.
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="outfit-must-section">
-        <div className="outfit-must-copy reveal-up">
-          <h2>Must-Haves</h2>
-          <p>
-            Thoughtfully designed everyday styles that combine comfort,
-            versatility, and effortless appeal. Reliable go-to pieces made to fit
-            seamlessly into your daily wardrobe.
-          </p>
-          <nav aria-label="Must-have categories">
-            {mustHaveTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveMustHaveProductId(tab.id)}
-                className={tab.id === activeMustHaveProduct?.id ? "is-active" : ""}
-                aria-pressed={tab.id === activeMustHaveProduct?.id}
-              >
-                {tab.title}
-              </button>
-            ))}
-          </nav>
-        </div>
-        {mustHaveProducts.length > 0 ? (
-          <div className="outfit-must-products" key={activeMustHaveProduct?.id ?? "all"}>
-            {mustHaveProducts.map((product, index) => renderProductTile(product, index))}
-          </div>
-        ) : (
-          <div className="outfit-must-empty reveal-up is-visible">
-            <p>No products found in this collection.</p>
-          </div>
-        )}
-      </section>
-
-      <section className="outfit-sale-rail">
-        <div className="outfit-split-heading reveal-up">
-          <div>
-            <p>Selected Stock</p>
-            <h2>Sale essentials</h2>
-          </div>
-          <button type="button" onClick={() => onShopCategory("all", "sale")}>
-            View all
-          </button>
-        </div>
-
-        <div className="outfit-product-row">
-          {saleRailProducts.map((product, index) => renderProductTile(product, index))}
-        </div>
-      </section>
-
-      <section className="outfit-service-strip">
-        {services.map((service, index) => (
-          <article
-            key={service.title}
-            className="reveal-up"
-            style={{ animationDelay: `${70 * index}ms` }}
-          >
-            <h3>{service.title}</h3>
-            <p>{service.detail}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="outfit-notes-section">
-        <div className="outfit-section-heading reveal-up">
-          <p>Customer Notes</p>
-          <h2>What shoppers say</h2>
-        </div>
-        <div className="outfit-notes-grid">
-          {testimonials.map((item, index) => (
-            <article
-              key={item.name}
-              className="reveal-up"
-              style={{ animationDelay: `${80 + index * 80}ms` }}
-            >
-              <p>"{item.quote}"</p>
-              <span>
-                {item.name} / {item.city}
+      {/* 3. FEATURED PRODUCTS & TABBED SHOWCASE */}
+      <section className="bg-[var(--panel)] py-16 lg:py-24 border-y border-[var(--line)]">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--muted)] flex items-center gap-1">
+                <TrendingUp size={14} /> CURATED DROPS
               </span>
-            </article>
-          ))}
+              <h2 className="font-display text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-[var(--ink)] mt-1">
+                Featured Collections
+              </h2>
+            </div>
+
+            {/* Tabs Selector */}
+            <div className="flex rounded-full border border-[var(--line-strong)] bg-white p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setActiveTab("bestsellers")}
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition ${
+                  activeTab === "bestsellers" ? "bg-[var(--ink)] text-white shadow-md" : "text-[var(--muted)] hover:text-[var(--ink)]"
+                }`}
+              >
+                Best Sellers
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("sale")}
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition ${
+                  activeTab === "sale" ? "bg-[var(--ink)] text-white shadow-md" : "text-[var(--muted)] hover:text-[var(--ink)]"
+                }`}
+              >
+                Sale Essentials
+              </button>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {displayProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                liked={wishlist.includes(product.id)}
+                pickedSize={selectedSize[product.id]}
+                onPickSize={onPickSize}
+                onToggleWishlist={onToggleWishlist}
+                onAddToCart={onAddToCart}
+                onOpenProduct={onOpenProduct}
+                onOpenQuickView={setQuickViewProduct}
+              />
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <button
+              type="button"
+              onClick={() => onShopCategory("all")}
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-8 py-4 text-xs font-bold uppercase tracking-[0.16em] text-white hover:bg-neutral-800 transition shadow-xl active:scale-95"
+            >
+              EXPLORE ALL PRODUCTS <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </section>
 
+      {/* 4. BRAND STORY EDITORIAL BANNER */}
+      <section className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
+        <div className="overflow-hidden rounded-3xl bg-[var(--ink)] text-white shadow-2xl grid md:grid-cols-12">
+          <div className="md:col-span-6 p-8 sm:p-12 lg:p-16 flex flex-col justify-between">
+            <div className="space-y-4">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-neutral-400">AYLEE IDENTITY</span>
+              <h2 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight">
+                CRAFTED FOR MODERN ELEVATED LIVING
+              </h2>
+              <p className="text-sm text-neutral-300 font-light leading-relaxed">
+                At Aylee, every piece is designed with meticulous attention to detail — from heavy GSM fabrics and reinforced stitching to ergonomic streetwear fits made to empower everyday confidence.
+              </p>
+            </div>
+
+            <div className="pt-8">
+              <a
+                href={getHashUrl(APP_ROUTES.about)}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-[var(--ink)] hover:bg-neutral-200 transition"
+              >
+                OUR BRAND STORY &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div className="md:col-span-6 relative min-h-[340px]">
+            <ImageWithFallback
+              src="https://pk.lamaretail.com/cdn/shop/files/LAMA_DESKTOP_BANNER_2_1800x.jpg"
+              alt="Aylee Editorial"
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 5. CUSTOMER TESTIMONIALS REVIEWS */}
+      {testimonials.length > 0 && (
+        <section className="bg-[var(--panel)] py-16 border-t border-[var(--line)]">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="text-center max-w-xl mx-auto mb-12">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--muted)]">CUSTOMER FEEDBACK</span>
+              <h2 className="font-display text-3xl font-extrabold uppercase tracking-tight text-[var(--ink)] mt-1">
+                What Our Clients Say
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-6">
+              {testimonials.slice(0, 3).map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm space-y-4"
+                >
+                  <div className="flex items-center gap-1 text-amber-500">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={16} className="fill-amber-500 stroke-amber-500" />
+                    ))}
+                  </div>
+                  <p className="text-xs leading-relaxed text-neutral-700 italic">
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+                  <div className="border-t border-[var(--line)] pt-3 flex justify-between text-xs font-bold uppercase tracking-wider text-[var(--ink)]">
+                    <span>{item.name}</span>
+                    <span className="text-[var(--muted)] font-normal">{item.city}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Quick View Modal */}
       {quickViewProduct && (
         <QuickViewModal
           product={quickViewProduct}
@@ -454,8 +360,9 @@ export function HomePage({
           onPickSize={onPickSize}
           onToggleWishlist={onToggleWishlist}
           onAddToCart={onAddToCart}
+          onOpenProduct={onOpenProduct}
         />
       )}
-    </>
+    </div>
   );
 }

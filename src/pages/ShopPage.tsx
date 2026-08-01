@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { SlidersHorizontal, Grid2X2, Grid3X3, Square, ArrowLeft, ArrowRight } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import { API_ROUTES } from "../api/apiRoutes";
 import { mapApiProduct } from "../api/storeApi";
 import { APP_ROUTES } from "../routes/appRoutes";
-import { navigateToHash } from "../routes/routeUtils";
+import { getHashUrl } from "../routes/routeUtils";
 import { ProductCard } from "../components/ProductCard";
+import { ProductGrid } from "../components/ProductGrid";
+import { FilterDrawer } from "../components/FilterDrawer";
+import { QuickViewModal } from "../components/QuickViewModal";
 import type { Category, Product } from "../types/store";
 
 type ShopPageProps = {
@@ -83,47 +87,6 @@ const sortOptions = [
 
 type GridLayout = "single" | "double" | "quad";
 
-function IconGridSingle() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <rect x="3" y="2.75" width="12" height="12.5" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  );
-}
-
-function IconGridDouble() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <rect x="2.5" y="2.75" width="5.75" height="12.5" stroke="currentColor" strokeWidth="1.4" />
-      <rect x="9.75" y="2.75" width="5.75" height="12.5" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  );
-}
-
-function IconGridQuad() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <rect x="2.5" y="2.5" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="8" y="2.5" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="13.5" y="2.5" width="2" height="4" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="2.5" y="8" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="8" y="8" width="4" height="4" stroke="currentColor" strokeWidth="1.3" />
-      <rect x="13.5" y="8" width="2" height="4" stroke="currentColor" strokeWidth="1.3" />
-    </svg>
-  );
-}
-
-function IconSort() {
-  return (
-    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
-      <path d="M2.5 4.25h14M2.5 9.5h14M2.5 14.75h14" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
-      <circle cx="6.25" cy="4.25" r="1.65" fill="white" stroke="currentColor" strokeWidth="1.2" />
-      <circle cx="12.75" cy="9.5" r="1.65" fill="white" stroke="currentColor" strokeWidth="1.2" />
-      <circle cx="8.75" cy="14.75" r="1.65" fill="white" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
 export function ShopPage({
   categories,
   wishlist,
@@ -138,492 +101,368 @@ export function ShopPage({
   activeQuery,
   activeSortBy,
 }: ShopPageProps) {
-  const pageRef = useRef<HTMLElement | null>(null);
-  const [gridLayout, setGridLayout] = useState<GridLayout>("quad");
-  const [retryCount, setRetryCount] = useState(0);
-
-  // Parse hash search params
-  const hash = typeof window !== "undefined" ? window.location.hash : "";
-  const params = useMemo(() => {
-    const queryIndex = hash.indexOf("?");
-    return new URLSearchParams(queryIndex === -1 ? "" : hash.slice(queryIndex + 1));
-  }, [hash]);
-
-  const categoryId = params.get("category_id") || "";
-  const subCategoryId = params.get("sub_category_id") || "";
-  const page = Number(params.get("page")) || 1;
-  const urlQuery = params.get("q") || "";
-  const urlSort = params.get("sort_by") || "featured";
-
-  // Category and products state
   const [parentCategory, setParentCategory] = useState<ParentCategoryData | null>(null);
   const [childCategories, setChildCategories] = useState<ChildCategoryData[]>([]);
   const [apiProducts, setApiProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
-  const [pageLoading, setPageLoading] = useState(false);
+  const [subCategoryId, setSubCategoryId] = useState<string>("all");
+  const [pageLoading, setPageLoading] = useState(true);
   const [pageError, setPageError] = useState("");
-  const [lastLoadedCategoryId, setLastLoadedCategoryId] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+  const [layout, setLayout] = useState<GridLayout>("quad");
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
-  // Sync route params to App.tsx root state
+  const [hashVersion, setHashVersion] = useState(0);
+
   useEffect(() => {
-    onQueryChange(urlQuery);
-  }, [urlQuery, onQueryChange]);
+    const handleHashChange = () => setHashVersion((v) => v + 1);
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
-  useEffect(() => {
-    onSortChange(urlSort);
-  }, [urlSort, onSortChange]);
-
-  // Clear products/pagination when parent category switches to prevent screen flash
-  useEffect(() => {
-    if (categoryId !== lastLoadedCategoryId) {
-      setParentCategory(null);
-      setChildCategories([]);
-      setApiProducts([]);
-      setPagination(null);
-    }
-  }, [categoryId, lastLoadedCategoryId]);
-
-  // Fetch Category Products from API
-  useEffect(() => {
-    if (!categoryId) return;
-
-    const controller = new AbortController();
-
-    async function loadCategoryData() {
-      setPageLoading(true);
-      setPageError("");
-      try {
-        const hasSelectedChild = Boolean(
-          subCategoryId && subCategoryId !== "all",
-        );
-        const fetchParams: Record<string, unknown> = { page };
-        const endpoint = hasSelectedChild
-          ? API_ROUTES.catalog.productsByCategory(subCategoryId)
-          : API_ROUTES.catalog.categoryWithProducts(categoryId);
-
-        const response = await axiosClient.get<CategoryProductsResponse>(
-          endpoint,
-          {
-            params: fetchParams,
-            signal: controller.signal,
-          },
-        );
-
-        const data = response.data;
-        if (data.responseCode === 200 && data.payload) {
-          const productPayload = data.payload.products;
-          const rawProducts = productPayload?.data ?? data.payload.data ?? [];
-          const nextChildCategories = data.payload.child_categories ?? [];
-          const childCategoryIds = new Set(
-            nextChildCategories.map((child) => String(child.id)),
-          );
-          const mappedProducts = rawProducts.map((raw) => mapApiProduct(raw));
-          const productsForSelectedCategory = hasSelectedChild
-            ? mappedProducts
-            : mappedProducts.filter((product) => {
-                const belongsToSelectedParent =
-                  product.categoryId === "all" ||
-                  product.categoryId === categoryId;
-                const belongsToSelectedChild =
-                  childCategoryIds.has(product.categoryId) ||
-                  (product.subCategoryId !== null &&
-                    product.subCategoryId !== undefined &&
-                    childCategoryIds.has(String(product.subCategoryId)));
-
-                return belongsToSelectedParent || belongsToSelectedChild;
-              });
-
-          // The child-category endpoint only returns products and pagination.
-          // Keep the parent endpoint's metadata so the tabs remain visible.
-          if (!hasSelectedChild) {
-            setParentCategory(data.payload.parent_category ?? null);
-            setChildCategories(nextChildCategories);
-          }
-          setApiProducts(productsForSelectedCategory);
-          onProductsLoaded(productsForSelectedCategory);
-          setPagination(productPayload?.pagination ?? data.payload.pagination ?? null);
-          setLastLoadedCategoryId(categoryId);
-        } else {
-          setPageError(data.message || "Failed to retrieve category products.");
-        }
-      } catch (err: unknown) {
-        if (controller.signal.aborted || axios.isCancel(err)) {
-          return;
-        }
-        const error = err as { message?: string };
-        setPageError(error.message || "Something went wrong while fetching products.");
-      } finally {
-        if (!controller.signal.aborted) {
-          setPageLoading(false);
-        }
-      }
-    }
-
-    void loadCategoryData();
-
-    return () => {
-      controller.abort();
+  const parsedHash = useMemo(() => {
+    const raw = window.location.hash.replace(/^#/, "");
+    if (!raw.startsWith("/shop")) return { categoryId: "all", subCategoryId: "all" };
+    const queryStr = raw.includes("?") ? raw.split("?")[1] : "";
+    const params = new URLSearchParams(queryStr);
+    return {
+      categoryId: params.get("category") || params.get("category_id") || "all",
+      subCategoryId: params.get("subcategory") || params.get("sub_category_id") || "all",
     };
-  }, [categoryId, subCategoryId, page, retryCount, onProductsLoaded]);
+  }, [hashVersion]);
 
-  // Handle URL change updates
-  function updateSearchParams(newParams: Record<string, string | null>) {
-    const nextParams = new URLSearchParams(params);
-    Object.entries(newParams).forEach(([key, val]) => {
-      if (val === null) {
-        nextParams.delete(key);
+  const selectedCategoryId = parsedHash.categoryId;
+
+  useEffect(() => {
+    setSubCategoryId(parsedHash.subCategoryId);
+  }, [parsedHash.subCategoryId]);
+
+  const activeCategoryObj = useMemo(
+    () => categories.find((c) => c.id === selectedCategoryId) ?? null,
+    [categories, selectedCategoryId]
+  );
+
+  const fetchCategoryData = async (catId: string, subId: string, pageNum = 1) => {
+    setPageLoading(true);
+    setPageError("");
+    try {
+      if (catId === "all" || !catId) {
+        const res = await axiosClient.get<{
+          responseCode: number;
+          message: string;
+          payload: { data: Record<string, unknown>[]; pagination: PaginationData };
+        }>(API_ROUTES.catalog.products, { params: { page: pageNum, per_page: 24 } });
+        const rawList = res.data.payload?.data || [];
+        const mapped = rawList.map(mapApiProduct);
+        setApiProducts(mapped);
+        setPagination(res.data.payload?.pagination || null);
+        setParentCategory(null);
+        setChildCategories([]);
+        onProductsLoaded(mapped);
       } else {
-        nextParams.set(key, val);
+        const url = API_ROUTES.catalog.categoryWithProducts(catId);
+        const params: Record<string, unknown> = { page: pageNum, per_page: 24 };
+        if (subId && subId !== "all") params.sub_category_id = subId;
+
+        const res = await axiosClient.get<CategoryProductsResponse>(url, { params });
+        const payload = res.data.payload || {};
+        const rawProducts = payload.products?.data || payload.data || [];
+        const mapped = rawProducts.map(mapApiProduct);
+
+        setApiProducts(mapped);
+        setPagination(payload.products?.pagination || payload.pagination || null);
+        if (payload.parent_category) setParentCategory(payload.parent_category);
+        if (payload.child_categories) setChildCategories(payload.child_categories);
+        onProductsLoaded(mapped);
       }
-    });
-    const queryString = nextParams.toString();
-    navigateToHash(queryString ? `${APP_ROUTES.shop}?${queryString}` : APP_ROUTES.shop);
-  }
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setPageError(err.response?.data?.message || err.message || "Failed to load products");
+      } else {
+        setPageError("Failed to load products");
+      }
+    } finally {
+      setPageLoading(false);
+    }
+  };
 
-  function handleSubCategoryChange(subId: string) {
-    updateSearchParams({
-      sub_category_id: subId === "all" ? null : subId,
-      page: "1", // reset to page 1
-    });
-  }
+  useEffect(() => {
+    fetchCategoryData(selectedCategoryId, subCategoryId, 1);
+  }, [selectedCategoryId, subCategoryId, retryCount]);
 
-  function handlePageChange(newPage: number) {
-    updateSearchParams({ page: String(newPage) });
-  }
+  const handleSubCategoryChange = (newSubId: string) => {
+    setSubCategoryId(newSubId);
+    const raw = window.location.hash.replace(/^#/, "");
+    const queryStr = raw.includes("?") ? raw.split("?")[1] : "";
+    const params = new URLSearchParams(queryStr);
+    if (newSubId && newSubId !== "all") {
+      params.set("subcategory", newSubId);
+    } else {
+      params.delete("subcategory");
+    }
+    window.location.hash = `/shop?${params.toString()}`;
+  };
 
-  function handleQueryChange(newQuery: string) {
-    updateSearchParams({
-      q: newQuery || null,
-      page: "1", // reset to page 1
-    });
-  }
+  const handleQueryChange = (val: string) => {
+    onQueryChange(val);
+  };
 
-  function handleSortChange(newSort: string) {
-    updateSearchParams({
-      sort_by: newSort === "featured" ? null : newSort,
-      page: "1", // reset to page 1
-    });
-  }
+  const handleSortChange = (val: string) => {
+    onSortChange(val);
+  };
 
-  // Client-side filtering & sorting on API products (handles search + backup filtering)
+  const handlePageChange = (newPage: number) => {
+    fetchCategoryData(selectedCategoryId, subCategoryId, newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const displayedProducts = useMemo(() => {
-    const q = activeQuery.trim().toLowerCase();
-    let list = apiProducts.filter((product) => {
-      // A child tab must never show direct-parent or sibling products.
-      if (subCategoryId && subCategoryId !== "all") {
-        const belongsToSelectedSubcategory =
-          String(product.subCategoryId ?? "") === subCategoryId ||
-          (product.categoryId !== categoryId &&
-            product.categoryId === subCategoryId);
+    let list = [...apiProducts];
 
-        if (!belongsToSelectedSubcategory) {
-          return false;
-        }
+    // Strictly filter by selected category if not 'all'
+    if (selectedCategoryId && selectedCategoryId !== "all") {
+      const targetCat = selectedCategoryId.toLowerCase();
+      const filtered = list.filter((p) => {
+        const pCat = (p.categoryId || "").toLowerCase();
+        const pLabel = (p.categoryLabel || "").toLowerCase();
+        const pTitle = (p.title || "").toLowerCase();
+        const pTags = (p.tags || []).join(" ").toLowerCase();
+
+        return (
+          pCat === targetCat ||
+          pLabel === targetCat ||
+          pTitle.includes(targetCat) ||
+          pTags.includes(targetCat)
+        );
+      });
+      if (filtered.length > 0) {
+        list = filtered;
       }
-
-      return (
-        q.length === 0 ||
-        product.title.toLowerCase().includes(q) ||
-        product.description.toLowerCase().includes(q) ||
-        product.categoryLabel.toLowerCase().includes(q) ||
-        product.fit.toLowerCase().includes(q) ||
-        product.material.toLowerCase().includes(q) ||
-        product.badge.toLowerCase().includes(q) ||
-        product.colors.some((color) => color.toLowerCase().includes(q)) ||
-        product.tags.some((tag) => tag.toLowerCase().includes(q))
-      );
-    });
-
-    // Client-side sort fallback
-    if (activeSortBy === "price-low") {
-      list = [...list].sort((a, b) => a.price - b.price);
-    } else if (activeSortBy === "price-high") {
-      list = [...list].sort((a, b) => b.price - a.price);
-    } else if (activeSortBy === "rating") {
-      list = [...list].sort((a, b) => b.rating - a.rating);
-    } else if (activeSortBy === "newest") {
-      list = [...list].reverse();
     }
 
+    if (activeQuery.trim()) {
+      const q = activeQuery.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.fit.toLowerCase().includes(q) ||
+          p.categoryLabel.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    if (activeSortBy === "price-low") list.sort((a, b) => a.price - b.price);
+    else if (activeSortBy === "price-high") list.sort((a, b) => b.price - a.price);
+    else if (activeSortBy === "rating") list.sort((a, b) => b.rating - a.rating);
     return list;
-  }, [apiProducts, categoryId, subCategoryId, activeQuery, activeSortBy]);
+  }, [apiProducts, selectedCategoryId, activeQuery, activeSortBy]);
 
-  // Set stagger animations when products update
-  useEffect(() => {
-    const cards = pageRef.current?.querySelectorAll<HTMLElement>(".product-card.reveal-up");
-    if (!cards?.length) return;
-
-    cards.forEach((card, index) => {
-      card.style.setProperty("--section-stagger", `${Math.min(index * 60, 360)}ms`);
-      card.classList.add("is-visible");
-    });
-  }, [displayedProducts]);
-
-  const gridClass =
-    gridLayout === "single"
-      ? "shop-product-grid--single"
-      : gridLayout === "double"
-        ? "shop-product-grid--double"
-        : "shop-product-grid--quad";
-  const skeletonCount =
-    gridLayout === "single" ? 1 : gridLayout === "double" ? 2 : 5;
-
-  const selectedCategory = categories.find((category) => category.id === categoryId);
-  const fallbackChildCategories = useMemo<ChildCategoryData[]>(
-    () =>
-      categories
-        .filter((category) => category.parentId === categoryId)
-        .map((category) => ({
-          id: Number(category.id),
-          title: category.name,
-          slug: "",
-          summary: category.subtitle,
-          photo: category.image ? [category.image] : [],
-          is_parent: "0",
-          parent_id: categoryId,
-          status: "active",
-        }))
-        .filter((category) => Number.isFinite(category.id)),
-    [categories, categoryId],
-  );
-  const visibleChildCategories = useMemo(() => {
-    const matchingApiChildren = childCategories.filter(
-      (child) => String(child.parent_id) === categoryId,
-    );
-    return matchingApiChildren.length > 0
-      ? matchingApiChildren
-      : fallbackChildCategories;
-  }, [childCategories, fallbackChildCategories, categoryId]);
-  const collectionTitle = parentCategory?.title || selectedCategory?.name || "Collection";
-  const normalizedGender = parentCategory?.gender?.toLowerCase();
-  const audienceLabel =
-    normalizedGender === "male"
-      ? "Men"
-      : normalizedGender === "female"
-        ? "Women"
-        : parentCategory?.gender || "Men";
-
-  // Category Selection fallback screen
-  if (!categoryId) {
-    return (
-      <section className="shop-page">
-        <div className="shop-page__shell">
-          <header className="shop-header reveal-up">
-            <div className="shop-header__intro">
-              <h1 className="shop-header__title">Collections</h1>
-              <p className="shop-header__description">
-                Please select a collection to explore our catalog.
-              </p>
-            </div>
-          </header>
-
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 reveal-up mt-8">
-            {categories.filter((c) => c.isParent).map((category, index) => (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => {
-                  navigateToHash(`${APP_ROUTES.shop}?category_id=${category.id}`);
-                }}
-                className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] aspect-[4/3] bg-[var(--panel)] transition-all hover:border-[var(--ink)] cursor-pointer text-left"
-                style={{ animationDelay: `${70 + index * 70}ms` }}
-              >
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-end p-6">
-                  <span className="font-editorial text-2xl text-white uppercase">{category.name}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const parentTitle = parentCategory?.title || activeCategoryObj?.name || "ALL PRODUCTS";
+  const visibleChildCategories = childCategories.filter((c) => c.status === "active");
 
   return (
-    <section ref={pageRef} className="shop-page shop-page--category">
-      <div className="shop-page__shell">
-        <header className="shop-catalog-header reveal-up">
-          <div className="shop-catalog-topline">
-            <nav className="shop-breadcrumb" aria-label="Breadcrumb">
-              <span>Home</span>
-              <span>/</span>
-              <span>{audienceLabel}</span>
-              <span>/</span>
-              <strong>{collectionTitle}</strong>
-            </nav>
+    <section className="min-h-screen bg-[var(--paper)] text-[var(--ink)] py-8 lg:py-12">
+      <div className="mx-auto max-w-[1700px] px-4 sm:px-8">
+        {/* Header Title & Breadcrumb */}
+        <div className="border-b border-[var(--line)] pb-8 mb-8">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)] mb-2">
+            <a href={getHashUrl(APP_ROUTES.home)} className="hover:text-[var(--ink)] transition">Home</a>
+            <span>/</span>
+            <span className="text-[var(--ink)]">{parentTitle}</span>
+          </div>
 
-            <div className="shop-catalog-tools">
-              <div className="shop-grid-toggle" role="group" aria-label="Grid layout">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="font-display text-4xl sm:text-5xl font-black uppercase tracking-tight text-[var(--ink)]">
+                {parentTitle}
+              </h1>
+              <p className="mt-2 text-xs text-[var(--muted)] max-w-xl">
+                Elevated men&apos;s streetwear and contemporary Pakistani apparel crafted for comfort, fit, and style.
+              </p>
+            </div>
+
+            {/* Desktop Sort & Layout Controls */}
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setFilterDrawerOpen(true)}
+                className="lg:hidden flex items-center gap-2 rounded-full border border-[var(--line-strong)] bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--ink)] shadow-sm"
+              >
+                <SlidersHorizontal size={16} /> Filters &amp; Sort
+              </button>
+
+              <div className="hidden lg:flex items-center gap-2 border border-[var(--line-strong)] rounded-xl p-1 bg-white">
                 <button
                   type="button"
-                  aria-label="Single column view"
-                  aria-pressed={gridLayout === "single"}
-                  className={gridLayout === "single" ? "is-active" : ""}
-                  onClick={() => setGridLayout("single")}
+                  onClick={() => setLayout("single")}
+                  className={`p-2 rounded-lg transition ${layout === "single" ? "bg-[var(--ink)] text-white" : "text-[var(--muted)]"}`}
+                  aria-label="Single column layout"
                 >
-                  <IconGridSingle />
+                  <Square size={16} />
                 </button>
                 <button
                   type="button"
-                  aria-label="Two column view"
-                  aria-pressed={gridLayout === "double"}
-                  className={gridLayout === "double" ? "is-active" : ""}
-                  onClick={() => setGridLayout("double")}
+                  onClick={() => setLayout("double")}
+                  className={`p-2 rounded-lg transition ${layout === "double" ? "bg-[var(--ink)] text-white" : "text-[var(--muted)]"}`}
+                  aria-label="Double column layout"
                 >
-                  <IconGridDouble />
+                  <Grid2X2 size={16} />
                 </button>
                 <button
                   type="button"
-                  aria-label="Five column view"
-                  aria-pressed={gridLayout === "quad"}
-                  className={gridLayout === "quad" ? "is-active" : ""}
-                  onClick={() => setGridLayout("quad")}
+                  onClick={() => setLayout("quad")}
+                  className={`p-2 rounded-lg transition ${layout === "quad" ? "bg-[var(--ink)] text-white" : "text-[var(--muted)]"}`}
+                  aria-label="Four column layout"
                 >
-                  <IconGridQuad />
+                  <Grid3X3 size={16} />
                 </button>
               </div>
 
-              <label className="shop-sort-icon" title="Sort products">
-                <span className="sr-only">Sort products</span>
-                <select value={activeSortBy} onChange={(event) => handleSortChange(event.target.value)}>
-                  {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+              <div className="hidden lg:flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted)]">Sort:</span>
+                <select
+                  value={activeSortBy}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="rounded-xl border border-[var(--line-strong)] bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-[var(--ink)] outline-none cursor-pointer"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
                     </option>
                   ))}
                 </select>
-                <IconSort />
-              </label>
+              </div>
             </div>
           </div>
 
-          {/* Only subcategories returned for the selected parent category */}
-          <nav className="shop-tabs" aria-label="Collection tags">
-            <button
-              type="button"
-              className={!subCategoryId || subCategoryId === "all" ? "is-active" : ""}
-              onClick={() => handleSubCategoryChange("all")}
-            >
-              ALL
-            </button>
-            {visibleChildCategories.map((child) => {
-              const active = String(child.id) === subCategoryId;
-              return (
+          {/* Subcategories Pills */}
+          {visibleChildCategories.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-[var(--line)]">
+              <button
+                type="button"
+                onClick={() => handleSubCategoryChange("all")}
+                className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
+                  subCategoryId === "all"
+                    ? "bg-[var(--ink)] text-white shadow-md"
+                    : "border border-[var(--line-strong)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
+                }`}
+              >
+                All {parentTitle}
+              </button>
+              {visibleChildCategories.map((child) => (
                 <button
                   key={child.id}
                   type="button"
-                  className={active ? "is-active" : ""}
                   onClick={() => handleSubCategoryChange(String(child.id))}
+                  className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
+                    subCategoryId === String(child.id)
+                      ? "bg-[var(--ink)] text-white shadow-md"
+                      : "border border-[var(--line-strong)] bg-white text-[var(--ink)] hover:border-[var(--ink)]"
+                  }`}
                 >
-                  {child.title.toUpperCase()}
+                  {child.title}
                 </button>
-              );
-            })}
-          </nav>
-        </header>
-
-        {/* loading / error / list states */}
-        {pageLoading ? (
-          <div
-            className={`shop-product-grid ${gridClass}`}
-            role="status"
-            aria-live="polite"
-            aria-label="Loading products"
-          >
-            {Array.from({ length: skeletonCount }, (_, index) => (
-              <div
-                key={`${subCategoryId || "all"}-${index}`}
-                className="shop-product-skeleton animate-shimmer"
-              />
-            ))}
-          </div>
-        ) : pageError ? (
-          <article className="shop-empty-state reveal-up is-visible">
-            <span className="shop-empty-state__eyebrow">Catalog notice</span>
-            <h2 className="font-editorial">Products could not be loaded</h2>
-            <p>{pageError}</p>
-            <button type="button" onClick={() => setRetryCount((count) => count + 1)}>
-              Try again
-            </button>
-          </article>
-        ) : displayedProducts.length === 0 ? (
-          <article className="shop-empty-state reveal-up is-visible">
-            <span className="shop-empty-state__eyebrow">No match yet</span>
-            <h2 className="font-editorial">We could not find products</h2>
-            <p>No products found in this category.</p>
-            <button
-              type="button"
-              onClick={() => {
-                handleSubCategoryChange("all");
-                handleQueryChange("");
-              }}
-            >
-              Clear subcategory or search
-            </button>
-          </article>
-        ) : (
-          <>
-            <div className={`shop-product-grid ${gridClass} ${pageLoading ? "opacity-50 pointer-events-none" : ""}`}>
-              {displayedProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  liked={wishlist.includes(product.id)}
-                  pickedSize={selectedSize[product.id]}
-                  onPickSize={onPickSize}
-                  onToggleWishlist={onToggleWishlist}
-                  onAddToCart={onAddToCart}
-                  onOpenProduct={onOpenProduct}
-                  catalogAudience={audienceLabel}
-                  variant="catalog"
-                />
               ))}
             </div>
+          )}
+        </div>
 
-            {/* Pagination Controls */}
-            {pagination && pagination.total_pages > 1 && (
-              <nav className="shop-pagination reveal-up is-visible" aria-label="Pagination">
-                <button
-                  type="button"
-                  className="shop-pagination__arrow"
-                  disabled={pagination.current_page === 1}
-                  onClick={() => handlePageChange(pagination.current_page - 1)}
-                >
-                  &larr; Previous
-                </button>
-                {Array.from({ length: pagination.total_pages }, (_, i) => {
-                  const pageNum = i + 1;
-                  const active = pageNum === pagination.current_page;
-                  return (
-                    <button
-                      key={pageNum}
-                      type="button"
-                      className={`shop-pagination__number ${active ? "is-active" : ""}`}
-                      onClick={() => handlePageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  className="shop-pagination__arrow"
-                  disabled={pagination.current_page === pagination.total_pages}
-                  onClick={() => handlePageChange(pagination.current_page + 1)}
-                >
-                  Next &rarr;
-                </button>
-              </nav>
-            )}
-          </>
+        {/* Product Grid Section */}
+        {pageError ? (
+          <div className="py-12 text-center">
+            <p className="text-sm font-semibold text-red-600 mb-4">{pageError}</p>
+            <button
+              type="button"
+              onClick={() => setRetryCount((c) => c + 1)}
+              className="rounded-full bg-[var(--ink)] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
+            >
+              Retry Loading Catalog
+            </button>
+          </div>
+        ) : (
+          <ProductGrid
+            isLoading={pageLoading}
+            layout={layout}
+            count={displayedProducts.length}
+            onResetFilters={() => {
+              handleSubCategoryChange("all");
+              handleQueryChange("");
+            }}
+          >
+            {displayedProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                liked={wishlist.includes(product.id)}
+                pickedSize={selectedSize[product.id]}
+                onPickSize={onPickSize}
+                onToggleWishlist={onToggleWishlist}
+                onAddToCart={onAddToCart}
+                onOpenProduct={onOpenProduct}
+                onOpenQuickView={setQuickViewProduct}
+                variant="catalog"
+              />
+            ))}
+          </ProductGrid>
+        )}
+
+        {/* Pagination */}
+        {pagination && pagination.total_pages > 1 && (
+          <div className="mt-16 flex items-center justify-center gap-2 border-t border-[var(--line)] pt-8">
+            <button
+              type="button"
+              disabled={pagination.current_page === 1}
+              onClick={() => handlePageChange(pagination.current_page - 1)}
+              className="flex items-center gap-1.5 rounded-xl border border-[var(--line-strong)] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[var(--ink)] disabled:opacity-40 hover:bg-[var(--panel)] transition"
+            >
+              <ArrowLeft size={14} /> Previous
+            </button>
+            <span className="text-xs font-mono font-bold text-[var(--ink)] px-4">
+              Page {pagination.current_page} of {pagination.total_pages}
+            </span>
+            <button
+              type="button"
+              disabled={pagination.current_page === pagination.total_pages}
+              onClick={() => handlePageChange(pagination.current_page + 1)}
+              className="flex items-center gap-1.5 rounded-xl border border-[var(--line-strong)] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[var(--ink)] disabled:opacity-40 hover:bg-[var(--panel)] transition"
+            >
+              Next <ArrowRight size={14} />
+            </button>
+          </div>
         )}
       </div>
+
+      {/* Mobile Filter Drawer */}
+      <FilterDrawer
+        isOpen={filterDrawerOpen}
+        categories={categories}
+        activeCategory={selectedCategoryId}
+        activeSortBy={activeSortBy}
+        onSelectCategory={(catId) => {
+          window.location.hash = `/shop?category=${catId}`;
+        }}
+        onSelectSortBy={handleSortChange}
+        onClose={() => setFilterDrawerOpen(false)}
+        onReset={() => {
+          handleSubCategoryChange("all");
+          handleQueryChange("");
+        }}
+      />
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          liked={wishlist.includes(quickViewProduct.id)}
+          pickedSize={selectedSize[quickViewProduct.id]}
+          onClose={() => setQuickViewProduct(null)}
+          onPickSize={onPickSize}
+          onToggleWishlist={onToggleWishlist}
+          onAddToCart={onAddToCart}
+          onOpenProduct={onOpenProduct}
+        />
+      )}
     </section>
   );
 }
