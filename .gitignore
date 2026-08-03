@@ -8,9 +8,19 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.next
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
+coverage
+playwright-report
+test-results
+
+# Local secrets. `.env.example` is the only environment file intended for git.
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*

@@ -1,7 +1,66 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "src/app/**/*.ts",
+    "src/app/**/*.tsx",
+    "src/components/common/**/*.tsx",
+    "src/components/layout/**/*.tsx",
+    "src/components/product/**/*.tsx",
+    "src/components/cart/**/*.tsx",
+    "src/components/search/**/*.tsx",
+    "src/components/forms/**/*.tsx",
+    "src/components/account/**/*.tsx",
+    "src/components/providers/**/*.tsx",
+    "src/lib/commerce/**/*.ts",
+    "src/lib/seo/**/*.ts",
+    "src/lib/validation/**/*.ts",
+    "src/lib/utils/**/*.ts",
+    "src/config/site.ts",
+    "src/config/content.ts",
+    "src/types/commerce.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/api",
+    "src/pages",
+    "src/services",
+    "src/routes",
+    "src/context",
+    "src/hooks",
+    "src/config/env.ts",
+    "src/types/payment.ts",
+    "src/types/store.ts",
+    "src/App.tsx",
+    "src/main.tsx"
   ]
 }
