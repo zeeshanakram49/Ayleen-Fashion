@@ -3,7 +3,9 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { StoreProvider } from "@/components/providers/store-provider";
+import { MotionProvider } from "@/components/providers/motion-provider";
 import { siteConfig } from "@/config/site";
+import { getCategories } from "@/lib/commerce/collections";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -49,14 +51,25 @@ export const viewport: Viewport = {
   themeColor: "#fffefb",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const categories = await getCategories();
+  const menuCategories = categories.flatMap((category) => [
+    { id: category.id, slug: category.slug, name: category.name },
+    ...category.children.map((child) => ({
+      id: child.id,
+      slug: child.slug,
+      name: child.name,
+    })),
+  ]);
+
   return (
     <html lang="en-PK" data-scroll-behavior="smooth">
       <body>
         <StoreProvider>
-          <Header />
+          <MotionProvider />
+          <Header categories={menuCategories} />
           <main id="main-content">{children}</main>
           <Footer />
           <CartDrawer />

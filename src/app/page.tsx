@@ -14,6 +14,7 @@ import { getBanners, getProducts } from "@/lib/commerce/products";
 import { getCategories } from "@/lib/commerce/collections";
 import { siteConfig } from "@/config/site";
 import { NewsletterForm } from "@/components/forms/newsletter-form";
+import { HeroSlider } from "@/components/home/hero-slider";
 
 export const revalidate = 300;
 
@@ -47,7 +48,6 @@ export default async function HomePage() {
     getCategories(),
     getBanners(),
   ]);
-  const hero = banners[0];
   const saleProducts = products
     .filter((product) => Boolean(product.compareAtPrice))
     .slice(0, 4);
@@ -82,47 +82,7 @@ export default async function HomePage() {
     <>
       <JsonLd data={organization} />
       <JsonLd data={website} />
-      <section className="relative min-h-[72svh] overflow-hidden bg-[#d9d5cc] md:min-h-[82svh]">
-        {hero ? (
-          <Image
-            src={hero.image}
-            alt="Aylee seasonal collection"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,#c9c1b4,#eeeae2_55%,#b5aa99)]" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
-        <div className="container-site relative flex min-h-[72svh] items-end py-12 text-white md:min-h-[82svh] md:items-center md:py-20">
-          <div className="max-w-3xl">
-            <p className="eyebrow !text-white/75">The latest Aylee edit</p>
-            <h1 className="display-title mt-5 max-w-3xl">
-              Everyday style, considered.
-            </h1>
-            <p className="mt-6 max-w-xl text-base text-white/85 md:text-lg">
-              Explore the current collection, sourced directly from Aylee&apos;s
-              live catalog.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/shop"
-                className="button-primary !border-white !bg-white !text-[#171613] hover:!bg-[#f2eee7]"
-              >
-                Shop the collection <ArrowRight size={16} />
-              </Link>
-              <Link
-                href="/collections"
-                className="button-secondary !border-white !text-white hover:!bg-white hover:!text-[#171613]"
-              >
-                Browse categories
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSlider banners={banners} />
 
       <section className="section-pad container-site">
         <SectionHeading
@@ -131,12 +91,16 @@ export default async function HomePage() {
           description="Browse the categories currently available from Aylee."
         />
         {categories.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div
+            data-reveal
+            data-stagger
+            className="category-grid grid gap-4 md:grid-cols-2"
+          >
             {categories.map((category, index) => (
               <Link
                 key={category.id}
                 href={`/categories/${category.slug}`}
-                className="group relative aspect-[4/3] overflow-hidden bg-[#efede7] md:aspect-[5/4]"
+                className="category-card group relative aspect-[4/3] overflow-hidden bg-[#efede7] md:aspect-[5/4]"
               >
                 {category.image ? (
                   <Image
@@ -144,7 +108,7 @@ export default async function HomePage() {
                     alt={`${category.name} category`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover transition duration-500 group-hover:scale-[1.025]"
+                    className="object-cover transition duration-1000 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]"
                   />
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
@@ -156,7 +120,11 @@ export default async function HomePage() {
                     {category.name}
                   </h3>
                   <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
-                    Explore <ArrowRight size={15} />
+                    Explore{" "}
+                    <ArrowRight
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                      size={15}
+                    />
                   </span>
                 </div>
               </Link>
@@ -204,13 +172,14 @@ export default async function HomePage() {
       </section>
 
       {saleProducts.length ? (
-        <section className="section-pad bg-[#6f2d24] text-white">
+        <section className="section-pad bg-[#28312c] text-white">
           <div className="container-site">
             <SectionHeading
               eyebrow="Selected reductions"
               title="Sale essentials"
               description="Current markdowns supplied by the Aylee catalog."
               link={{ href: "/sale", label: "Shop sale" }}
+              inverted
             />
             <div className="rounded-sm bg-white p-4 text-[#171613] md:p-8">
               <ProductGrid products={saleProducts} />
@@ -219,7 +188,10 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="grid bg-[#e9e4db] lg:grid-cols-2">
+      <section
+        data-reveal
+        className="story-panel grid overflow-hidden bg-[#e9e4db] lg:grid-cols-2"
+      >
         <div className="flex items-center px-6 py-16 md:px-16 lg:px-[8vw] lg:py-24">
           <div className="max-w-xl">
             <p className="eyebrow">Designed for real days</p>
@@ -235,9 +207,9 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="grid min-h-[400px] place-items-center bg-[#cbc2b5] p-12 text-center">
+        <div className="brand-stage grid min-h-[400px] place-items-center bg-[#cbc2b5] p-12 text-center">
           <div>
-            <p className="serif text-7xl tracking-[-0.06em] md:text-9xl">
+            <p className="brand-word serif text-7xl tracking-[-0.06em] md:text-9xl">
               AYLEE
             </p>
             <p className="mt-3 text-xs tracking-[0.3em] uppercase">Pakistan</p>
@@ -251,7 +223,10 @@ export default async function HomePage() {
           title="Verified reviews, when available"
           description="The current backend does not publish verified review data. Reviews will appear here only when authentic purchase-linked feedback is available."
         />
-        <div className="border border-[#dedbd2] bg-[#f7f5f0] p-8 md:p-12">
+        <div
+          data-reveal
+          className="quote-panel border border-[#dedbd2] bg-[#f7f5f0] p-8 md:p-12"
+        >
           <p className="serif max-w-3xl text-3xl leading-snug md:text-5xl">
             No fabricated ratings. No borrowed praise. Just verified customer
             voices when the data is ready.
@@ -260,7 +235,11 @@ export default async function HomePage() {
       </section>
 
       <section className="border-y border-[#dedbd2] bg-white">
-        <div className="container-site grid md:grid-cols-2 lg:grid-cols-4">
+        <div
+          data-reveal
+          data-stagger
+          className="benefits-grid container-site grid md:grid-cols-2 lg:grid-cols-4"
+        >
           {benefits.map(({ icon: Icon, title, detail }) => (
             <div
               key={title}
@@ -275,7 +254,10 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad bg-[#171613] text-white">
-        <div className="container-site grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
+        <div
+          data-reveal
+          className="container-site grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end"
+        >
           <div>
             <p className="eyebrow !text-white/55">Aylee list</p>
             <h2 className="serif mt-4 max-w-3xl text-5xl leading-none tracking-[-0.04em] md:text-7xl">
@@ -300,7 +282,11 @@ export default async function HomePage() {
           description="Published storefront locations across Lahore, Islamabad, and Karachi."
           link={{ href: "/stores", label: "View all stores" }}
         />
-        <div className="grid gap-px bg-[#dedbd2] md:grid-cols-3">
+        <div
+          data-reveal
+          data-stagger
+          className="stores-grid grid gap-px bg-[#dedbd2] md:grid-cols-3"
+        >
           {siteConfig.stores.map((store) => (
             <article key={store.city} className="bg-white p-7 md:p-9">
               <h3 className="serif text-4xl">{store.city}</h3>

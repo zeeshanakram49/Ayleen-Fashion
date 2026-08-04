@@ -10,6 +10,8 @@ export async function GET(request: Request) {
       slug: product.slug,
       name: product.name,
       category: product.category?.name || null,
+      image: product.images[0]?.thumbnailUrl || product.images[0]?.url || null,
+      price: product.price,
     })),
   });
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Plus } from "lucide-react";
@@ -19,10 +20,33 @@ export function ProductCard({
   const discount = calculateDiscount(product.price, product.compareAtPrice);
   const primary = product.images[0];
   const secondary = product.images[1];
+  const cardRef = useRef<HTMLElement>(null);
+
+  function handlePointerMove(event: ReactPointerEvent<HTMLElement>) {
+    if (event.pointerType !== "mouse" || !cardRef.current) return;
+    const bounds = cardRef.current.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width;
+    const y = (event.clientY - bounds.top) / bounds.height;
+    cardRef.current.style.setProperty("--card-rotate-x", `${(0.5 - y) * 7}deg`);
+    cardRef.current.style.setProperty("--card-rotate-y", `${(x - 0.5) * 8}deg`);
+    cardRef.current.style.setProperty("--card-glare-x", `${x * 100}%`);
+    cardRef.current.style.setProperty("--card-glare-y", `${y * 100}%`);
+  }
+
+  function resetPointerDepth() {
+    cardRef.current?.style.setProperty("--card-rotate-x", "0deg");
+    cardRef.current?.style.setProperty("--card-rotate-y", "0deg");
+  }
 
   return (
-    <article className="group min-w-0" data-testid="product-card">
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#efede7]">
+    <article
+      ref={cardRef}
+      className="product-card group min-w-0"
+      data-testid="product-card"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetPointerDepth}
+    >
+      <div className="product-media relative aspect-[4/5] overflow-hidden bg-[#efede7]">
         <Link
           href={`/products/${product.slug}`}
           aria-label={`View ${product.name}`}
@@ -34,7 +58,7 @@ export function ProductCard({
               alt={primary.alt}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={`object-cover transition-opacity duration-300 ${secondary ? "group-hover:opacity-0" : ""}`}
+              className={`object-cover transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.035] ${secondary ? "group-hover:opacity-0" : ""}`}
               loading={eager ? "eager" : "lazy"}
             />
           ) : (
@@ -48,7 +72,7 @@ export function ProductCard({
               alt={secondary.alt}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              className="scale-[1.035] object-cover opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-100 group-hover:opacity-100"
             />
           ) : null}
         </Link>
@@ -67,7 +91,7 @@ export function ProductCard({
         <button
           type="button"
           onClick={() => toggleWishlist(product.id)}
-          className="absolute top-3 right-3 grid size-10 place-items-center rounded-full bg-white/90 shadow-sm"
+          className="card-action absolute top-3 right-3 grid size-10 place-items-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm"
           aria-label={
             favourite
               ? `Remove ${product.name} from wishlist`
@@ -81,7 +105,7 @@ export function ProductCard({
           <button
             type="button"
             onClick={() => addItem(product)}
-            className="absolute inset-x-3 bottom-3 flex min-h-11 translate-y-3 items-center justify-center gap-2 bg-white px-3 text-xs font-bold tracking-wider uppercase opacity-0 shadow-sm transition group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100 max-md:translate-y-0 max-md:opacity-100"
+            className="quick-add absolute inset-x-3 bottom-3 flex min-h-11 translate-y-3 items-center justify-center gap-2 bg-white/95 px-3 text-xs font-bold tracking-wider uppercase opacity-0 shadow-[0_8px_28px_rgb(0_0_0/0.12)] backdrop-blur-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100 max-md:translate-y-0 max-md:opacity-100"
             aria-label={`Quick add ${product.name}`}
           >
             <Plus size={15} /> Quick add

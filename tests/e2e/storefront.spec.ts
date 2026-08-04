@@ -19,10 +19,17 @@ async function openReady(page: import("@playwright/test").Page, path: string) {
 
 test("homepage loads and primary navigation works", async ({ page }) => {
   await openReady(page, "/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Everyday style",
-  );
-  await page.getByRole("link", { name: "Shop the collection" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const shopLink = page.getByRole("link", { name: "Shop", exact: true });
+  if (await shopLink.isVisible()) {
+    await shopLink.click();
+  } else {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page
+      .getByRole("dialog", { name: "Mobile navigation" })
+      .getByRole("link", { name: "Shop", exact: true })
+      .click();
+  }
   await expect(page).toHaveURL(/\/shop/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Shop all");
 });

@@ -29,7 +29,8 @@ export async function placeOrder(input: CheckoutInput) {
           country: data.country,
           post_code: data.postCode,
         },
-        payment_method: data.payment,
+        // The order endpoint creates the order with its default COD state.
+        // Hosted card/wallet payments are initiated separately after creation.
         note: data.note,
         items: data.lines.map((line) => ({
           product_id: line.productId,
