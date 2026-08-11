@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { StoreProvider } from "@/components/providers/store-provider";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { SiteMotionConfig } from "@/components/motion/motion-config";
 import { siteConfig } from "@/config/site";
 import { getCategories } from "@/lib/commerce/collections";
 import "./globals.css";
@@ -68,11 +69,13 @@ export default async function RootLayout({
     <html lang="en-PK" data-scroll-behavior="smooth">
       <body>
         <StoreProvider>
-          <MotionProvider />
-          <Header categories={menuCategories} />
-          <main id="main-content">{children}</main>
-          <Footer />
-          <CartDrawer />
+          <SiteMotionConfig>
+            <MotionProvider />
+            <Header categories={menuCategories} />
+            <main id="main-content">{children}</main>
+            <Footer />
+            <CartDrawer />
+          </SiteMotionConfig>
         </StoreProvider>
       </body>
     </html>

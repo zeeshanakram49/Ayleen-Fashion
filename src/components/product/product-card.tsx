@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Heart, Plus } from "lucide-react";
 import { useStore } from "@/components/providers/store-provider";
 import { calculateDiscount, formatPrice } from "@/lib/utils/format";
 import type { Product } from "@/types/commerce";
@@ -21,6 +22,26 @@ export function ProductCard({
   const primary = product.images[0];
   const secondary = product.images[1];
   const cardRef = useRef<HTMLElement>(null);
+  const needsSizePicker = product.sizes.length > 1;
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  function handleQuickAdd() {
+    if (needsSizePicker) {
+      setPickerOpen(true);
+      return;
+    }
+    addItem(product);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1800);
+  }
+
+  function handleSizePick(size: string) {
+    addItem(product, { size });
+    setPickerOpen(false);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1800);
+  }
 
   function handlePointerMove(event: ReactPointerEvent<HTMLElement>) {
     if (event.pointerType !== "mouse" || !cardRef.current) return;
@@ -88,9 +109,10 @@ export function ProductCard({
             </span>
           ) : null}
         </div>
-        <button
+        <motion.button
           type="button"
           onClick={() => toggleWishlist(product.id)}
+          whileTap={{ scale: 0.92 }}
           className="card-action absolute top-3 right-3 grid size-10 place-items-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm"
           aria-label={
             favourite
@@ -99,17 +121,74 @@ export function ProductCard({
           }
           aria-pressed={favourite}
         >
-          <Heart size={18} fill={favourite ? "currentColor" : "none"} />
-        </button>
-        {product.isAvailable ? (
-          <button
-            type="button"
-            onClick={() => addItem(product)}
-            className="quick-add absolute inset-x-3 bottom-3 flex min-h-11 translate-y-3 items-center justify-center gap-2 bg-white/95 px-3 text-xs font-bold tracking-wider uppercase opacity-0 shadow-[0_8px_28px_rgb(0_0_0/0.12)] backdrop-blur-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100 max-md:translate-y-0 max-md:opacity-100"
-            aria-label={`Quick add ${product.name}`}
+          <motion.span
+            key={String(favourite)}
+            initial={{ scale: 0.7 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Plus size={15} /> Quick add
-          </button>
+            <Heart size={18} fill={favourite ? "currentColor" : "none"} />
+          </motion.span>
+        </motion.button>
+        {product.isAvailable ? (
+          <div className="quick-add-wrap absolute inset-x-3 bottom-3">
+            <AnimatePresence>
+              {pickerOpen ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="mb-2 flex flex-wrap gap-1.5 bg-white/95 p-2 shadow-[0_8px_28px_rgb(0_0_0/0.12)] backdrop-blur-sm"
+                >
+                  {product.sizes.map((entry) => (
+                    <motion.button
+                      key={entry}
+                      type="button"
+                      onClick={() => handleSizePick(entry)}
+                      whileTap={{ scale: 0.9 }}
+                      className="min-h-8 min-w-9 border border-[#dedbd2] px-2 text-xs font-semibold"
+                    >
+                      {entry}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              className="quick-add flex min-h-11 w-full translate-y-3 items-center justify-center gap-2 bg-white/95 px-3 text-xs font-bold tracking-wider uppercase opacity-0 shadow-[0_8px_28px_rgb(0_0_0/0.12)] backdrop-blur-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100 max-md:translate-y-0 max-md:opacity-100 active:scale-[0.97]"
+              aria-label={`Quick add ${product.name}`}
+              aria-expanded={pickerOpen}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {added ? (
+                  <motion.span
+                    key="added"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Check size={15} /> Added
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="add"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Plus size={15} /> Quick add
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
         ) : null}
       </div>
       <div className="pt-4">

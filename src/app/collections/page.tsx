@@ -41,6 +41,7 @@ export default async function CollectionsPage() {
                   src={category.image}
                   alt={`${category.name} collection`}
                   fill
+                  unoptimized
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition duration-500 group-hover:scale-[1.025]"
                 />

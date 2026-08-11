@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { accountSchema } from "@/lib/validation/schemas";
+import { Spinner } from "@/components/motion/spinner";
 import type { z } from "zod";
 
 type AccountInput = z.infer<typeof accountSchema>;
@@ -22,6 +23,7 @@ export function AccountPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [serverMessage, setServerMessage] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
   const {
     register,
     handleSubmit,
@@ -63,8 +65,10 @@ export function AccountPanel() {
   }
 
   async function logout() {
+    setLoggingOut(true);
     await fetch("/api/auth/session", { method: "DELETE" });
     setUser(null);
+    setLoggingOut(false);
   }
 
   if (loadingSession)
@@ -82,9 +86,11 @@ export function AccountPanel() {
           <button
             type="button"
             onClick={logout}
-            className="mt-6 text-xs font-bold tracking-wider uppercase underline underline-offset-4"
+            disabled={loggingOut}
+            className="mt-6 inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase underline underline-offset-4 disabled:opacity-60"
           >
-            Sign out
+            {loggingOut ? <Spinner size={13} /> : null}
+            {loggingOut ? "Signing out…" : "Sign out"}
           </button>
         </aside>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -185,6 +191,7 @@ export function AccountPanel() {
           className="button-primary w-full"
           disabled={isSubmitting}
         >
+          {isSubmitting ? <Spinner size={16} /> : null}
           {isSubmitting
             ? "Please wait…"
             : mode === "login"

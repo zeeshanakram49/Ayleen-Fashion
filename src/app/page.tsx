@@ -15,6 +15,9 @@ import { getCategories } from "@/lib/commerce/collections";
 import { siteConfig } from "@/config/site";
 import { NewsletterForm } from "@/components/forms/newsletter-form";
 import { HeroSlider } from "@/components/home/hero-slider";
+import { Reveal } from "@/components/motion/reveal";
+import { Parallax } from "@/components/motion/parallax";
+import { MagneticButton } from "@/components/motion/magnetic-button";
 
 export const revalidate = 300;
 
@@ -91,43 +94,41 @@ export default async function HomePage() {
           description="Browse the categories currently available from Aylee."
         />
         {categories.length ? (
-          <div
-            data-reveal
-            data-stagger
-            className="category-grid grid gap-4 md:grid-cols-2"
-          >
+          <div data-reveal className="category-grid grid gap-4 md:grid-cols-2">
             {categories.map((category, index) => (
-              <Link
-                key={category.id}
-                href={`/categories/${category.slug}`}
-                className="category-card group relative aspect-[4/3] overflow-hidden bg-[#efede7] md:aspect-[5/4]"
-              >
-                {category.image ? (
-                  <Image
-                    src={category.image}
-                    alt={`${category.name} category`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover transition duration-1000 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]"
-                  />
-                ) : null}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-9">
-                  <p className="text-xs tracking-[0.18em] uppercase">
-                    Category {String(index + 1).padStart(2, "0")}
-                  </p>
-                  <h3 className="serif mt-2 text-4xl md:text-5xl">
-                    {category.name}
-                  </h3>
-                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
-                    Explore{" "}
-                    <ArrowRight
-                      className="transition-transform duration-300 group-hover:translate-x-1"
-                      size={15}
+              <Reveal key={category.id} delay={index * 0.08}>
+                <Link
+                  href={`/categories/${category.slug}`}
+                  className="category-card group relative block aspect-[4/3] overflow-hidden bg-[#efede7] md:aspect-[5/4]"
+                >
+                  {category.image ? (
+                    <Image
+                      src={category.image}
+                      alt={`${category.name} category`}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover transition duration-1000 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]"
                     />
-                  </span>
-                </div>
-              </Link>
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-9">
+                    <p className="text-xs tracking-[0.18em] uppercase">
+                      Category {String(index + 1).padStart(2, "0")}
+                    </p>
+                    <h3 className="serif mt-2 text-4xl md:text-5xl">
+                      {category.name}
+                    </h3>
+                    <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
+                      Explore{" "}
+                      <ArrowRight
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                        size={15}
+                      />
+                    </span>
+                  </div>
+                </Link>
+              </Reveal>
             ))}
           </div>
         ) : (
@@ -172,8 +173,12 @@ export default async function HomePage() {
       </section>
 
       {saleProducts.length ? (
-        <section className="section-pad bg-[#28312c] text-white">
-          <div className="container-site">
+        <section className="section-pad relative overflow-hidden bg-[#28312c] text-white">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 right-[8%] -z-0 size-64 -translate-y-1/2 rounded-full bg-[#6f2d24]/40 blur-3xl motion-safe:animate-pulse md:size-96"
+          />
+          <div className="container-site relative">
             <SectionHeading
               eyebrow="Selected reductions"
               title="Sale essentials"
@@ -202,18 +207,20 @@ export default async function HomePage() {
               A focused catalog, clear availability, and a simple path from
               discovery to checkout.
             </p>
-            <Link href="/about" className="button-secondary mt-8">
-              Discover Aylee
-            </Link>
+            <MagneticButton className="mt-8 inline-block" strength={0.25}>
+              <Link href="/about" className="button-secondary">
+                Discover Aylee
+              </Link>
+            </MagneticButton>
           </div>
         </div>
-        <div className="brand-stage grid min-h-[400px] place-items-center bg-[#cbc2b5] p-12 text-center">
-          <div>
+        <div className="brand-stage grid min-h-[400px] place-items-center overflow-hidden bg-[#cbc2b5] p-12 text-center">
+          <Parallax range={[30, -30]} scaleRange={[0.92, 1.08]}>
             <p className="brand-word serif text-7xl tracking-[-0.06em] md:text-9xl">
               AYLEE
             </p>
             <p className="mt-3 text-xs tracking-[0.3em] uppercase">Pakistan</p>
-          </div>
+          </Parallax>
         </div>
       </section>
 
@@ -235,20 +242,18 @@ export default async function HomePage() {
       </section>
 
       <section className="border-y border-[#dedbd2] bg-white">
-        <div
-          data-reveal
-          data-stagger
-          className="benefits-grid container-site grid md:grid-cols-2 lg:grid-cols-4"
-        >
-          {benefits.map(({ icon: Icon, title, detail }) => (
-            <div
+        <div className="benefits-grid container-site grid md:grid-cols-2 lg:grid-cols-4">
+          {benefits.map(({ icon: Icon, title, detail }, index) => (
+            <Reveal
               key={title}
+              delay={index * 0.1}
+              y={16}
               className="border-b border-[#dedbd2] px-5 py-9 last:border-b-0 md:border-r lg:border-b-0 md:[&:nth-child(2)]:border-r-0 lg:[&:nth-child(2)]:border-r"
             >
               <Icon size={24} strokeWidth={1.4} aria-hidden />
               <h3 className="mt-5 font-semibold">{title}</h3>
               <p className="mt-2 text-sm text-[#6c6961]">{detail}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>

@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useStore } from "@/components/providers/store-provider";
 import { EmptyState } from "@/components/common/empty-state";
 import { formatPrice } from "@/lib/utils/format";
 import { siteConfig } from "@/config/site";
+import { MagneticButton } from "@/components/motion/magnetic-button";
 
 export function CartPageView() {
   const { lines, summary, updateQuantity, removeItem, clearCart } = useStore();
@@ -36,9 +38,19 @@ export function CartPageView() {
           </button>
         </div>
         <ul className="divide-y divide-[#dedbd2] border-y border-[#dedbd2]">
-          {lines.map((line) => (
-            <li
+          <AnimatePresence initial={false}>
+          {lines.map((line, index) => (
+            <motion.li
               key={line.key}
+              layout
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -24, transition: { duration: 0.25 } }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.05,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="grid grid-cols-[96px_1fr] gap-4 py-6 sm:grid-cols-[132px_1fr] sm:gap-6"
             >
               <Link
@@ -78,43 +90,47 @@ export function CartPageView() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex h-10 items-center border border-[#dedbd2]">
-                    <button
+                    <motion.button
                       type="button"
                       onClick={() =>
                         updateQuantity(line.key, line.quantity - 1)
                       }
+                      whileTap={{ scale: 0.9 }}
                       className="h-full px-3"
                       aria-label={`Decrease ${line.name} quantity`}
                     >
                       <Minus size={14} />
-                    </button>
+                    </motion.button>
                     <span className="min-w-9 text-center text-sm">
                       {line.quantity}
                     </span>
-                    <button
+                    <motion.button
                       type="button"
                       onClick={() =>
                         updateQuantity(line.key, line.quantity + 1)
                       }
+                      whileTap={{ scale: 0.9 }}
                       className="h-full px-3"
                       aria-label={`Increase ${line.name} quantity`}
                       disabled={line.quantity >= line.stock}
                     >
                       <Plus size={14} />
-                    </button>
+                    </motion.button>
                   </div>
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => removeItem(line.key)}
+                    whileTap={{ scale: 0.9 }}
                     className="p-2 text-[#6c6961]"
                     aria-label={`Remove ${line.name}`}
                   >
                     <Trash2 size={18} />
-                  </button>
+                  </motion.button>
                 </div>
               </div>
-            </li>
+            </motion.li>
           ))}
+          </AnimatePresence>
         </ul>
       </div>
       <aside className="border border-[#dedbd2] bg-[#f7f5f0] p-6 lg:sticky lg:top-32">
@@ -164,9 +180,11 @@ export function CartPageView() {
             Coupon validation will appear when enabled by the commerce backend.
           </p>
         </div>
-        <Link href="/checkout" className="button-primary mt-7 w-full">
-          <ShoppingBag size={16} /> Continue to checkout
-        </Link>
+        <MagneticButton className="block w-full mt-7" strength={0.2}>
+          <Link href="/checkout" className="button-primary w-full">
+            <ShoppingBag size={16} /> Continue to checkout
+          </Link>
+        </MagneticButton>
         <Link
           href="/shop"
           className="mt-4 block text-center text-xs underline underline-offset-4"

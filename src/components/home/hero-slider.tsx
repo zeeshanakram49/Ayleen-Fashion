@@ -12,6 +12,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Banner } from "@/types/commerce";
+import { SplitText } from "@/components/motion/text-reveal";
+import { MagneticButton } from "@/components/motion/magnetic-button";
 
 type HeroSliderProps = {
   banners: Banner[];
@@ -19,6 +21,7 @@ type HeroSliderProps = {
 
 export function HeroSlider({ banners }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [firstImageLoaded, setFirstImageLoaded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const swipeStartRef = useRef({ x: 0, y: 0 });
   const trackpadAmountRef = useRef(0);
@@ -26,7 +29,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
   const trackpadEndTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (banners.length < 2) return;
+    if (banners.length < 2 || !firstImageLoaded) return;
 
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -38,7 +41,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
     }, 6000);
 
     return () => window.clearInterval(timer);
-  }, [activeSlide, banners.length]);
+  }, [activeSlide, banners.length, firstImageLoaded]);
 
   useEffect(
     () => () => {
@@ -142,34 +145,45 @@ export function HeroSlider({ banners }: HeroSliderProps) {
       onWheel={handleTrackpadSwipe}
     >
       {banners.length ? (
-        <div className="absolute inset-0">
-          {banners.map((banner, index) => (
-            <div
-              key={banner.id}
-              className={`hero-slide absolute inset-0 transition-[opacity,transform] duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] ${
-                index === activeSlide
-                  ? "z-[1] scale-100 opacity-100"
-                  : "scale-[1.025] opacity-0"
-              }`}
-              aria-hidden={index !== activeSlide}
-            >
-              <Image
-                src={banner.image}
-                alt={banner.title || "Aylee seasonal collection"}
-                fill
-                priority={index === 0}
-                draggable={false}
-                sizes="100vw"
-                className={`hero-image object-cover object-center ${index === activeSlide ? "is-active" : ""}`}
-              />
-            </div>
-          ))}
+        <div className="pointer-events-none absolute inset-0">
+          {banners.map((banner, index) => {
+            if (index > 0 && !firstImageLoaded) return null;
+            return (
+              <div
+                key={banner.id}
+                className={`hero-slide absolute inset-0 transition-[opacity,transform] duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] ${
+                  index === activeSlide
+                    ? "z-[1] scale-100 opacity-100"
+                    : "scale-[1.025] opacity-0"
+                }`}
+                aria-hidden={index !== activeSlide}
+              >
+                <Image
+                  src={banner.image}
+                  alt={banner.title || "Aylee seasonal collection"}
+                  fill
+                  preload={index === 0}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  quality={70}
+                  draggable={false}
+                  sizes="100vw"
+                  className={`hero-image object-cover object-center ${index === activeSlide ? "is-active" : ""}`}
+                  onLoad={
+                    index === 0 ? () => setFirstImageLoaded(true) : undefined
+                  }
+                  onError={
+                    index === 0 ? () => setFirstImageLoaded(true) : undefined
+                  }
+                />
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,#c9c1b4,#eeeae2_55%,#b5aa99)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,#c9c1b4,#eeeae2_55%,#b5aa99)]" />
       )}
 
-      <div className="absolute inset-0 z-[2] bg-[linear-gradient(90deg,rgba(10,10,9,.72)_0%,rgba(10,10,9,.35)_43%,rgba(10,10,9,.08)_75%),linear-gradient(0deg,rgba(10,10,9,.58)_0%,transparent_42%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(90deg,rgba(10,10,9,.72)_0%,rgba(10,10,9,.35)_43%,rgba(10,10,9,.08)_75%),linear-gradient(0deg,rgba(10,10,9,.58)_0%,transparent_42%)]" />
       <div className="hero-noise pointer-events-none absolute inset-0 z-[3] opacity-[0.16]" />
 
       <div className="container-site relative z-[4] flex h-full items-end pb-28 text-white md:items-center md:pb-0">
@@ -178,19 +192,24 @@ export function HeroSlider({ banners }: HeroSliderProps) {
             <span className="h-px w-8 bg-white/60" /> The new Aylee edit
           </p>
           <h1 className="display-title mt-5 text-balance drop-shadow-sm">
-            {banners[activeSlide]?.title || "Everyday, considered."}
+            <SplitText
+              text={banners[activeSlide]?.title || "Everyday, considered."}
+              animateKey={activeSlide}
+            />
           </h1>
           <p className="mt-6 max-w-lg text-sm leading-7 text-white/75 md:text-base">
             {banners[activeSlide]?.description ||
               "Modern essentials shaped for real days—quietly confident, effortlessly yours."}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/shop"
-              className="button-primary button-arrow !border-white !bg-white !text-[#171613] hover:!border-[#f2eee7] hover:!bg-[#f2eee7]"
-            >
-              Shop collection <ArrowRight size={16} />
-            </Link>
+            <MagneticButton>
+              <Link
+                href="/shop"
+                className="button-primary button-arrow !border-white !bg-white !text-[#171613] hover:!border-[#f2eee7] hover:!bg-[#f2eee7]"
+              >
+                Shop collection <ArrowRight size={16} />
+              </Link>
+            </MagneticButton>
             <Link
               href="/collections"
               className="button-secondary !border-white/55 !text-white hover:!border-white hover:!bg-white hover:!text-[#171613]"

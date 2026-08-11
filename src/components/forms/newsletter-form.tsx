@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { MagneticButton } from "@/components/motion/magnetic-button";
+import { Spinner } from "@/components/motion/spinner";
 
 export function NewsletterForm({
   id,
@@ -44,12 +46,15 @@ export function NewsletterForm({
           placeholder="Your email address"
           className={`min-w-0 flex-1 bg-transparent py-4 outline-none ${dark ? "text-white placeholder:text-white/45" : "text-[#171613] placeholder:text-[#77736b]"}`}
         />
-        <button
-          disabled={pending}
-          className="px-3 text-xs font-bold tracking-wider uppercase"
-        >
-          {pending ? "Please wait…" : "Subscribe"}
-        </button>
+        <MagneticButton strength={0.25}>
+          <button
+            disabled={pending}
+            className="inline-flex items-center gap-2 px-3 text-xs font-bold tracking-wider uppercase"
+          >
+            {pending ? <Spinner size={13} /> : null}
+            {pending ? "Please wait…" : "Subscribe"}
+          </button>
+        </MagneticButton>
       </form>
       {message ? (
         <p

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { Check, Heart, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/providers/store-provider";
 import { isVariantSelectionComplete } from "@/lib/utils/product";
+import { MagneticButton } from "@/components/motion/magnetic-button";
 import type { Product } from "@/types/commerce";
 
 export function ProductPurchase({ product }: { product: Product }) {
@@ -110,24 +112,42 @@ export function ProductPurchase({ product }: { product: Product }) {
         </div>
       </div>
       <div className="grid grid-cols-[1fr_52px] gap-2">
-        <button
-          type="button"
-          onClick={add}
-          disabled={!enabled}
-          className="button-primary w-full"
-          data-testid="add-to-cart"
-        >
-          {added ? (
-            <>
-              <Check size={17} /> Added to bag
-            </>
-          ) : (
-            <>
-              <ShoppingBag size={17} />{" "}
-              {product.isAvailable ? "Add to bag" : "Sold out"}
-            </>
-          )}
-        </button>
+        <MagneticButton className="block" strength={0.15}>
+          <button
+            type="button"
+            onClick={add}
+            disabled={!enabled}
+            className="button-primary w-full"
+            data-testid="add-to-cart"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {added ? (
+                <motion.span
+                  key="added"
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-flex items-center gap-2"
+                >
+                  <Check size={17} /> Added to bag
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="add"
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ShoppingBag size={17} />{" "}
+                  {product.isAvailable ? "Add to bag" : "Sold out"}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </MagneticButton>
         <button
           type="button"
           onClick={() => toggleWishlist(product.id)}
@@ -135,17 +155,26 @@ export function ProductPurchase({ product }: { product: Product }) {
           aria-label={favourite ? "Remove from wishlist" : "Add to wishlist"}
           aria-pressed={favourite}
         >
-          <Heart size={19} fill={favourite ? "currentColor" : "none"} />
+          <motion.span
+            key={String(favourite)}
+            initial={{ scale: 0.7 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Heart size={19} fill={favourite ? "currentColor" : "none"} />
+          </motion.span>
         </button>
       </div>
-      <button
-        type="button"
-        onClick={buyNow}
-        disabled={!enabled}
-        className="button-secondary w-full"
-      >
-        Buy now
-      </button>
+      <MagneticButton className="block w-full" strength={0.15}>
+        <button
+          type="button"
+          onClick={buyNow}
+          disabled={!enabled}
+          className="button-secondary w-full"
+        >
+          Buy now
+        </button>
+      </MagneticButton>
       <p className="sr-only" aria-live="polite">
         {added ? `${product.name} added to your bag` : ""}
       </p>

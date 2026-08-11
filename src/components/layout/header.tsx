@@ -60,7 +60,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
         Skip to content
       </a>
       <p
-        className={`${isHomepage ? "absolute inset-x-0 top-0 z-[51] bg-black/60 backdrop-blur-sm" : "bg-[#171613]"} px-4 py-2 text-center text-[0.65rem] font-semibold tracking-[0.2em] text-white uppercase`}
+        className={`${isHomepage ? "absolute inset-x-0 top-0 z-[51] bg-black/60 backdrop-blur-sm" : "bg-[#171613]"} pointer-events-none px-4 py-2 text-center text-[0.65rem] font-semibold tracking-[0.2em] text-white uppercase`}
       >
         {siteConfig.announcement}
       </p>
@@ -71,10 +71,10 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
             : floating
               ? "fixed inset-x-0 top-0 z-[60] py-3 text-[#171613]"
               : `sticky top-0 z-[60] bg-white/90 text-[#171613] backdrop-blur-xl ${scrolled ? "shadow-[0_8px_30px_rgb(0_0_0/0.06)]" : "shadow-[0_1px_0_rgb(23_22_19/0.08)]"}`
-        } transition-colors duration-300`}
+        } pointer-events-auto isolate touch-manipulation transition-colors duration-300`}
       >
         <div
-          className={`container-site transition-all duration-300 ${
+          className={`container-site pointer-events-auto relative z-[1] transition-all duration-300 ${
             floating
               ? "rounded-[1.5rem] bg-white/95 px-3 shadow-[0_14px_45px_rgb(0_0_0/0.14)] ring-1 ring-black/5 backdrop-blur-xl md:px-5 xl:rounded-full"
               : ""
@@ -155,14 +155,14 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
 
           <nav
             aria-label="Mobile primary navigation"
-            className="overflow-x-auto pb-3 xl:hidden"
+            className="pointer-events-auto touch-pan-x overflow-x-auto pb-3 xl:hidden"
           >
             <div className="flex min-w-max items-center gap-5 px-1">
               {siteConfig.navigation.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="text-[0.72rem] font-bold tracking-[0.09em] uppercase opacity-90"
+                  className="touch-manipulation py-2 text-[0.72rem] font-bold tracking-[0.09em] uppercase opacity-90"
                 >
                   {item.label}
                 </Link>

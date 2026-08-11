@@ -9,6 +9,7 @@ import {
   type WheelEvent as ReactWheelEvent,
 } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -187,14 +188,32 @@ export function ProductGallery({
   return (
     <div>
       <div className="group relative aspect-[4/5] overflow-hidden bg-[#efede7]">
-        <Image
-          src={image.url}
-          alt={image.alt || productName}
-          fill
-          sizes="(max-width: 1024px) calc(100vw - 2rem), 58vw"
-          className="object-cover"
-          loading="eager"
-        />
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.button
+            key={image.id}
+            type="button"
+            onClick={openFullscreen}
+            onPointerEnter={() => {
+              const preload = new window.Image();
+              preload.src = image.url;
+            }}
+            className="absolute inset-0 cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#171613]"
+            aria-label={`Open ${productName} image ${active + 1} in fullscreen`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Image
+              src={image.url}
+              alt={image.alt || productName}
+              fill
+              sizes="(max-width: 1024px) calc(100vw - 2rem), 58vw"
+              className="object-cover"
+              loading="eager"
+            />
+          </motion.button>
+        </AnimatePresence>
         {images.length > 1 ? (
           <>
             <button

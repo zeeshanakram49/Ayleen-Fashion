@@ -20,6 +20,9 @@ async function openReady(page: import("@playwright/test").Page, path: string) {
 test("homepage loads and primary navigation works", async ({ page }) => {
   await openReady(page, "/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const categoryGrid = page.locator(".category-grid");
+  await categoryGrid.scrollIntoViewIfNeeded();
+  await expect(categoryGrid).toHaveCSS("opacity", "1");
   const shopLink = page.getByRole("link", { name: "Shop", exact: true });
   if (await shopLink.isVisible()) {
     await shopLink.click();
@@ -50,6 +53,10 @@ test("product variant, cart quantity, removal, and checkout journey", async ({
 }) => {
   await openReady(page, "/products/relaxed-t-shirt");
   await page.getByRole("button", { name: "M", exact: true }).click();
+  const colourOptions = page.getByRole("group", { name: "Colour" });
+  if (await colourOptions.isVisible()) {
+    await colourOptions.getByRole("button").first().click();
+  }
   await page.getByTestId("add-to-cart").click();
   await expect(
     page.getByRole("dialog", { name: "Shopping bag" }),
@@ -63,12 +70,34 @@ test("product variant, cart quantity, removal, and checkout journey", async ({
     .click();
   await page.getByRole("link", { name: /Continue to checkout/ }).click();
   await expect(page).toHaveURL(/\/checkout/);
-  await expect(page.getByRole("heading", { name: "Checkout" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Complete your order" }),
+  ).toBeVisible();
+  const orderSummaryToggle = page.getByRole("button", { name: /Your bag/ });
+  await expect(orderSummaryToggle).toHaveAttribute("aria-expanded", "true");
+  await orderSummaryToggle.click();
+  await expect(page.locator("#checkout-order-summary")).toBeHidden();
+  await orderSummaryToggle.click();
+  await expect(page.locator("#checkout-order-summary")).toBeVisible();
+  await expect(page.getByText("VISA", { exact: true })).toBeVisible();
 });
 
 test("mobile menu and policy pages are accessible", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openReady(page, "/");
+
+  await page.getByRole("button", { name: "Search" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Search products" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close search" }).click();
+
+  await page.getByRole("button", { name: /Shopping bag with/ }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Shopping bag" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close bag" }).click();
+
   await page.getByRole("button", { name: "Open menu" }).click();
   const mobileMenu = page.getByRole("dialog", { name: "Mobile navigation" });
   await expect(mobileMenu).toBeVisible();
