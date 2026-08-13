@@ -31,18 +31,20 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/og.png",
-        width: 1731,
-        height: 909,
+        url: "/og-aylee.jpg",
+        secureUrl: "/og-aylee.jpg",
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
         alt: "Aylee official online store",
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Aylee | Official Online Store",
     description: siteConfig.description,
-    images: ["/og.png"],
+    images: ["/og-aylee.jpg"],
   },
 };
 
