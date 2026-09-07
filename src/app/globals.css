@@ -308,18 +308,7 @@ summary {
 }
 
 .hero-image {
-  transform: translate3d(
-      calc(var(--hero-x) * -18px),
-      calc(var(--hero-y) * -12px),
-      0
-    )
-    scale(1.075);
-  transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-
-.hero-image.is-active {
-  animation: hero-breathe 7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform: none;
 }
 
 .hero-copy {
@@ -386,25 +375,6 @@ summary {
     5px 5px,
     7px 7px;
   mix-blend-mode: soft-light;
-}
-
-@keyframes hero-breathe {
-  from {
-    transform: translate3d(
-        calc(var(--hero-x) * -18px),
-        calc(var(--hero-y) * -12px),
-        0
-      )
-      scale(1.075);
-  }
-  to {
-    transform: translate3d(
-        calc(var(--hero-x) * -18px),
-        calc(var(--hero-y) * -12px),
-        0
-      )
-      scale(1.025);
-  }
 }
 
 @keyframes hero-copy-in {

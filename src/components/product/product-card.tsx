@@ -79,7 +79,7 @@ export function ProductCard({
               alt={primary.alt}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={`object-cover transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.035] ${secondary ? "group-hover:opacity-0" : ""}`}
+              className={`object-cover object-top transition-opacity duration-700 ${secondary ? "group-hover:opacity-0" : ""}`}
               loading={eager ? "eager" : "lazy"}
             />
           ) : (
@@ -93,7 +93,7 @@ export function ProductCard({
               alt={secondary.alt}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="scale-[1.035] object-cover opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-100 group-hover:opacity-100"
+              className="object-cover object-top opacity-0 transition-opacity duration-700 group-hover:opacity-100"
             />
           ) : null}
         </Link>

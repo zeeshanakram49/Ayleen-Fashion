@@ -43,7 +43,7 @@ export default async function CollectionsPage() {
                   fill
                   unoptimized
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.025]"
+                  className="object-cover object-top"
                 />
               ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />

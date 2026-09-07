@@ -160,6 +160,16 @@ export function HeroSlider({ banners }: HeroSliderProps) {
               >
                 <Image
                   src={banner.image}
+                  alt=""
+                  fill
+                  aria-hidden="true"
+                  quality={45}
+                  draggable={false}
+                  sizes="100vw"
+                  className="object-cover object-center opacity-60 blur-xl scale-105"
+                />
+                <Image
+                  src={banner.image}
                   alt={banner.title || "Aylee seasonal collection"}
                   fill
                   preload={index === 0}
@@ -167,7 +177,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                   quality={70}
                   draggable={false}
                   sizes="100vw"
-                  className={`hero-image object-cover object-center ${index === activeSlide ? "is-active" : ""}`}
+                  className="hero-image object-contain object-center"
                   onLoad={
                     index === 0 ? () => setFirstImageLoaded(true) : undefined
                   }

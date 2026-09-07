@@ -108,7 +108,7 @@ export default async function HomePage() {
                       fill
                       unoptimized
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover transition duration-1000 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.06]"
+                      className="object-cover object-top"
                     />
                   ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
