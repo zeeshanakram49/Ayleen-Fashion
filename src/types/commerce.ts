@@ -5,6 +5,11 @@ export type ProductImage = {
   alt: string;
 };
 
+export type ProductColor = {
+  name: string;
+  code: string | null;
+};
+
 export type Category = {
   id: string;
   slug: string;
@@ -28,7 +33,9 @@ export type Product = {
   images: ProductImage[];
   stock: number;
   sizes: string[];
+  sizeChart: string | null;
   colors: string[];
+  colorOptions: ProductColor[];
   category: Pick<Category, "id" | "slug" | "name"> | null;
   sku: string | null;
   brand: string;

@@ -5,10 +5,12 @@ import type {
   Banner,
   Category,
   Product,
+  ProductColor,
   ProductImage,
   ProductQuery,
 } from "@/types/commerce";
 import { slugify, stripHtml } from "@/lib/utils/format";
+import { resolveProductColorCode } from "@/lib/utils/color";
 import { commerceConfig } from "./config";
 import { getCategories } from "./collections";
 import {
@@ -49,6 +51,64 @@ function stringList(value: unknown): string[] {
         .filter(Boolean),
     ),
   ];
+}
+
+function recordList(value: unknown): Record<string, unknown>[] {
+  if (Array.isArray(value)) return value.filter(isRecord);
+  const raw = asString(value);
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(isRecord) : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeColors(value: Record<string, unknown>): ProductColor[] {
+  const colors = new Map<string, ProductColor>();
+
+  const addColor = (nameValue: unknown, codeValue?: unknown) => {
+    const name = asString(nameValue);
+    if (!name) return;
+    const key = name.toLocaleLowerCase();
+    const rawCode = asString(codeValue);
+    const code = rawCode ? resolveProductColorCode(name, rawCode) : null;
+    const existing = colors.get(key);
+    const isBlackPlaceholder =
+      key !== "black" &&
+      ["#000", "#000000", "#000000ff"].includes(rawCode.toLocaleLowerCase());
+    colors.set(key, {
+      name: existing?.name || name,
+      code:
+        existing?.code && isBlackPlaceholder
+          ? existing.code
+          : code || existing?.code || null,
+    });
+  };
+
+  stringList(value.colors ?? value.color ?? value.available_colors).forEach(
+    (name) => addColor(name),
+  );
+
+  recordList(value.colors_with_codes ?? value.color_options).forEach((color) =>
+    addColor(
+      color.name ?? color.color ?? color.title,
+      color.code ?? color.color_code ?? color.hex,
+    ),
+  );
+
+  recordList(value.variants).forEach((variant) =>
+    addColor(
+      variant.color ?? variant.color_name,
+      variant.color_code ?? variant.code,
+    ),
+  );
+
+  return [...colors.values()].map((color) => ({
+    ...color,
+    code: color.code || resolveProductColorCode(color.name, ""),
+  }));
 }
 
 function normalizeImages(value: unknown, productName: string): ProductImage[] {
@@ -129,9 +189,8 @@ export function normalizeProduct(
     name,
   );
   const category = categoryForProduct(value.category, categories);
-  const colors = stringList(
-    value.colors ?? value.color ?? value.available_colors,
-  );
+  const colorOptions = normalizeColors(value);
+  const colors = colorOptions.map((color) => color.name);
   const sizes = stringList(
     value.size ?? value.sizes ?? value.available_sizes,
   ).map((size) => size.toUpperCase());
@@ -156,7 +215,10 @@ export function normalizeProduct(
     images,
     stock,
     sizes: [...new Set(sizes)],
+    sizeChart:
+      normalizeImageUrl(asString(value.size_chart ?? value.sizeChart)) || null,
     colors: [...new Set(colors)],
+    colorOptions,
     category,
     sku: asString(value.sku) || null,
     brand: isRecord(value.brand)
@@ -190,7 +252,7 @@ const getAllProductsCached = unstable_cache(
       return fallbackProducts;
     }
   },
-  ["commerce-products"],
+  ["commerce-products-v2"],
   { revalidate: commerceConfig.revalidateSeconds, tags: ["products"] },
 );
 
@@ -264,19 +326,24 @@ export async function getProducts(
 
 export async function getProduct(slug: string): Promise<Product | null> {
   const categories = await getCategories();
+  let detailProduct: Product | null = null;
   try {
     const response = await fetchCommerce(
       commerceConfig.endpoints.product(slug),
       {},
       { tags: [`product:${slug}`] },
     );
-    const product = normalizeProduct(recordFromResponse(response), categories);
-    if (product) return product;
+    detailProduct = normalizeProduct(recordFromResponse(response), categories);
+    if (detailProduct?.sizeChart) return detailProduct;
   } catch {
     // The live detail endpoint currently returns 500 for some slugs; use the catalog record.
   }
   const products = await getAllProductsCached();
-  return products.find((product) => product.slug === slug) ?? null;
+  const catalogProduct = products.find((product) => product.slug === slug);
+  if (!detailProduct) return catalogProduct ?? null;
+  return catalogProduct?.sizeChart
+    ? { ...detailProduct, sizeChart: catalogProduct.sizeChart }
+    : detailProduct;
 }
 
 export async function getRelatedProducts(

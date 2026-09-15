@@ -177,7 +177,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                   quality={70}
                   draggable={false}
                   sizes="100vw"
-                  className="hero-image object-contain object-center"
+                  className="hero-image object-cover object-center"
                   onLoad={
                     index === 0 ? () => setFirstImageLoaded(true) : undefined
                   }

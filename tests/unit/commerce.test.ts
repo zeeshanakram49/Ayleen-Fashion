@@ -11,6 +11,7 @@ import {
   isProductAvailable,
   isVariantSelectionComplete,
 } from "@/lib/utils/product";
+import { isLightColorCode, resolveProductColorCode } from "@/lib/utils/color";
 import type { CartLine } from "@/types/commerce";
 
 const line: CartLine = {
@@ -63,6 +64,26 @@ describe("product availability and variants", () => {
     expect(
       isVariantSelectionComplete({ sizes: ["S", "M"], colors: [] }, {}),
     ).toBe(false);
+  });
+});
+
+describe("product colours", () => {
+  it("replaces the API black placeholder for a named colour", () => {
+    expect(resolveProductColorCode("Smoke Grey", "#000000")).toBe("#6b7075");
+    expect(resolveProductColorCode("Maroon", "#000000")).toBe("#800000");
+    expect(resolveProductColorCode("White", "#000000")).toBe("#ffffff");
+    expect(resolveProductColorCode("Olive", "#000000")).toBe("#6b6b24");
+    expect(resolveProductColorCode("Burgundy", "#000000")).toBe("#800020");
+  });
+
+  it("keeps real black and valid API colour codes", () => {
+    expect(resolveProductColorCode("Black", "#000000")).toBe("#000000");
+    expect(resolveProductColorCode("Olive", "#556b2f")).toBe("#556b2f");
+  });
+
+  it("identifies light swatches whose labels need extra contrast", () => {
+    expect(isLightColorCode("#ffffff")).toBe(true);
+    expect(isLightColorCode("#800000")).toBe(false);
   });
 });
 

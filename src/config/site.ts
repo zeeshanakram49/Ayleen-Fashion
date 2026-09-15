@@ -15,8 +15,8 @@ export const siteConfig = {
   freeShippingThreshold: 2500,
   contact: {
     email: "support@aylee.pk",
-    whatsappDisplay: "+92 42 35467243",
-    whatsappHref: "https://wa.me/924235467243",
+    whatsappDisplay: "+92 3017372115",
+    whatsappHref: "https://wa.me/923017372115",
     hours: "09:00 AM to 09:00 PM (PST), Monday to Saturday",
   },
   social: {

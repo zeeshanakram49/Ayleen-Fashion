@@ -1,6 +1,10 @@
 "use client";
 
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -158,7 +162,7 @@ export function ProductCard({
             <button
               type="button"
               onClick={handleQuickAdd}
-              className="quick-add flex min-h-11 w-full translate-y-3 items-center justify-center gap-2 bg-white/95 px-3 text-xs font-bold tracking-wider uppercase opacity-0 shadow-[0_8px_28px_rgb(0_0_0/0.12)] backdrop-blur-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100 max-md:translate-y-0 max-md:opacity-100 active:scale-[0.97]"
+              className="quick-add flex min-h-11 w-full translate-y-3 items-center justify-center gap-2 bg-white/95 px-3 text-xs font-bold tracking-wider uppercase opacity-0 shadow-[0_8px_28px_rgb(0_0_0/0.12)] backdrop-blur-sm transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100 active:scale-[0.97] max-md:translate-y-0 max-md:opacity-100"
               aria-label={`Quick add ${product.name}`}
               aria-expanded={pickerOpen}
             >
@@ -212,9 +216,33 @@ export function ProductCard({
           ) : null}
         </div>
         {product.colors.length > 0 ? (
-          <p className="mt-2 text-xs text-[#6c6961]">
-            {product.colors.slice(0, 3).join(" · ")}
-          </p>
+          <div
+            className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5"
+            aria-label={`Available colours: ${product.colors.join(", ")}`}
+          >
+            {product.colorOptions.slice(0, 3).map((entry) => {
+              const entryColor = entry.code || "#57544d";
+
+              return (
+                <span
+                  key={entry.name}
+                  className="grid size-7 place-items-center border border-[#d4d0c6] bg-white p-[3px] shadow-sm"
+                  title={entry.name}
+                  aria-hidden="true"
+                >
+                  <span
+                    className="size-full border border-black/10 shadow-inner"
+                    style={{ backgroundColor: entryColor }}
+                  />
+                </span>
+              );
+            })}
+            {product.colorOptions.length > 3 ? (
+              <span className="ml-0.5 text-[0.7rem] text-[#6c6961]">
+                +{product.colorOptions.length - 3}
+              </span>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </article>

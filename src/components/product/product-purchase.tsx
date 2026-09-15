@@ -40,7 +40,10 @@ export function ProductPurchase({ product }: { product: Product }) {
           <div className="flex items-center justify-between">
             <legend className="text-sm font-semibold">Size</legend>
             <Link
-              href="/size-guide"
+              href={{
+                pathname: "/size-guide",
+                query: { product: product.slug },
+              }}
               className="text-xs underline underline-offset-4"
             >
               Size guide
@@ -68,20 +71,50 @@ export function ProductPurchase({ product }: { product: Product }) {
       ) : null}
       {product.colors.length > 0 ? (
         <fieldset>
-          <legend className="text-sm font-semibold">Colour</legend>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {product.colors.map((entry) => (
-              <button
-                key={entry}
-                type="button"
-                onClick={() => setColor(entry)}
-                className={`min-h-11 border px-4 text-xs ${color === entry ? "border-[#171613] bg-[#171613] text-white" : "border-[#dedbd2]"}`}
-                aria-pressed={color === entry}
-              >
-                {entry}
-              </button>
-            ))}
+          <legend className="sr-only">Choose a colour</legend>
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-sm font-semibold">Colour</p>
+            {!color ? (
+              <span className="text-xs text-[#6c6961]">Select one</span>
+            ) : null}
           </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {product.colorOptions.map((entry) => {
+              const entryColor = entry.code || "#57544d";
+              const selected = color === entry.name;
+
+              return (
+                <button
+                  key={entry.name}
+                  type="button"
+                  onClick={() => setColor(entry.name)}
+                  className={`grid size-12 place-items-center border bg-white p-1 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${selected ? "border-[#171613] outline outline-1 outline-offset-2 outline-[#171613]" : "border-[#d4d0c6]"}`}
+                  aria-label={`Select ${entry.name}`}
+                  aria-pressed={selected}
+                  title={entry.name}
+                >
+                  <span
+                    className="grid size-full place-items-center border border-black/10 shadow-inner"
+                    style={{ backgroundColor: entryColor }}
+                    aria-hidden="true"
+                  >
+                    {selected ? (
+                      <Check
+                        size={17}
+                        strokeWidth={2.5}
+                        className="text-white mix-blend-difference drop-shadow-sm"
+                      />
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {!color ? (
+            <p className="mt-2 text-xs text-[#6c6961]">
+              Select a colour to continue.
+            </p>
+          ) : null}
         </fieldset>
       ) : null}
       <div>
