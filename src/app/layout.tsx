@@ -7,6 +7,7 @@ import { MotionProvider } from "@/components/providers/motion-provider";
 import { SiteMotionConfig } from "@/components/motion/motion-config";
 import { siteConfig } from "@/config/site";
 import { getCategories } from "@/lib/commerce/collections";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -77,6 +78,7 @@ export default async function RootLayout({
             <main id="main-content">{children}</main>
             <Footer />
             <CartDrawer />
+            <MetaPixel />
           </SiteMotionConfig>
         </StoreProvider>
       </body>
