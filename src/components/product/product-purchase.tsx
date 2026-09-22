@@ -19,10 +19,12 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [color, setColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const selectedColor =
+    product.colors.length === 1 ? product.colors[0] : color;
 
   const complete = isVariantSelectionComplete(product, {
     size,
-    color,
+    color: selectedColor,
   });
 
   const enabled = product.isAvailable && complete;
@@ -69,7 +71,7 @@ export function ProductPurchase({ product }: { product: Product }) {
 
     addItem(product, {
       size,
-      color,
+      color: selectedColor,
       quantity,
     });
 
@@ -160,7 +162,7 @@ export function ProductPurchase({ product }: { product: Product }) {
               Colour
             </p>
 
-            {!color ? (
+            {!selectedColor ? (
               <span className="text-xs text-[#6c6961]">
                 Select one
               </span>
@@ -173,7 +175,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                 entry.code || "#57544d";
 
               const selected =
-                color === entry.name;
+                selectedColor === entry.name;
 
               return (
                 <button
@@ -212,7 +214,7 @@ export function ProductPurchase({ product }: { product: Product }) {
             })}
           </div>
 
-          {!color ? (
+          {!selectedColor ? (
             <p className="mt-2 text-xs text-[#6c6961]">
               Select a colour to continue.
             </p>

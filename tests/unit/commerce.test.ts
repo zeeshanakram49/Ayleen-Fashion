@@ -45,7 +45,8 @@ describe("commerce utilities", () => {
     expect(cartSummary([line])).toMatchObject({
       itemCount: 2,
       subtotal: 4050,
-      hasFreeShipping: true,
+      remainingForFreeShipping: 950,
+      hasFreeShipping: false,
     }));
 });
 
@@ -64,6 +65,14 @@ describe("product availability and variants", () => {
     expect(
       isVariantSelectionComplete({ sizes: ["S", "M"], colors: [] }, {}),
     ).toBe(false);
+  });
+  it("accepts the only available colour without a manual choice", () => {
+    expect(
+      isVariantSelectionComplete(
+        { sizes: [], colors: ["Black"] },
+        {},
+      ),
+    ).toBe(true);
   });
 });
 

@@ -25,7 +25,7 @@ const benefits = [
   {
     icon: Truck,
     title: "Nationwide delivery",
-    detail: "Free delivery on qualifying orders above Rs. 2,500.",
+    detail: "Free delivery on qualifying orders of Rs. 5,000 or more.",
   },
   {
     icon: RefreshCcw,

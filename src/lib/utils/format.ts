@@ -24,7 +24,7 @@ export function cartSubtotal(
 
 export function amountUntilFreeShipping(
   subtotal: number,
-  threshold = siteConfig.freeShippingThreshold,
+  threshold: number = siteConfig.freeShippingThreshold,
 ): number {
   return Math.max(0, threshold - subtotal);
 }
