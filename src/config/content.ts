@@ -18,7 +18,7 @@ export const policies: Record<string, PolicyContent> = {
       {
         heading: "Published summary",
         paragraphs: [
-          "Aylee currently advertises nationwide delivery in Pakistan and free delivery on qualifying orders above Rs. 2,500.",
+          "Aylee currently advertises nationwide delivery in Pakistan and free delivery on qualifying orders of Rs. 5,000 or more.",
           "A complete delivery timetable, service-area list, and exception policy was not available from the source website. Contact customer service before ordering if timing is critical.",
         ],
       },

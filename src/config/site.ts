@@ -11,8 +11,8 @@ export const siteConfig = {
   currencyLabel: "Rs.",
   description:
     "Shop the latest Aylee clothing collection with secure checkout and nationwide delivery across Pakistan.",
-  announcement: "Free shipping on orders above Rs. 5,000",
-  freeShippingThreshold: 2500,
+  announcement: "Free shipping on orders of Rs. 5,000 or more",
+  freeShippingThreshold: 5000,
   contact: {
     email: "support@aylee.pk",
     whatsappDisplay: "+92 3017372115",

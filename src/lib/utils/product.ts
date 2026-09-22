@@ -11,6 +11,7 @@ export function isVariantSelectionComplete(
   selected: { size?: string; color?: string },
 ): boolean {
   const sizeComplete = product.sizes.length === 0 || Boolean(selected.size);
-  const colorComplete = product.colors.length === 0 || Boolean(selected.color);
+  const colorComplete =
+    product.colors.length <= 1 || Boolean(selected.color);
   return sizeComplete && colorComplete;
 }
