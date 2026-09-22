@@ -19,6 +19,48 @@ type HeroSliderProps = {
   banners: Banner[];
 };
 
+function HeroVideo({
+  src,
+  poster,
+  active,
+  first,
+  onReady,
+}: {
+  src: string;
+  poster: string | null;
+  active: boolean;
+  first: boolean;
+  onReady: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (active) {
+      void video.play().catch(() => undefined);
+    } else {
+      video.pause();
+    }
+  }, [active]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      poster={poster || undefined}
+      autoPlay={active}
+      muted
+      loop
+      playsInline
+      preload={first ? "auto" : "metadata"}
+      className="hero-image h-full w-full object-contain object-center md:object-right"
+      onCanPlay={first ? onReady : undefined}
+      onError={first ? onReady : undefined}
+    />
+  );
+}
+
 export function HeroSlider({ banners }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [firstImageLoaded, setFirstImageLoaded] = useState(false);
@@ -158,33 +200,45 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                 }`}
                 aria-hidden={index !== activeSlide}
               >
-                <Image
-                  src={banner.image}
-                  alt=""
-                  fill
-                  aria-hidden="true"
-                  quality={45}
-                  draggable={false}
-                  sizes="100vw"
-                  className="object-cover object-center opacity-60 blur-xl scale-105"
-                />
-                <Image
-                  src={banner.image}
-                  alt={banner.title || "Aylee seasonal collection"}
-                  fill
-                  preload={index === 0}
-                  fetchPriority={index === 0 ? "high" : "auto"}
-                  quality={70}
-                  draggable={false}
-                  sizes="100vw"
-                  className="hero-image object-cover object-center"
-                  onLoad={
-                    index === 0 ? () => setFirstImageLoaded(true) : undefined
-                  }
-                  onError={
-                    index === 0 ? () => setFirstImageLoaded(true) : undefined
-                  }
-                />
+                {banner.image ? (
+                  <Image
+                    src={banner.image}
+                    alt=""
+                    fill
+                    aria-hidden="true"
+                    quality={45}
+                    draggable={false}
+                    sizes="100vw"
+                    className="scale-105 object-cover object-center opacity-60 blur-xl"
+                  />
+                ) : null}
+                {banner.video ? (
+                  <HeroVideo
+                    src={banner.video}
+                    poster={banner.image}
+                    active={index === activeSlide}
+                    first={index === 0}
+                    onReady={() => setFirstImageLoaded(true)}
+                  />
+                ) : banner.image ? (
+                  <Image
+                    src={banner.image}
+                    alt={banner.title || "Aylee seasonal collection"}
+                    fill
+                    preload={index === 0}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    quality={70}
+                    draggable={false}
+                    sizes="100vw"
+                    className="hero-image object-contain object-center md:object-right"
+                    onLoad={
+                      index === 0 ? () => setFirstImageLoaded(true) : undefined
+                    }
+                    onError={
+                      index === 0 ? () => setFirstImageLoaded(true) : undefined
+                    }
+                  />
+                ) : null}
               </div>
             );
           })}

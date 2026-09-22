@@ -31,6 +31,10 @@ function normalizeImageUrl(value: string): string {
   return `${commerceConfig.apiUrl}${path}`;
 }
 
+function isVideoUrl(value: string): boolean {
+  return /\.(?:mp4|webm|ogg|mov|m4v)(?:$|[?#])/i.test(value);
+}
+
 function stringList(value: unknown): string[] {
   if (Array.isArray(value))
     return [...new Set(value.map(asString).filter(Boolean))];
@@ -365,15 +369,26 @@ const getBannersCached = unstable_cache(
       return listFromResponse(response)
         .map((value): Banner | null => {
           if (!isRecord(value)) return null;
-          const image = normalizeImageUrl(
-            asString(value.photo) || asString(value.image),
+          const photo = normalizeImageUrl(asString(value.photo));
+          const explicitVideo = normalizeImageUrl(
+            asString(value.video_url) ||
+              asString(value.video) ||
+              asString(value.media_url),
           );
-          if (!image) return null;
+          const video = explicitVideo || (isVideoUrl(photo) ? photo : "");
+          const image = normalizeImageUrl(
+            asString(value.poster) ||
+              asString(value.poster_url) ||
+              asString(value.image) ||
+              (!isVideoUrl(photo) ? photo : ""),
+          );
+          if (!image && !video) return null;
           return {
-            id: asString(value.id) || image,
+            id: asString(value.id) || video || image,
             title: asString(value.title) || "Aylee",
             description: asString(value.description) || null,
-            image,
+            image: image || null,
+            video: video || null,
           };
         })
         .filter((banner): banner is Banner => Boolean(banner));

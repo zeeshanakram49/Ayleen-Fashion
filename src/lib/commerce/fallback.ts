@@ -124,6 +124,7 @@ export const fallbackBanners: Banner[] = [
     description: null,
     image:
       "https://admin.aylee.store/storage/photos/1/product_06_website_square_1600.jpg",
+    video: null,
   },
   {
     id: "2",
@@ -131,5 +132,6 @@ export const fallbackBanners: Banner[] = [
     description: null,
     image:
       "https://admin.aylee.store/storage/photos/1/product_05_website_square_1600.jpg",
+    video: null,
   },
 ];

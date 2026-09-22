@@ -49,7 +49,8 @@ export type Banner = {
   id: string;
   title: string;
   description: string | null;
-  image: string;
+  image: string | null;
+  video: string | null;
 };
 
 export type CartLine = {
