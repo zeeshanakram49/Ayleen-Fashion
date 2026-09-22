@@ -779,6 +779,7 @@ export function CheckoutForm() {
                             src={line.image}
                             alt={line.name}
                             fill
+                            unoptimized
                             sizes="76px"
                             className="object-cover"
                           />

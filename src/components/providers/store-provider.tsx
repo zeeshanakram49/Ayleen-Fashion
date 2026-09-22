@@ -142,7 +142,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       productId: product.id,
       slug: product.slug,
       name: product.name,
-      image: product.images[0]?.thumbnailUrl || product.images[0]?.url || null,
+      image: product.images[0]?.url || null,
       price: product.price,
       size,
       color,
@@ -157,6 +157,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         entry.key === key
           ? {
               ...entry,
+              image: line.image,
               quantity: Math.min(entry.quantity + quantity, entry.stock),
             }
           : entry,

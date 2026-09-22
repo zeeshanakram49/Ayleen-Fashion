@@ -79,9 +79,10 @@ export function ProductCard({
         >
           {primary ? (
             <Image
-              src={primary.thumbnailUrl || primary.url}
+              src={primary.url}
               alt={primary.alt}
               fill
+              unoptimized
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className={`object-cover object-top transition-opacity duration-700 ${secondary ? "group-hover:opacity-0" : ""}`}
               loading={eager ? "eager" : "lazy"}
@@ -93,9 +94,10 @@ export function ProductCard({
           )}
           {secondary ? (
             <Image
-              src={secondary.thumbnailUrl || secondary.url}
+              src={secondary.url}
               alt={secondary.alt}
               fill
+              unoptimized
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover object-top opacity-0 transition-opacity duration-700 group-hover:opacity-100"
             />

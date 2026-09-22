@@ -127,6 +127,7 @@ export function CartDrawer() {
                         src={line.image}
                         alt={line.name}
                         fill
+                        unoptimized
                         sizes="88px"
                         className="object-cover"
                       />

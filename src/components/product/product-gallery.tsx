@@ -72,14 +72,10 @@ export function ProductGallery({
   );
 
   const openFullscreen = useCallback(() => {
-    if (image) {
-      const preload = new window.Image();
-      preload.src = image.url;
-    }
     setModalImageLoaded(false);
     resetZoom();
     setExpanded(true);
-  }, [image, resetZoom]);
+  }, [resetZoom]);
 
   const closeFullscreen = useCallback(() => {
     setExpanded(false);
@@ -110,20 +106,6 @@ export function ProductGallery({
       previousFocusRef.current?.focus();
     };
   }, [closeFullscreen, expanded, moveSlide]);
-
-  useEffect(() => {
-    if (!expanded || images.length < 2) return;
-    const adjacentIndexes = [
-      (active - 1 + images.length) % images.length,
-      (active + 1) % images.length,
-    ];
-    adjacentIndexes.forEach((index) => {
-      const adjacentImage = images[index];
-      if (!adjacentImage) return;
-      const preload = new window.Image();
-      preload.src = adjacentImage.url;
-    });
-  }, [active, expanded, images]);
 
   function changeZoom(nextZoom: number) {
     const clamped = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, nextZoom));
@@ -193,10 +175,6 @@ export function ProductGallery({
             key={image.id}
             type="button"
             onClick={openFullscreen}
-            onPointerEnter={() => {
-              const preload = new window.Image();
-              preload.src = image.url;
-            }}
             className="absolute inset-0 cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#171613]"
             aria-label={`Open ${productName} image ${active + 1} in fullscreen`}
             initial={{ opacity: 0 }}
@@ -208,9 +186,10 @@ export function ProductGallery({
               src={image.url}
               alt={image.alt || productName}
               fill
+              unoptimized
               sizes="(max-width: 1024px) calc(100vw - 2rem), 58vw"
               className="object-cover"
-              loading="eager"
+              priority
             />
           </motion.button>
         </AnimatePresence>
@@ -237,10 +216,6 @@ export function ProductGallery({
         <button
           type="button"
           onClick={openFullscreen}
-          onPointerEnter={() => {
-            const preload = new window.Image();
-            preload.src = image.url;
-          }}
           className="absolute right-4 bottom-4 grid size-11 place-items-center rounded-full bg-white/90 shadow-sm transition hover:scale-105"
           aria-label="Expand product image"
         >
