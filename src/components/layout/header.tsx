@@ -60,14 +60,14 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
         Skip to content
       </a>
       <p
-        className={`${isHomepage ? "absolute inset-x-0 top-0 z-[51] bg-black/60 backdrop-blur-sm" : "bg-[#171613]"} pointer-events-none px-4 py-2 text-center text-[0.65rem] font-semibold tracking-[0.2em] text-white uppercase`}
+        className={`${isHomepage ? "absolute inset-x-0 top-0 z-[51] bg-transparent drop-shadow-[0_1px_3px_rgb(0_0_0/0.9)]" : "bg-[#171613]"} pointer-events-none px-2 py-2 text-center text-[0.55rem] leading-[1.35] font-semibold tracking-[0.13em] text-white uppercase sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]`}
       >
         {siteConfig.announcement}
       </p>
       <header
         className={`${
           transparent
-            ? "absolute inset-x-0 top-[33px] z-[60] bg-transparent text-white max-md:bg-gradient-to-b max-md:from-black/40 max-md:to-transparent max-md:backdrop-blur-[2px]"
+            ? "absolute inset-x-0 top-[28px] z-[60] bg-transparent text-white max-md:bg-gradient-to-b max-md:from-black/40 max-md:to-transparent max-md:backdrop-blur-[2px] sm:top-[30px]"
             : floating
               ? "fixed inset-x-0 top-0 z-[60] py-3 text-[#171613]"
               : `sticky top-0 z-[60] bg-white/90 text-[#171613] backdrop-blur-xl ${scrolled ? "shadow-[0_8px_30px_rgb(0_0_0/0.06)]" : "shadow-[0_1px_0_rgb(23_22_19/0.08)]"}`
@@ -81,7 +81,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
           }`}
         >
           <div
-            className={`grid grid-cols-[auto_1fr_auto] items-center ${floating ? "min-h-14 xl:min-h-16" : "min-h-20"}`}
+            className={`grid grid-cols-[auto_1fr_auto] items-center ${floating ? "min-h-14 xl:min-h-16" : "min-h-16 sm:min-h-20"}`}
           >
             <div className="flex items-center gap-3 justify-self-start md:gap-4">
               <button
@@ -155,9 +155,9 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
 
           <nav
             aria-label="Mobile primary navigation"
-            className="pointer-events-auto touch-pan-x overflow-x-auto pb-3 xl:hidden"
+            className="pointer-events-auto touch-pan-x overflow-x-auto pb-2 sm:pb-3 xl:hidden"
           >
-            <div className="flex min-w-max items-center gap-5 px-1">
+            <div className="flex min-w-max items-center gap-4 px-1 sm:gap-5">
               {siteConfig.navigation.map((item) => (
                 <Link
                   key={item.label}

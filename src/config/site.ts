@@ -14,9 +14,9 @@ export const siteConfig = {
   announcement: "Free shipping on orders of Rs. 5,000 or more",
   freeShippingThreshold: 5000,
   contact: {
-    email: "support@aylee.pk",
-    whatsappDisplay: "+92 3017372115",
-    whatsappHref: "https://wa.me/923017372115",
+    email: "aylynasir@gmail.com",
+    whatsappDisplay: "03088984000",
+    whatsappHref: "https://wa.me/923088984000",
     hours: "09:00 AM to 09:00 PM (PST), Monday to Saturday",
   },
   social: {

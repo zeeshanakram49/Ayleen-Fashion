@@ -75,10 +75,10 @@ export function OrderFailedPage({
                 WhatsApp Helpline:
               </span>
               <a
-                href="tel:+924235467243"
+                href="tel:+923088984000"
                 className="transition hover:text-[var(--gold-deep)]"
               >
-                +92 42 35467243
+                03088984000
               </a>
             </div>
             <div>
@@ -86,10 +86,10 @@ export function OrderFailedPage({
                 Email Support:
               </span>
               <a
-                href="mailto:support@aylee.pk"
+                href="mailto:aylynasir@gmail.com"
                 className="transition hover:text-[var(--gold-deep)]"
               >
-                support@aylee.pk
+                aylynasir@gmail.com
               </a>
             </div>
           </div>

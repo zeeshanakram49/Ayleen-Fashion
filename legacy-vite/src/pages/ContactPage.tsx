@@ -24,10 +24,10 @@ export function ContactPage() {
           </p>
           <div className="mt-7 space-y-3 text-sm">
             <p>
-              <span className="font-semibold">Phone:</span> +92 303 4965359
+              <span className="font-semibold">Phone:</span> 03088984000
             </p>
             <p>
-              <span className="font-semibold">Email:</span> support@ayleen.pk
+              <span className="font-semibold">Email:</span> aylynasir@gmail.com
             </p>
             <p>
               <span className="font-semibold">Address:</span> Ali Town, Lahore

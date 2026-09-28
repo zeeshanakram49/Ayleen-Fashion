@@ -311,6 +311,13 @@ summary {
   transform: none;
 }
 
+@media (max-width: 767px) {
+  .hero-image-main {
+    transform: translate3d(0, 5.5rem, 0) scale(1.04);
+    transform-origin: center;
+  }
+}
+
 .hero-copy {
   transform: translate3d(
     calc(var(--hero-x) * 14px),

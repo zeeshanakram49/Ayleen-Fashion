@@ -54,7 +54,7 @@ function HeroVideo({
       loop
       playsInline
       preload={first ? "auto" : "metadata"}
-      className="hero-image h-full w-full object-contain object-center md:object-right"
+      className="hero-image hero-image-main h-full w-full object-cover object-[62%_center] md:object-contain md:object-right"
       onCanPlay={first ? onReady : undefined}
       onError={first ? onReady : undefined}
     />
@@ -175,7 +175,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
   return (
     <section
       ref={sectionRef}
-      className="hero-shell relative h-[100svh] min-h-[680px] w-full touch-pan-y overflow-hidden overscroll-x-none bg-[#1b1b18]"
+      className="hero-shell relative h-[100svh] min-h-[600px] w-full touch-pan-y overflow-hidden overscroll-x-none bg-[#1b1b18] sm:min-h-[640px] md:min-h-[680px]"
       aria-roledescription="carousel"
       aria-label="Aylee seasonal collection"
       onPointerDown={handlePointerDown}
@@ -230,7 +230,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                     quality={70}
                     draggable={false}
                     sizes="100vw"
-                    className="hero-image object-contain object-center md:object-right"
+                    className="hero-image hero-image-main object-cover object-[62%_center] md:object-contain md:object-right"
                     onLoad={
                       index === 0 ? () => setFirstImageLoaded(true) : undefined
                     }
@@ -250,33 +250,38 @@ export function HeroSlider({ banners }: HeroSliderProps) {
       <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(90deg,rgba(10,10,9,.72)_0%,rgba(10,10,9,.35)_43%,rgba(10,10,9,.08)_75%),linear-gradient(0deg,rgba(10,10,9,.58)_0%,transparent_42%)]" />
       <div className="hero-noise pointer-events-none absolute inset-0 z-[3] opacity-[0.16]" />
 
-      <div className="container-site relative z-[4] flex h-full items-end pb-28 text-white md:items-center md:pb-0">
-        <div key={activeSlide} className="hero-copy max-w-3xl pt-24">
+      <div className="container-site relative z-[4] flex h-full items-end pb-24 text-white sm:pb-28 md:items-center md:pb-0">
+        <div key={activeSlide} className="hero-copy max-w-3xl pt-28 sm:pt-24">
           <p className="eyebrow flex items-center gap-3 !text-white/70">
             <span className="h-px w-8 bg-white/60" /> The new Aylee edit
           </p>
-          <h1 className="display-title mt-5 text-balance drop-shadow-sm">
-            <SplitText
-              text={banners[activeSlide]?.title || "Everyday, considered."}
-              animateKey={activeSlide}
-            />
+          <h1 className="display-title mt-5 text-[clamp(2.75rem,13vw,4rem)] text-balance drop-shadow-sm md:text-[clamp(2.5rem,6vw,6.5rem)]">
+            <span className="md:hidden">
+              {banners[activeSlide]?.title || "Everyday, considered."}
+            </span>
+            <span className="hidden md:inline">
+              <SplitText
+                text={banners[activeSlide]?.title || "Everyday, considered."}
+                animateKey={activeSlide}
+              />
+            </span>
           </h1>
           <p className="mt-6 max-w-lg text-sm leading-7 text-white/75 md:text-base">
             {banners[activeSlide]?.description ||
               "Modern essentials shaped for real days—quietly confident, effortlessly yours."}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <MagneticButton>
+          <div className="mt-7 grid w-full gap-3 min-[420px]:flex min-[420px]:flex-wrap sm:mt-8">
+            <MagneticButton className="block">
               <Link
                 href="/shop"
-                className="button-primary button-arrow !border-white !bg-white !text-[#171613] hover:!border-[#f2eee7] hover:!bg-[#f2eee7]"
+                className="button-primary button-arrow w-full !border-white !bg-white !text-[#171613] hover:!border-[#f2eee7] hover:!bg-[#f2eee7] min-[420px]:w-auto"
               >
                 Shop collection <ArrowRight size={16} />
               </Link>
             </MagneticButton>
             <Link
               href="/collections"
-              className="button-secondary !border-white/55 !text-white hover:!border-white hover:!bg-white hover:!text-[#171613]"
+              className="button-secondary w-full !border-white/55 !text-white hover:!border-white hover:!bg-white hover:!text-[#171613] min-[420px]:w-auto"
             >
               Explore edits
             </Link>
