@@ -30,18 +30,41 @@ export function ProductCard({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [added, setAdded] = useState(false);
 
+  function trackAddToCart() {
+    if (typeof window.fbq !== "function") return;
+
+    const unitPrice = Number(product.price);
+
+    window.fbq("track", "AddToCart", {
+      content_ids: [String(product.id)],
+      content_name: product.name,
+      content_type: "product",
+      contents: [
+        {
+          id: String(product.id),
+          quantity: 1,
+          item_price: unitPrice,
+        },
+      ],
+      value: unitPrice,
+      currency: product.currency || "PKR",
+    });
+  }
+
   function handleQuickAdd() {
     if (needsSizePicker) {
       setPickerOpen(true);
       return;
     }
     addItem(product);
+    trackAddToCart();
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);
   }
 
   function handleSizePick(size: string) {
     addItem(product, { size });
+    trackAddToCart();
     setPickerOpen(false);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);

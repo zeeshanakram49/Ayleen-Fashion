@@ -8,6 +8,7 @@ import { SiteMotionConfig } from "@/components/motion/motion-config";
 import { siteConfig } from "@/config/site";
 import { getCategories } from "@/lib/commerce/collections";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { BackToTop } from "@/components/common/back-to-top";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -77,6 +78,7 @@ export default async function RootLayout({
             <Header categories={menuCategories} />
             <main id="main-content">{children}</main>
             <Footer />
+            <BackToTop />
             <CartDrawer />
             <MetaPixel />
           </SiteMotionConfig>

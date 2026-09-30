@@ -129,9 +129,7 @@ function SectionHeader({
       </span>
 
       <div>
-        <h2 className="serif text-2xl leading-none md:text-[2rem]">
-          {title}
-        </h2>
+        <h2 className="serif text-2xl leading-none md:text-[2rem]">{title}</h2>
 
         <p className="mt-2 text-sm text-[#6c6961]">{description}</p>
       </div>
@@ -293,8 +291,7 @@ export function CheckoutForm() {
 
       if (!response.ok || !body.orderId) {
         throw new Error(
-          body.message ||
-            "The order could not be placed. Please try again.",
+          body.message || "The order could not be placed. Please try again.",
         );
       }
 
@@ -332,10 +329,18 @@ export function CheckoutForm() {
         num_items: summary.itemCount,
       };
 
-      window.sessionStorage.setItem(
-        `aylee_meta_purchase:${body.orderId}`,
-        JSON.stringify(purchasePayload),
-      );
+      const purchaseKey = `aylee_meta_purchase:${body.orderId}`;
+      const trackedKey = `aylee_meta_purchase_tracked:${body.orderId}`;
+
+      try {
+        window.sessionStorage.setItem(
+          purchaseKey,
+          JSON.stringify(purchasePayload),
+        );
+      } catch {
+        // Storage can be unavailable in strict privacy modes. COD Purchase
+        // tracking below must still be allowed to run.
+      }
 
       /*
        * IMPORTANT:
@@ -354,11 +359,36 @@ export function CheckoutForm() {
       }
 
       /*
-       * COD orders go directly to confirmation.
+       * A COD order is complete as soon as the backend accepts it. Fire the
+       * event before navigating so confirmation-page hydration cannot cause
+       * the Purchase event to be missed. PurchaseEvent remains a fallback
+       * when the Pixel has not loaded yet.
        */
-      router.push(
-        `/order-confirmation/${encodeURIComponent(body.orderId)}`,
-      );
+      if (values.payment === "COD" && typeof window.fbq === "function") {
+        window.fbq(
+          "track",
+          "Purchase",
+          {
+            value: purchasePayload.value,
+            currency: purchasePayload.currency,
+            content_ids: purchasePayload.content_ids,
+            content_type: "product",
+            contents: purchasePayload.contents,
+            num_items: purchasePayload.num_items,
+            order_id: purchasePayload.orderId,
+          },
+          { eventID: `order_${body.orderId}` },
+        );
+
+        try {
+          window.sessionStorage.setItem(trackedKey, "1");
+          window.sessionStorage.removeItem(purchaseKey);
+        } catch {
+          // The event has already been queued by Meta Pixel.
+        }
+      }
+
+      router.push(`/order-confirmation/${encodeURIComponent(body.orderId)}`);
     } catch (error) {
       setServerError(
         error instanceof Error
@@ -386,7 +416,6 @@ export function CheckoutForm() {
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
             <label className="text-sm sm:col-span-2">
               Full name
-
               <input
                 {...register("fullName")}
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
@@ -394,13 +423,11 @@ export function CheckoutForm() {
                 placeholder="Your full name"
                 aria-invalid={Boolean(errors.fullName)}
               />
-
               <FieldError message={errors.fullName?.message} />
             </label>
 
             <label className="text-sm">
               Email
-
               <input
                 {...register("email")}
                 type="email"
@@ -409,13 +436,11 @@ export function CheckoutForm() {
                 placeholder="you@example.com"
                 aria-invalid={Boolean(errors.email)}
               />
-
               <FieldError message={errors.email?.message} />
             </label>
 
             <label className="text-sm">
               Phone
-
               <input
                 {...register("phone")}
                 type="tel"
@@ -424,7 +449,6 @@ export function CheckoutForm() {
                 placeholder="03XX XXXXXXX"
                 aria-invalid={Boolean(errors.phone)}
               />
-
               <FieldError message={errors.phone?.message} />
             </label>
           </div>
@@ -442,7 +466,6 @@ export function CheckoutForm() {
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
             <label className="text-sm sm:col-span-2">
               Address
-
               <input
                 {...register("address")}
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
@@ -450,14 +473,12 @@ export function CheckoutForm() {
                 placeholder="House, street and area"
                 aria-invalid={Boolean(errors.address)}
               />
-
               <FieldError message={errors.address?.message} />
             </label>
 
             <label className="text-sm sm:col-span-2">
               Apartment, suite, etc.{" "}
               <span className="text-[#6c6961]">(optional)</span>
-
               <input
                 {...register("address2")}
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
@@ -467,7 +488,6 @@ export function CheckoutForm() {
 
             <label className="text-sm">
               City
-
               <input
                 {...register("city")}
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
@@ -475,14 +495,11 @@ export function CheckoutForm() {
                 placeholder="City"
                 aria-invalid={Boolean(errors.city)}
               />
-
               <FieldError message={errors.city?.message} />
             </label>
 
             <label className="text-sm">
-              Postal code{" "}
-              <span className="text-[#6c6961]">(optional)</span>
-
+              Postal code <span className="text-[#6c6961]">(optional)</span>
               <input
                 {...register("postCode")}
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
@@ -493,7 +510,6 @@ export function CheckoutForm() {
 
             <label className="text-sm sm:col-span-2">
               Country
-
               <input
                 {...register("country")}
                 className="field mt-2 !rounded-xl bg-[#f5f3ee]"
@@ -529,23 +545,17 @@ export function CheckoutForm() {
 
             <span className="flex items-center justify-end gap-1.5 text-right text-xs font-bold sm:text-sm">
               <span>
-                {summary.hasFreeShipping
-                  ? "Free"
-                  : "Confirmed on order"}
+                {summary.hasFreeShipping ? "Free" : "Confirmed on order"}
               </span>
 
-              <Check
-                size={18}
-                className="shrink-0 text-[#28633b]"
-              />
+              <Check size={18} className="shrink-0 text-[#28633b]" />
             </span>
           </div>
 
           {!summary.hasFreeShipping ? (
             <p className="mt-3 text-xs text-[#6c6961]">
-              Add{" "}
-              {formatPrice(summary.remainingForFreeShipping)}{" "}
-              more to qualify for free shipping.
+              Add {formatPrice(summary.remainingForFreeShipping)} more to
+              qualify for free shipping.
             </p>
           ) : null}
         </section>
@@ -560,98 +570,86 @@ export function CheckoutForm() {
           />
 
           <fieldset className="mt-5 space-y-2.5">
-            <legend className="sr-only">
-              Payment method
-            </legend>
+            <legend className="sr-only">Payment method</legend>
 
-            {PAYMENT_METHODS.map(
-              ({
-                value,
-                label,
-                caption,
-                icon: Icon,
-              }) => {
-                const selected =
-                  selectedPayment === value;
+            {PAYMENT_METHODS.map(({ value, label, caption, icon: Icon }) => {
+              const selected = selectedPayment === value;
 
-                return (
-                  <div key={value}>
-                    <label
-                      className="option-card !rounded-xl text-sm"
-                      data-selected={selected}
+              return (
+                <div key={value}>
+                  <label
+                    className="option-card !rounded-xl text-sm"
+                    data-selected={selected}
+                  >
+                    <input
+                      {...register("payment")}
+                      type="radio"
+                      value={value}
+                      className="size-4 accent-[#171613]"
+                    />
+
+                    <span
+                      className={`grid size-10 shrink-0 place-items-center rounded-full ${
+                        selected
+                          ? "bg-[#171613] text-white"
+                          : "bg-[#f3f1eb] text-[#6c6961]"
+                      }`}
                     >
-                      <input
-                        {...register("payment")}
-                        type="radio"
-                        value={value}
-                        className="size-4 accent-[#171613]"
-                      />
+                      <Icon size={18} />
+                    </span>
 
-                      <span
-                        className={`grid size-10 shrink-0 place-items-center rounded-full ${
-                          selected
-                            ? "bg-[#171613] text-white"
-                            : "bg-[#f3f1eb] text-[#6c6961]"
-                        }`}
-                      >
-                        <Icon size={18} />
-                      </span>
+                    <span className="flex-1">
+                      <span className="block font-medium">{label}</span>
 
-                      <span className="flex-1">
-                        <span className="block font-medium">
-                          {label}
+                      {caption ? (
+                        <span className="block text-xs text-[#6c6961]">
+                          {caption}
                         </span>
-
-                        {caption ? (
-                          <span className="block text-xs text-[#6c6961]">
-                            {caption}
-                          </span>
-                        ) : null}
-                      </span>
-
-                      <PaymentMarks method={value} />
-                    </label>
-
-                    <AnimatePresence initial={false}>
-                      {selected && value !== "COD" ? (
-                        <motion.p
-                          initial={{
-                            opacity: 0,
-                            height: 0,
-                          }}
-                          animate={{
-                            opacity: 1,
-                            height: "auto",
-                          }}
-                          exit={{
-                            opacity: 0,
-                            height: 0,
-                          }}
-                          transition={{
-                            duration: 0.25,
-                            ease: EASE,
-                          }}
-                          className="mx-2 -mt-1 overflow-hidden rounded-b-xl border-x border-b border-[#dedbd2] bg-[#f7f5f0] px-4 text-xs text-[#6c6961]"
-                        >
-                          <span className="flex items-start gap-2.5 py-3.5">
-                            <ShieldCheck
-                              size={16}
-                              className="mt-0.5 shrink-0 text-[#28633b]"
-                            />
-
-                            <span>
-                              {value === "CARD"
-                                ? "After placing the order, you’ll continue to our secure card page. Aylee never stores your card number."
-                                : `You’ll continue to ${label} to authorize the payment securely.`}
-                            </span>
-                          </span>
-                        </motion.p>
                       ) : null}
-                    </AnimatePresence>
-                  </div>
-                );
-              },
-            )}
+                    </span>
+
+                    <PaymentMarks method={value} />
+                  </label>
+
+                  <AnimatePresence initial={false}>
+                    {selected && value !== "COD" ? (
+                      <motion.p
+                        initial={{
+                          opacity: 0,
+                          height: 0,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          height: "auto",
+                        }}
+                        exit={{
+                          opacity: 0,
+                          height: 0,
+                        }}
+                        transition={{
+                          duration: 0.25,
+                          ease: EASE,
+                        }}
+                        className="mx-2 -mt-1 overflow-hidden rounded-b-xl border-x border-b border-[#dedbd2] bg-[#f7f5f0] px-4 text-xs text-[#6c6961]"
+                      >
+                        <span className="flex items-start gap-2.5 py-3.5">
+                          <ShieldCheck
+                            size={16}
+                            className="mt-0.5 shrink-0 text-[#28633b]"
+                          />
+
+                          <span>
+                            {value === "CARD"
+                              ? "After placing the order, you’ll continue to our secure card page. Aylee never stores your card number."
+                              : `You’ll continue to ${label} to authorize the payment securely.`}
+                          </span>
+                        </span>
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </fieldset>
         </section>
 
@@ -660,10 +658,7 @@ export function CheckoutForm() {
         <section className="rounded-2xl border border-[#dedbd2] bg-white p-5 shadow-[0_16px_50px_rgb(23_22_19/0.04)] md:p-8">
           <label className="block text-sm font-medium">
             Order note{" "}
-            <span className="font-normal text-[#6c6961]">
-              (optional)
-            </span>
-
+            <span className="font-normal text-[#6c6961]">(optional)</span>
             <textarea
               {...register("note")}
               className="field mt-2 min-h-28 resize-y !rounded-xl focus:border-[#171613] focus:outline-none"
@@ -679,11 +674,7 @@ export function CheckoutForm() {
         <div className="flex items-center gap-3 border-b border-[#dedbd2] bg-white px-5 py-3 md:px-6">
           <button
             type="button"
-            onClick={() =>
-              setOrderOpen(
-                (current) => !current,
-              )
-            }
+            onClick={() => setOrderOpen((current) => !current)}
             className="group flex min-w-0 flex-1 items-center justify-between gap-3 py-2 text-left"
             aria-expanded={orderOpen}
             aria-controls="checkout-order-summary"
@@ -693,9 +684,7 @@ export function CheckoutForm() {
                 Order summary
               </span>
 
-              <span className="serif mt-1 block text-3xl">
-                Your bag
-              </span>
+              <span className="serif mt-1 block text-3xl">Your bag</span>
             </span>
 
             <span className="flex shrink-0 items-center gap-2">
@@ -705,9 +694,7 @@ export function CheckoutForm() {
 
               <motion.span
                 animate={{
-                  rotate: orderOpen
-                    ? 180
-                    : 0,
+                  rotate: orderOpen ? 180 : 0,
                 }}
                 transition={{
                   duration: 0.3,
@@ -817,10 +804,7 @@ export function CheckoutForm() {
                       </div>
 
                       <p className="py-1 text-sm font-semibold whitespace-nowrap">
-                        {formatPrice(
-                          line.price *
-                            line.quantity,
-                        )}
+                        {formatPrice(line.price * line.quantity)}
                       </p>
                     </li>
                   ))}
@@ -829,18 +813,11 @@ export function CheckoutForm() {
                 <div className="mt-6 space-y-3 border-t border-[#d6d2c9] pt-5 text-sm">
                   <div className="flex justify-between gap-4">
                     <span className="text-[#57544d]">
-                      Subtotal ·{" "}
-                      {summary.itemCount}{" "}
-                      {summary.itemCount === 1
-                        ? "item"
-                        : "items"}
+                      Subtotal · {summary.itemCount}{" "}
+                      {summary.itemCount === 1 ? "item" : "items"}
                     </span>
 
-                    <strong>
-                      {formatPrice(
-                        summary.subtotal,
-                      )}
-                    </strong>
+                    <strong>{formatPrice(summary.subtotal)}</strong>
                   </div>
 
                   <div className="flex justify-between gap-4">
@@ -856,18 +833,14 @@ export function CheckoutForm() {
                           : "text-[#6c6961]"
                       }
                     >
-                      {summary.hasFreeShipping
-                        ? "Free"
-                        : "Confirmed on order"}
+                      {summary.hasFreeShipping ? "Free" : "Confirmed on order"}
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-5 flex items-end justify-between gap-4 border-t border-[#d6d2c9] pt-5">
                   <div>
-                    <span className="text-lg font-bold">
-                      Total
-                    </span>
+                    <span className="text-lg font-bold">Total</span>
 
                     {!summary.hasFreeShipping ? (
                       <p className="mt-0.5 text-[0.65rem] text-[#6c6961]">
@@ -882,9 +855,7 @@ export function CheckoutForm() {
                     </span>
 
                     <strong className="serif text-3xl leading-none">
-                      {formatPrice(
-                        summary.subtotal,
-                      ).replace("Rs. ", "")}
+                      {formatPrice(summary.subtotal).replace("Rs. ", "")}
                     </strong>
                   </p>
                 </div>
@@ -903,10 +874,7 @@ export function CheckoutForm() {
                   disabled={isSubmitting}
                   className="button-primary mt-6 min-h-14 w-full !rounded-xl shadow-[0_12px_30px_rgb(23_22_19/0.18)]"
                 >
-                  <AnimatePresence
-                    mode="wait"
-                    initial={false}
-                  >
+                  <AnimatePresence mode="wait" initial={false}>
                     {isSubmitting ? (
                       <motion.span
                         key="placing"

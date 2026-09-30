@@ -23,6 +23,23 @@ import {
 } from "./http";
 import { fallbackBanners, fallbackProducts } from "./fallback";
 
+type ProductCatalog = {
+  products: Product[];
+  pageSize: number;
+};
+
+export type ProductPage = {
+  products: Product[];
+  total: number;
+  pageSize: number;
+  currentPage: number;
+  totalPages: number;
+  from: number;
+  to: number;
+};
+
+const DEFAULT_PRODUCT_PAGE_SIZE = 10;
+
 function normalizeImageUrl(value: string): string {
   if (!value) return "";
   if (/^https?:\/\//i.test(value))
@@ -239,8 +256,37 @@ export function normalizeProduct(
   };
 }
 
+function paginationFromResponse(value: unknown): {
+  pageSize: number;
+  totalPages: number;
+} {
+  if (!isRecord(value) || !isRecord(value.payload)) {
+    return {
+      pageSize: DEFAULT_PRODUCT_PAGE_SIZE,
+      totalPages: 1,
+    };
+  }
+
+  const pagination = value.payload.pagination;
+
+  if (!isRecord(pagination)) {
+    return {
+      pageSize: DEFAULT_PRODUCT_PAGE_SIZE,
+      totalPages: 1,
+    };
+  }
+
+  return {
+    pageSize: Math.max(
+      1,
+      Math.round(asNumber(pagination.per_page) ?? DEFAULT_PRODUCT_PAGE_SIZE),
+    ),
+    totalPages: Math.max(1, Math.round(asNumber(pagination.total_pages) ?? 1)),
+  };
+}
+
 const getAllProductsCached = unstable_cache(
-  async (): Promise<Product[]> => {
+  async (): Promise<ProductCatalog> => {
     try {
       const categories = await getCategories();
       const first = await fetchCommerce(
@@ -248,22 +294,47 @@ const getAllProductsCached = unstable_cache(
         {},
         { tags: ["products"] },
       );
-      const values = listFromResponse(first);
-      return values
+
+      const pagination = paginationFromResponse(first);
+      const remainingPages = await Promise.all(
+        Array.from(
+          { length: pagination.totalPages - 1 },
+          (_, index) => index + 2,
+        ).map((page) =>
+          fetchCommerce(
+            `${commerceConfig.endpoints.products}?page=${page}`,
+            {},
+            { tags: ["products"] },
+          ),
+        ),
+      );
+
+      const products = [first, ...remainingPages]
+        .flatMap(listFromResponse)
         .map((value) => normalizeProduct(value, categories))
         .filter((product): product is Product => Boolean(product));
+
+      return {
+        products: [
+          ...new Map(products.map((product) => [product.id, product])).values(),
+        ],
+        pageSize: pagination.pageSize,
+      };
     } catch {
-      return fallbackProducts;
+      return {
+        products: fallbackProducts,
+        pageSize: DEFAULT_PRODUCT_PAGE_SIZE,
+      };
     }
   },
-  ["commerce-products-v2"],
+  ["commerce-products-v3"],
   { revalidate: commerceConfig.revalidateSeconds, tags: ["products"] },
 );
 
 export async function getProducts(
   query: ProductQuery = {},
 ): Promise<Product[]> {
-  let products = [...(await getAllProductsCached())];
+  let products = [...(await getAllProductsCached()).products];
   const search = query.query?.trim().toLowerCase();
   if (search) {
     products = products.filter((product) =>
@@ -328,6 +399,35 @@ export async function getProducts(
   return query.limit ? products.slice(0, query.limit) : products;
 }
 
+export async function getProductsPage(
+  query: ProductQuery = {},
+  requestedPage = 1,
+): Promise<ProductPage> {
+  const [catalog, products] = await Promise.all([
+    getAllProductsCached(),
+    getProducts(query),
+  ]);
+  const pageSize = catalog.pageSize;
+  const total = products.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(
+    totalPages,
+    Math.max(1, Math.trunc(requestedPage) || 1),
+  );
+  const start = (currentPage - 1) * pageSize;
+  const pageProducts = products.slice(start, start + pageSize);
+
+  return {
+    products: pageProducts,
+    total,
+    pageSize,
+    currentPage,
+    totalPages,
+    from: total ? start + 1 : 0,
+    to: total ? start + pageProducts.length : 0,
+  };
+}
+
 export async function getProduct(slug: string): Promise<Product | null> {
   const categories = await getCategories();
   let detailProduct: Product | null = null;
@@ -342,7 +442,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
   } catch {
     // The live detail endpoint currently returns 500 for some slugs; use the catalog record.
   }
-  const products = await getAllProductsCached();
+  const products = (await getAllProductsCached()).products;
   const catalogProduct = products.find((product) => product.slug === slug);
   if (!detailProduct) return catalogProduct ?? null;
   return catalogProduct?.sizeChart

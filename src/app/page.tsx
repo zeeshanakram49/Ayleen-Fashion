@@ -13,6 +13,7 @@ import { JsonLd } from "@/components/common/json-ld";
 import { getBanners, getProducts } from "@/lib/commerce/products";
 import { getCategories } from "@/lib/commerce/collections";
 import { siteConfig } from "@/config/site";
+import { calculateDiscount } from "@/lib/utils/format";
 import { NewsletterForm } from "@/components/forms/newsletter-form";
 import { HeroSlider } from "@/components/home/hero-slider";
 import { Reveal } from "@/components/motion/reveal";
@@ -54,6 +55,14 @@ export default async function HomePage() {
   const saleProducts = products
     .filter((product) => Boolean(product.compareAtPrice))
     .slice(0, 4);
+  const highestDiscount = products.reduce(
+    (highest, product) =>
+      Math.max(
+        highest,
+        calculateDiscount(product.price, product.compareAtPrice),
+      ),
+    0,
+  );
 
   const organization = {
     "@context": "https://schema.org",
@@ -85,7 +94,7 @@ export default async function HomePage() {
     <>
       <JsonLd data={organization} />
       <JsonLd data={website} />
-      <HeroSlider banners={banners} />
+      <HeroSlider banners={banners} discountPercent={highestDiscount} />
 
       <section className="section-pad container-site">
         <SectionHeading

@@ -12,11 +12,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Banner } from "@/types/commerce";
-import { SplitText } from "@/components/motion/text-reveal";
-import { MagneticButton } from "@/components/motion/magnetic-button";
 
 type HeroSliderProps = {
   banners: Banner[];
+  discountPercent?: number;
 };
 
 function HeroVideo({
@@ -54,14 +53,14 @@ function HeroVideo({
       loop
       playsInline
       preload={first ? "auto" : "metadata"}
-      className="hero-image hero-image-main h-full w-full object-cover object-[62%_center] md:object-contain md:object-right"
+      className="hero-image hero-image-main h-full w-full object-cover object-center"
       onCanPlay={first ? onReady : undefined}
       onError={first ? onReady : undefined}
     />
   );
 }
 
-export function HeroSlider({ banners }: HeroSliderProps) {
+export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [firstImageLoaded, setFirstImageLoaded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -200,18 +199,6 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                 }`}
                 aria-hidden={index !== activeSlide}
               >
-                {banner.image ? (
-                  <Image
-                    src={banner.image}
-                    alt=""
-                    fill
-                    aria-hidden="true"
-                    quality={45}
-                    draggable={false}
-                    sizes="100vw"
-                    className="scale-105 object-cover object-center opacity-60 blur-xl"
-                  />
-                ) : null}
                 {banner.video ? (
                   <HeroVideo
                     src={banner.video}
@@ -230,7 +217,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                     quality={70}
                     draggable={false}
                     sizes="100vw"
-                    className="hero-image hero-image-main object-cover object-[62%_center] md:object-contain md:object-right"
+                    className="hero-image hero-image-main object-cover object-center"
                     onLoad={
                       index === 0 ? () => setFirstImageLoaded(true) : undefined
                     }
@@ -246,53 +233,55 @@ export function HeroSlider({ banners }: HeroSliderProps) {
       ) : (
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,#c9c1b4,#eeeae2_55%,#b5aa99)]" />
       )}
+      <h1 className="sr-only">Aylee seasonal collection</h1>
 
-      <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(90deg,rgba(10,10,9,.72)_0%,rgba(10,10,9,.35)_43%,rgba(10,10,9,.08)_75%),linear-gradient(0deg,rgba(10,10,9,.58)_0%,transparent_42%)]" />
-      <div className="hero-noise pointer-events-none absolute inset-0 z-[3] opacity-[0.16]" />
-
-      <div className="container-site relative z-[4] flex h-full items-end pb-24 text-white sm:pb-28 md:items-center md:pb-0">
-        <div key={activeSlide} className="hero-copy max-w-3xl pt-28 sm:pt-24">
-          <p className="eyebrow flex items-center gap-3 !text-white/70">
-            <span className="h-px w-8 bg-white/60" /> The new Aylee edit
-          </p>
-          <h1 className="display-title mt-5 text-[clamp(2.75rem,13vw,4rem)] text-balance drop-shadow-sm md:text-[clamp(2.5rem,6vw,6.5rem)]">
-            <span className="md:hidden">
-              {banners[activeSlide]?.title || "Everyday, considered."}
-            </span>
-            <span className="hidden md:inline">
-              <SplitText
-                text={banners[activeSlide]?.title || "Everyday, considered."}
-                animateKey={activeSlide}
-              />
-            </span>
-          </h1>
-          <p className="mt-6 max-w-lg text-sm leading-7 text-white/75 md:text-base">
-            {banners[activeSlide]?.description ||
-              "Modern essentials shaped for real days—quietly confident, effortlessly yours."}
-          </p>
-          <div className="mt-7 grid w-full gap-3 min-[420px]:flex min-[420px]:flex-wrap sm:mt-8">
-            <MagneticButton className="block">
-              <Link
-                href="/shop"
-                className="button-primary button-arrow w-full !border-white !bg-white !text-[#171613] hover:!border-[#f2eee7] hover:!bg-[#f2eee7] min-[420px]:w-auto"
-              >
-                Shop collection <ArrowRight size={16} />
-              </Link>
-            </MagneticButton>
-            <Link
-              href="/collections"
-              className="button-secondary w-full !border-white/55 !text-white hover:!border-white hover:!bg-white hover:!text-[#171613] min-[420px]:w-auto"
-            >
-              Explore edits
-            </Link>
-          </div>
-        </div>
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/75 via-black/5 to-black/10 md:hidden" />
+      <div className="absolute inset-x-0 bottom-20 z-[4] px-5 pb-5 text-white md:hidden">
+        <p className="text-[0.65rem] font-semibold tracking-[0.22em] text-white/75 uppercase">
+          Aylee store
+        </p>
+        <h2 className="serif mt-2 max-w-[18rem] text-[2.6rem] leading-[0.9] tracking-[-0.04em] text-balance">
+          {discountPercent > 0
+            ? `Up to ${discountPercent}% off`
+            : banners[activeSlide]?.title || "Everyday style"}
+        </h2>
+        <p className="mt-3 max-w-[18rem] text-xs leading-5 text-white/80">
+          {banners[activeSlide]?.description ||
+            "Easy essentials, made for every day."}
+        </p>
+        <Link
+          href={discountPercent > 0 ? "/sale" : "/shop"}
+          className="pointer-events-auto mt-5 inline-flex min-h-11 items-center bg-white px-5 text-[0.68rem] font-bold tracking-[0.16em] text-[#171613] uppercase shadow-lg"
+        >
+          {discountPercent > 0 ? "Shop the sale" : "Shop now"}
+        </Link>
       </div>
 
+      {discountPercent > 0 ? (
+        <Link
+          href="/sale"
+          aria-label={`Shop sale with discounts up to ${discountPercent}% off`}
+          className="group absolute right-8 bottom-28 z-[4] hidden size-28 rotate-3 place-items-center rounded-full border border-white/45 bg-[#6f2d24] text-center text-white shadow-[0_18px_50px_rgb(0_0_0/0.28)] transition-transform duration-300 hover:scale-105 hover:rotate-0 md:grid lg:right-[max(2rem,calc((100vw-1440px)/2))]"
+        >
+          <span className="absolute inset-1.5 rounded-full border border-dashed border-white/45 transition-transform duration-700 group-hover:rotate-45" />
+          <span className="relative flex flex-col items-center uppercase">
+            <span className="text-[0.55rem] font-semibold tracking-[0.2em] text-white/75">
+              Up to
+            </span>
+            <strong className="serif mt-0.5 text-[1.45rem] leading-none tracking-[-0.04em] md:text-[2rem]">
+              {discountPercent}%
+            </strong>
+            <span className="mt-1 text-[0.58rem] font-bold tracking-[0.2em]">
+              Off · Shop
+            </span>
+          </span>
+        </Link>
+      ) : null}
+
       {banners.length > 1 ? (
-        <div className="container-site absolute inset-x-0 bottom-7 z-[5] flex items-end justify-between text-white md:bottom-10">
+        <div className="container-site absolute inset-x-0 top-3 z-[5] flex items-end justify-between text-white md:top-auto md:bottom-10">
           <div
-            className="flex w-full max-w-[260px] gap-2"
+            className="flex w-full max-w-[45%] gap-2 md:max-w-[260px]"
             role="group"
             aria-label="Choose a banner"
           >

@@ -22,11 +22,7 @@ type PurchasePayload = {
   num_items: number;
 };
 
-export function PurchaseEvent({
-  orderId,
-}: {
-  orderId: string;
-}) {
+export function PurchaseEvent({ orderId }: { orderId: string }) {
   const { clearCart } = useStore();
 
   const started = useRef(false);
@@ -44,8 +40,7 @@ export function PurchaseEvent({
      * Prevent duplicate Purchase events
      * when the confirmation page reloads.
      */
-    const alreadyTracked =
-      window.sessionStorage.getItem(trackedKey);
+    const alreadyTracked = window.sessionStorage.getItem(trackedKey);
 
     if (alreadyTracked === "1") {
       window.sessionStorage.removeItem(purchaseKey);
@@ -55,8 +50,7 @@ export function PurchaseEvent({
     /*
      * Purchase data was saved during checkout.
      */
-    const raw =
-      window.sessionStorage.getItem(purchaseKey);
+    const raw = window.sessionStorage.getItem(purchaseKey);
 
     if (!raw) {
       return;
@@ -74,10 +68,7 @@ export function PurchaseEvent({
      * Safety check:
      * confirmation order must match stored order.
      */
-    if (
-      String(payload.orderId) !==
-      String(orderId)
-    ) {
+    if (String(payload.orderId) !== String(orderId)) {
       return;
     }
 
@@ -90,47 +81,40 @@ export function PurchaseEvent({
     clearCart();
 
     const firePurchase = () => {
-      if (
-        typeof window.fbq !== "function"
-      ) {
+      if (typeof window.fbq !== "function") {
         return false;
       }
 
-      window.fbq("track", "Purchase", {
-        value: Number(payload.value),
+      window.fbq(
+        "track",
+        "Purchase",
+        {
+          value: Number(payload.value),
 
-        currency:
-          payload.currency || "PKR",
+          currency: payload.currency || "PKR",
 
-        content_ids:
-          payload.content_ids,
+          content_ids: payload.content_ids,
 
-        content_type: "product",
+          content_type: "product",
 
-        contents:
-          payload.contents,
+          contents: payload.contents,
 
-        num_items:
-          payload.num_items,
+          num_items: payload.num_items,
 
-        order_id:
-          payload.orderId,
-      });
+          order_id: payload.orderId,
+        },
+        { eventID: `order_${payload.orderId}` },
+      );
 
       /*
        * Mark this order as already tracked.
        */
-      window.sessionStorage.setItem(
-        trackedKey,
-        "1",
-      );
+      window.sessionStorage.setItem(trackedKey, "1");
 
       /*
        * Purchase payload is no longer needed.
        */
-      window.sessionStorage.removeItem(
-        purchaseKey,
-      );
+      window.sessionStorage.removeItem(purchaseKey);
 
       return true;
     };
@@ -149,19 +133,13 @@ export function PurchaseEvent({
      */
     let attempts = 0;
 
-    const interval =
-      window.setInterval(() => {
-        attempts += 1;
+    const interval = window.setInterval(() => {
+      attempts += 1;
 
-        if (
-          firePurchase() ||
-          attempts >= 20
-        ) {
-          window.clearInterval(
-            interval,
-          );
-        }
-      }, 250);
+      if (firePurchase() || attempts >= 20) {
+        window.clearInterval(interval);
+      }
+    }, 250);
 
     return () => {
       window.clearInterval(interval);

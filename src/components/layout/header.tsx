@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import {
+  BadgePercent,
+  Heart,
+  Layers3,
+  MapPin,
+  Menu,
+  Search,
+  Shirt,
+  ShoppingBag,
+  Store,
+  UserRound,
+  X,
+} from "lucide-react";
 import { Logo } from "@/components/common/logo";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { useStore } from "@/components/providers/store-provider";
@@ -14,6 +26,8 @@ type MenuCategory = {
   slug: string;
   name: string;
 };
+
+const mobileNavIcons = [Shirt, Store, Layers3, BadgePercent, MapPin];
 
 export function Header({ categories }: { categories: MenuCategory[] }) {
   const pathname = usePathname();
@@ -26,7 +40,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
   const floating = isHomepage && scrolled;
   const iconButtonClass = `relative z-10 grid size-11 touch-manipulation place-items-center rounded-full transition duration-200 ${
     transparent
-      ? "hover:bg-white/15 focus-visible:bg-white/15"
+      ? "hover:bg-black/10 focus-visible:bg-black/10"
       : "hover:bg-[#efede7] focus-visible:bg-[#efede7]"
   }`;
 
@@ -60,14 +74,14 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
         Skip to content
       </a>
       <p
-        className={`${isHomepage ? "absolute inset-x-0 top-0 z-[51] bg-transparent drop-shadow-[0_1px_3px_rgb(0_0_0/0.9)]" : "bg-[#171613]"} pointer-events-none px-2 py-2 text-center text-[0.55rem] leading-[1.35] font-semibold tracking-[0.13em] text-white uppercase sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]`}
+        className={`${isHomepage ? "absolute inset-x-0 top-0 z-[51] bg-transparent drop-shadow-[0_1px_3px_rgb(0_0_0/0.9)] max-md:relative max-md:bg-[#f7f5f0] max-md:text-[#24271f] max-md:drop-shadow-none" : "bg-[#171613]"} pointer-events-none px-2 py-2 text-center text-[0.55rem] leading-[1.35] font-semibold tracking-[0.13em] text-white uppercase sm:px-4 sm:text-[0.65rem] sm:tracking-[0.2em]`}
       >
         {siteConfig.announcement}
       </p>
       <header
         className={`${
           transparent
-            ? "absolute inset-x-0 top-[28px] z-[60] bg-transparent text-white max-md:bg-gradient-to-b max-md:from-black/40 max-md:to-transparent max-md:backdrop-blur-[2px] sm:top-[30px]"
+            ? "absolute inset-x-0 top-[28px] z-[60] bg-transparent text-[#24271f] drop-shadow-[0_1px_1px_rgb(255_255_255/0.9)] max-md:relative max-md:top-0 max-md:bg-[#fffefb] max-md:drop-shadow-none max-md:shadow-[0_1px_0_rgb(23_22_19/0.1)] sm:top-[30px]"
             : floating
               ? "fixed inset-x-0 top-0 z-[60] py-3 text-[#171613]"
               : `sticky top-0 z-[60] bg-white/90 text-[#171613] backdrop-blur-xl ${scrolled ? "shadow-[0_8px_30px_rgb(0_0_0/0.06)]" : "shadow-[0_1px_0_rgb(23_22_19/0.08)]"}`
@@ -93,22 +107,29 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
               >
                 <Menu size={24} />
               </button>
-              <Logo light={transparent} prominent />
+              <span className="hidden md:inline-flex">
+                <Logo prominent />
+              </span>
             </div>
-            <nav
-              aria-label="Primary navigation"
-              className="hidden items-center gap-7 justify-self-center xl:flex"
-            >
-              {siteConfig.navigation.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="py-2 text-[0.78rem] font-semibold tracking-[0.1em] uppercase opacity-85 transition hover:opacity-100"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <div className="justify-self-center">
+              <span className="md:hidden">
+                <Logo />
+              </span>
+              <nav
+                aria-label="Primary navigation"
+                className="hidden items-center gap-7 xl:flex"
+              >
+                {siteConfig.navigation.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="py-2 text-[0.78rem] font-semibold tracking-[0.1em] uppercase opacity-85 transition hover:opacity-100"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
             <div className="flex items-center justify-self-end">
               <button
                 type="button"
@@ -155,7 +176,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
 
           <nav
             aria-label="Mobile primary navigation"
-            className="pointer-events-auto touch-pan-x overflow-x-auto pb-2 sm:pb-3 xl:hidden"
+            className="pointer-events-auto hidden touch-pan-x overflow-x-auto pb-2 sm:pb-3 md:block xl:hidden"
           >
             <div className="flex min-w-max items-center gap-4 px-1 sm:gap-5">
               {siteConfig.navigation.map((item) => (
@@ -174,7 +195,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
 
       {menuOpen ? (
         <div
-          className="menu-reveal fixed inset-0 z-[90] overflow-y-auto bg-white"
+          className="menu-reveal fixed inset-0 z-[90] flex min-h-[100dvh] flex-col overflow-y-auto bg-white"
           role="dialog"
           aria-modal="true"
           aria-label="Mobile navigation"
@@ -191,7 +212,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
             <Logo />
             <p className="eyebrow hidden justify-self-end md:block">Menu</p>
           </div>
-          <div className="container-site grid gap-14 py-10 md:py-16 lg:grid-cols-[minmax(240px,0.65fr)_minmax(0,1.35fr)] lg:gap-20">
+          <div className="container-site grid flex-1 gap-9 py-8 md:gap-14 md:py-16 lg:grid-cols-[minmax(240px,0.65fr)_minmax(0,1.35fr)] lg:gap-20">
             <nav aria-label="Menu navigation links">
               <p className="eyebrow mb-5">Explore</p>
               <ul className="divide-y divide-[#dedbd2] border-y border-[#dedbd2]">
@@ -200,7 +221,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
                     <Link
                       href={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-between py-4 text-xl font-semibold tracking-[-0.02em] uppercase transition hover:pl-2 hover:text-[#6f2d24] md:text-2xl"
+                      className="flex items-center justify-between py-3.5 text-lg font-semibold tracking-[-0.02em] uppercase transition hover:pl-2 hover:text-[#6f2d24] md:py-4 md:text-2xl"
                     >
                       {item.label}
                       <span aria-hidden className="text-base font-normal">
@@ -219,7 +240,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
                   <Link
                     href="/shop"
                     onClick={() => setMenuOpen(false)}
-                    className="block py-4 text-xl uppercase transition hover:pl-2 hover:text-[#6f2d24] md:text-2xl"
+                    className="block py-3.5 text-lg uppercase transition hover:pl-2 hover:text-[#6f2d24] md:py-4 md:text-2xl"
                   >
                     View all
                   </Link>
@@ -232,7 +253,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
                     <Link
                       href={`/categories/${category.slug}`}
                       onClick={() => setMenuOpen(false)}
-                      className="block py-4 text-xl uppercase transition hover:pl-2 hover:text-[#6f2d24] md:text-2xl"
+                      className="block py-3.5 text-lg uppercase transition hover:pl-2 hover:text-[#6f2d24] md:py-4 md:text-2xl"
                     >
                       {category.name}
                     </Link>
@@ -260,6 +281,34 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
           </div>
         </div>
       ) : null}
+      <nav
+        aria-label="Mobile quick navigation"
+        className="fixed inset-x-0 bottom-0 z-[70] grid grid-cols-5 border-t border-black/10 bg-white/95 pt-2 pb-[calc(0.35rem+env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgb(0_0_0/0.08)] backdrop-blur-xl md:hidden"
+      >
+        {siteConfig.navigation.map((item, index) => {
+          const Icon = mobileNavIcons[index] ?? Store;
+          const active =
+            pathname === item.href &&
+            (item.href !== "/shop" || item.label === "Shop");
+
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={`relative flex min-w-0 flex-col items-center justify-center gap-0.5 px-1 py-1 text-[0.56rem] leading-tight font-semibold tracking-[0.04em] uppercase transition-colors ${
+                active ? "text-[#6f2d24]" : "text-[#4f4c45]"
+              }`}
+            >
+              {active ? (
+                <span className="absolute -top-2 h-0.5 w-8 rounded-full bg-[#6f2d24]" />
+              ) : null}
+              <Icon size={19} strokeWidth={active ? 2 : 1.7} />
+              <span className="max-w-full truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

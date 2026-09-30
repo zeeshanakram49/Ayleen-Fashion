@@ -1,9 +1,10 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { EmptyState } from "@/components/common/empty-state";
 import { ProductGrid } from "@/components/product/product-grid";
+import { CatalogPagination } from "@/components/product/catalog-pagination";
 import { ShopFilters } from "@/components/product/shop-filters";
 import { getCategories } from "@/lib/commerce/collections";
-import { getProducts } from "@/lib/commerce/products";
+import { getProductsPage } from "@/lib/commerce/products";
 import type { ProductQuery } from "@/types/commerce";
 
 export type CatalogSearchParams = Record<string, string | string[] | undefined>;
@@ -27,26 +28,35 @@ export async function CatalogView({
   showFilters?: boolean;
   breadcrumbLabel?: string;
 }) {
-  const [categories, products] = await Promise.all([
+  const requestedPage = Number(first(searchParams.page)) || 1;
+  const [categories, productPage] = await Promise.all([
     getCategories(),
-    getProducts({
-      query: first(searchParams.q),
-      category: first(searchParams.category),
-      sort: (first(searchParams.sort) as ProductQuery["sort"]) || "featured",
-      availability: first(
-        searchParams.availability,
-      ) as ProductQuery["availability"],
-      minPrice: first(searchParams.minPrice)
-        ? Number(first(searchParams.minPrice))
-        : undefined,
-      maxPrice: first(searchParams.maxPrice)
-        ? Number(first(searchParams.maxPrice))
-        : undefined,
-      size: first(searchParams.size),
-      color: first(searchParams.color),
-      ...fixedQuery,
-    }),
+    getProductsPage(
+      {
+        query: first(searchParams.q),
+        category: first(searchParams.category),
+        sort: (first(searchParams.sort) as ProductQuery["sort"]) || "featured",
+        availability: first(
+          searchParams.availability,
+        ) as ProductQuery["availability"],
+        minPrice: first(searchParams.minPrice)
+          ? Number(first(searchParams.minPrice))
+          : undefined,
+        maxPrice: first(searchParams.maxPrice)
+          ? Number(first(searchParams.maxPrice))
+          : undefined,
+        size: first(searchParams.size),
+        color: first(searchParams.color),
+        ...fixedQuery,
+      },
+      requestedPage,
+    ),
   ]);
+
+  const { products } = productPage;
+  const hasActiveFilters = Object.entries(searchParams).some(
+    ([key, value]) => key !== "page" && Boolean(value),
+  );
 
   return (
     <div className="container-site section-pad !pt-8 md:!pt-12">
@@ -64,16 +74,24 @@ export async function CatalogView({
       {showFilters ? <ShopFilters categories={categories} /> : null}
       <div className="mt-8 mb-6 flex items-center justify-between text-xs text-[#6c6961]">
         <p aria-live="polite">
-          {products.length} {products.length === 1 ? "style" : "styles"}
+          {productPage.total
+            ? `Showing ${productPage.from}–${productPage.to} of ${productPage.total} styles`
+            : "0 styles"}
         </p>
-        {Object.values(searchParams).some(Boolean) ? (
-          <a href="/shop" className="underline underline-offset-4">
+        {hasActiveFilters ? (
+          <a href="?" className="underline underline-offset-4">
             Clear filters
           </a>
         ) : null}
       </div>
       {products.length ? (
-        <ProductGrid products={products} eagerCount={4} />
+        <>
+          <ProductGrid products={products} eagerCount={4} />
+          <CatalogPagination
+            currentPage={productPage.currentPage}
+            totalPages={productPage.totalPages}
+          />
+        </>
       ) : (
         <EmptyState
           title="Nothing matched"
