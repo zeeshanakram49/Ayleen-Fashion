@@ -119,7 +119,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
       <header
         className={`${
           transparent
-            ? "absolute inset-x-0 top-[28px] z-[60] bg-transparent text-[#24271f] drop-shadow-[0_1px_1px_rgb(255_255_255/0.9)] max-md:relative max-md:top-0 max-md:bg-[#fffefb] max-md:shadow-[0_1px_0_rgb(23_22_19/0.1)] max-md:drop-shadow-none sm:top-[30px]"
+            ? "home-hero-header absolute inset-x-0 top-[28px] z-[60] bg-transparent text-[#24271f] drop-shadow-[0_1px_1px_rgb(255_255_255/0.9)] max-md:relative max-md:top-0 max-md:bg-[#fffefb] max-md:shadow-[0_1px_0_rgb(23_22_19/0.1)] max-md:drop-shadow-none sm:top-[30px]"
             : floating
               ? "fixed inset-x-0 top-0 z-[60] py-3 text-[#171613]"
               : `sticky top-0 z-[60] bg-white/90 text-[#171613] backdrop-blur-xl ${scrolled ? "shadow-[0_8px_30px_rgb(0_0_0/0.06)]" : "shadow-[0_1px_0_rgb(23_22_19/0.08)]"}`

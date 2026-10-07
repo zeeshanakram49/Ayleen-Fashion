@@ -26,12 +26,14 @@ function HeroVideo({
   active,
   first,
   onReady,
+  onEnded,
 }: {
   src: string;
   poster: string | null;
   active: boolean;
   first: boolean;
   onReady: () => void;
+  onEnded: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -42,6 +44,7 @@ function HeroVideo({
       void video.play().catch(() => undefined);
     } else {
       video.pause();
+      video.currentTime = 0;
     }
   }, [active]);
 
@@ -52,12 +55,12 @@ function HeroVideo({
       poster={poster || undefined}
       autoPlay={active}
       muted
-      loop
       playsInline
       preload={first ? "auto" : "metadata"}
       className="hero-image hero-image-main h-full w-full object-cover object-center"
       onCanPlay={first ? onReady : undefined}
       onError={first ? onReady : undefined}
+      onEnded={onEnded}
     />
   );
 }
@@ -82,20 +85,21 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
   }, []);
 
   useEffect(() => {
-    if (banners.length < 2 || !firstImageLoaded) return;
+    if (banners.length < 2 || !firstImageLoaded || banners[activeSlide]?.video)
+      return;
 
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (reducedMotion) return;
 
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setPreviousSlide(activeSlide);
       setActiveSlide((activeSlide + 1) % banners.length);
     }, SLIDE_INTERVAL_MS);
 
-    return () => window.clearInterval(timer);
-  }, [activeSlide, banners.length, firstImageLoaded]);
+    return () => window.clearTimeout(timer);
+  }, [activeSlide, banners, firstImageLoaded]);
 
   useEffect(
     () => () => {
@@ -227,6 +231,16 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
                     active={index === activeSlide}
                     first={index === 0}
                     onReady={() => setFirstImageLoaded(true)}
+                    onEnded={() => {
+                      if (
+                        index === activeSlide &&
+                        banners.length > 1 &&
+                        !window.matchMedia("(prefers-reduced-motion: reduce)")
+                          .matches
+                      ) {
+                        showSlide((index + 1) % banners.length);
+                      }
+                    }}
                   />
                 ) : banner.image ? (
                   <Image

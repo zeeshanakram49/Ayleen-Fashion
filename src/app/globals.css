@@ -387,6 +387,12 @@ summary {
   transform-style: preserve-3d;
 }
 
+@media (min-width: 768px) {
+  body:has(.hero-slide[aria-hidden="false"] video) .home-hero-header {
+    filter: none;
+  }
+}
+
 .hero-slide--initial,
 .hero-slide--enter {
   z-index: 2;
