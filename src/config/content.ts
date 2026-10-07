@@ -12,14 +12,14 @@ export const policies: Record<string, PolicyContent> = {
   "shipping-policy": {
     slug: "shipping-policy",
     title: "Shipping policy",
-    description: "A summary of currently published Aylee delivery information.",
+    description: "Delivery information for orders in Pakistan.",
     status: "pending-confirmation",
     sections: [
       {
-        heading: "Published summary",
+        heading: "Delivery charges",
         paragraphs: [
-          "Aylee currently advertises nationwide delivery in Pakistan and free delivery on qualifying orders of Rs. 5,000 or more.",
-          "A complete delivery timetable, service-area list, and exception policy was not available from the source website. Contact customer service before ordering if timing is critical.",
+          "Aylee offers free delivery on orders of Rs. 5,000 or more. For smaller orders, please contact us for the delivery charge before placing your order.",
+          "Delivery times depend on your location. Contact Aylee on WhatsApp if you need an estimated arrival date before ordering.",
         ],
       },
     ],
@@ -27,14 +27,14 @@ export const policies: Record<string, PolicyContent> = {
   "exchange-policy": {
     slug: "exchange-policy",
     title: "Exchange policy",
-    description: "A summary of currently published Aylee exchange information.",
+    description: "How to ask Aylee about an exchange.",
     status: "pending-confirmation",
     sections: [
       {
-        heading: "Published summary",
+        heading: "Request an exchange",
         paragraphs: [
-          "The source storefront states that unused articles with original tags may receive exchange support within seven days.",
-          "Eligibility details, exclusions, return shipping responsibility, and the exchange process were not fully published. Contact customer service before returning an item.",
+          "Contact Aylee on WhatsApp with your order number and item details before sending anything back. Please keep the item unused with its original tags while your request is reviewed.",
+          "Ask our team to confirm the exchange window, eligibility and return courier charge for your order before dispatching a parcel.",
         ],
       },
     ],
@@ -46,10 +46,9 @@ export const policies: Record<string, PolicyContent> = {
     status: "pending-confirmation",
     sections: [
       {
-        heading: "Content pending confirmation",
+        heading: "Privacy enquiries",
         paragraphs: [
-          "A complete verified privacy notice could not be retrieved from the source website. This page is intentionally not populated with invented legal terms.",
-          "For questions about personal data, contact Aylee customer service using the details below.",
+          "For questions about your personal information or an order, contact Aylee customer service using the details below.",
         ],
       },
     ],
@@ -61,10 +60,9 @@ export const policies: Record<string, PolicyContent> = {
     status: "pending-confirmation",
     sections: [
       {
-        heading: "Content pending confirmation",
+        heading: "Purchasing enquiries",
         paragraphs: [
-          "Verified full terms and conditions were not available from the source website. This page is a clearly labelled placeholder and does not create or replace Aylee's legal terms.",
-          "Contact customer service for current purchasing terms before placing an order.",
+          "Contact Aylee customer service for purchasing terms or help with an order.",
         ],
       },
     ],

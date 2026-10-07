@@ -32,7 +32,12 @@ export const fallbackCategories: Category[] = [
 
 const description =
   "Made from soft and breathable cotton fabric. Designed for comfortable everyday wear. Features a simple and versatile style. Easy to pair with jeans, trousers, or shorts. Suitable for casual outings and daily use.";
-const category = { id: "2", slug: "t-shirts", name: "T-Shirts" } as const;
+const category = {
+  id: "2",
+  slug: "t-shirts",
+  name: "T-Shirts",
+  gender: "male",
+} as const;
 
 function product(
   id: string,

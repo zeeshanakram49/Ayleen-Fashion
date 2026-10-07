@@ -101,8 +101,8 @@ test("mobile menu and policy pages are accessible", async ({ page }) => {
   await page.getByRole("button", { name: "Open menu" }).click();
   const mobileMenu = page.getByRole("dialog", { name: "Mobile navigation" });
   await expect(mobileMenu).toBeVisible();
-  await mobileMenu.getByRole("link", { name: "Stores", exact: true }).click();
-  await expect(page).toHaveURL(/\/stores/);
+  await mobileMenu.getByRole("link", { name: "Sale", exact: true }).click();
+  await expect(page).toHaveURL(/\/sale/);
   await openReady(page, "/shipping-policy");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Shipping policy",

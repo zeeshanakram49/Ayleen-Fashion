@@ -100,7 +100,7 @@ export function AccountPanel() {
           >
             <h3 className="serif text-3xl">Orders</h3>
             <p className="mt-2 text-sm text-[#6c6961]">
-              View order history from the commerce backend.
+              View your Aylee order history.
             </p>
           </Link>
           <Link

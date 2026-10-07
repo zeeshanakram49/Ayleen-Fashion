@@ -35,6 +35,7 @@ export async function CatalogView({
       {
         query: first(searchParams.q),
         category: first(searchParams.category),
+        gender: first(searchParams.gender),
         sort: (first(searchParams.sort) as ProductQuery["sort"]) || "featured",
         availability: first(
           searchParams.availability,

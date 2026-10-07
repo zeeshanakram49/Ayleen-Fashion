@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   BadgePercent,
   Heart,
   Layers3,
-  MapPin,
   Menu,
   Search,
   Shirt,
@@ -27,7 +26,46 @@ type MenuCategory = {
   name: string;
 };
 
-const mobileNavIcons = [Shirt, Store, Layers3, BadgePercent, MapPin];
+const mobileNavIcons = [Shirt, Store, Layers3, BadgePercent];
+
+function MobileQuickNavigation() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  return (
+    <nav
+      aria-label="Mobile quick navigation"
+      className="fixed inset-x-0 bottom-0 z-[70] grid grid-cols-4 border-t border-black/10 bg-white/95 pt-2 pb-[calc(0.35rem+env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgb(0_0_0/0.08)] backdrop-blur-xl md:hidden"
+    >
+      {siteConfig.navigation.map((item, index) => {
+        const Icon = mobileNavIcons[index] ?? Store;
+        const active =
+          item.label === "Men"
+            ? pathname === "/shop" && searchParams?.get("gender") === "male"
+            : item.label === "Shop"
+              ? pathname === "/shop" && searchParams?.get("gender") !== "male"
+              : pathname === item.href;
+
+        return (
+          <Link
+            key={item.label}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={`relative flex min-w-0 flex-col items-center justify-center gap-0.5 px-1 py-1 text-[0.56rem] leading-tight font-semibold tracking-[0.04em] uppercase transition-colors ${
+              active ? "text-[#6f2d24]" : "text-[#4f4c45]"
+            }`}
+          >
+            {active ? (
+              <span className="absolute -top-2 h-0.5 w-8 rounded-full bg-[#6f2d24]" />
+            ) : null}
+            <Icon size={19} strokeWidth={active ? 2 : 1.7} />
+            <span className="max-w-full truncate">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
 export function Header({ categories }: { categories: MenuCategory[] }) {
   const pathname = usePathname();
@@ -81,7 +119,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
       <header
         className={`${
           transparent
-            ? "absolute inset-x-0 top-[28px] z-[60] bg-transparent text-[#24271f] drop-shadow-[0_1px_1px_rgb(255_255_255/0.9)] max-md:relative max-md:top-0 max-md:bg-[#fffefb] max-md:drop-shadow-none max-md:shadow-[0_1px_0_rgb(23_22_19/0.1)] sm:top-[30px]"
+            ? "absolute inset-x-0 top-[28px] z-[60] bg-transparent text-[#24271f] drop-shadow-[0_1px_1px_rgb(255_255_255/0.9)] max-md:relative max-md:top-0 max-md:bg-[#fffefb] max-md:shadow-[0_1px_0_rgb(23_22_19/0.1)] max-md:drop-shadow-none sm:top-[30px]"
             : floating
               ? "fixed inset-x-0 top-0 z-[60] py-3 text-[#171613]"
               : `sticky top-0 z-[60] bg-white/90 text-[#171613] backdrop-blur-xl ${scrolled ? "shadow-[0_8px_30px_rgb(0_0_0/0.06)]" : "shadow-[0_1px_0_rgb(23_22_19/0.08)]"}`
@@ -95,7 +133,7 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
           }`}
         >
           <div
-            className={`grid grid-cols-[auto_1fr_auto] items-center ${floating ? "min-h-14 xl:min-h-16" : "min-h-16 sm:min-h-20"}`}
+            className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center md:grid-cols-[auto_1fr_auto] ${floating ? "min-h-14 xl:min-h-16" : "min-h-16 sm:min-h-20"}`}
           >
             <div className="flex items-center gap-3 justify-self-start md:gap-4">
               <button
@@ -281,34 +319,9 @@ export function Header({ categories }: { categories: MenuCategory[] }) {
           </div>
         </div>
       ) : null}
-      <nav
-        aria-label="Mobile quick navigation"
-        className="fixed inset-x-0 bottom-0 z-[70] grid grid-cols-5 border-t border-black/10 bg-white/95 pt-2 pb-[calc(0.35rem+env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgb(0_0_0/0.08)] backdrop-blur-xl md:hidden"
-      >
-        {siteConfig.navigation.map((item, index) => {
-          const Icon = mobileNavIcons[index] ?? Store;
-          const active =
-            pathname === item.href &&
-            (item.href !== "/shop" || item.label === "Shop");
-
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={`relative flex min-w-0 flex-col items-center justify-center gap-0.5 px-1 py-1 text-[0.56rem] leading-tight font-semibold tracking-[0.04em] uppercase transition-colors ${
-                active ? "text-[#6f2d24]" : "text-[#4f4c45]"
-              }`}
-            >
-              {active ? (
-                <span className="absolute -top-2 h-0.5 w-8 rounded-full bg-[#6f2d24]" />
-              ) : null}
-              <Icon size={19} strokeWidth={active ? 2 : 1.7} />
-              <span className="max-w-full truncate">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      <Suspense fallback={null}>
+        <MobileQuickNavigation />
+      </Suspense>
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

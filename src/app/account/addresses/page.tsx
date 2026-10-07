@@ -23,10 +23,8 @@ export default function AddressesPage() {
       <div className="mt-12 max-w-2xl border border-[#dedbd2] bg-[#f7f5f0] p-8">
         <h2 className="serif text-3xl">Address management</h2>
         <p className="mt-3 text-[#6c6961]">
-          The current backend contract exposes account address information but
-          does not publish a safe address-update endpoint. Address updates are
-          therefore collected during secure checkout instead of being silently
-          stored here.
+          Add or update your delivery address when ordering. For help with an
+          existing order, contact Aylee customer service.
         </p>
         <Link href="/checkout" className="button-primary mt-6">
           Go to checkout

@@ -28,6 +28,7 @@ import {
 } from "@/lib/validation/schemas";
 import { formatPrice } from "@/lib/utils/format";
 import { Spinner } from "@/components/motion/spinner";
+import { siteConfig } from "@/config/site";
 
 declare global {
   interface Window {
@@ -36,6 +37,12 @@ declare global {
 }
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+// Replace only after the commerce backend provides a pre-order quote that
+// includes delivery, discounts and the final amount for the selected address.
+function hasVerifiedCheckoutQuote(): boolean {
+  return false;
+}
 
 const PAYMENT_METHODS = [
   {
@@ -257,7 +264,12 @@ export function CheckoutForm() {
   const selectedPayment = watch("payment");
 
   async function submit(values: CheckoutFormInput) {
-    setServerError("");
+    if (!hasVerifiedCheckoutQuote()) {
+      setServerError(
+        "Exact delivery and discount quotes are required before online ordering can resume.",
+      );
+      return;
+    }
 
     const payload: CheckoutInput = {
       ...values,
@@ -525,7 +537,7 @@ export function CheckoutForm() {
           <SectionHeader
             step={3}
             title="Shipping method"
-            description="Fast, tracked delivery across Pakistan."
+            description="Delivery across Pakistan."
           />
 
           <div className="mt-7 grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border-2 border-[#171613] bg-[#f7f5f0] p-4">
@@ -539,16 +551,20 @@ export function CheckoutForm() {
               </span>
 
               <span className="block text-xs text-[#6c6961]">
-                Tracked delivery to your provided address
+                Delivery to your provided address
               </span>
             </span>
 
             <span className="flex items-center justify-end gap-1.5 text-right text-xs font-bold sm:text-sm">
               <span>
-                {summary.hasFreeShipping ? "Free" : "Confirmed on order"}
+                {summary.hasFreeShipping
+                  ? "Free above threshold"
+                  : "Rate unavailable"}
               </span>
 
-              <Check size={18} className="shrink-0 text-[#28633b]" />
+              {summary.hasFreeShipping ? (
+                <Check size={18} className="shrink-0 text-[#28633b]" />
+              ) : null}
             </span>
           </div>
 
@@ -821,6 +837,11 @@ export function CheckoutForm() {
                   </div>
 
                   <div className="flex justify-between gap-4">
+                    <span className="text-[#57544d]">Discount</span>
+                    <span>Requires order quote</span>
+                  </div>
+
+                  <div className="flex justify-between gap-4">
                     <span className="inline-flex items-center gap-1.5 text-[#57544d]">
                       Shipping
                       <Truck size={14} />
@@ -833,32 +854,36 @@ export function CheckoutForm() {
                           : "text-[#6c6961]"
                       }
                     >
-                      {summary.hasFreeShipping ? "Free" : "Confirmed on order"}
+                      {summary.hasFreeShipping
+                        ? "Free above threshold"
+                        : "Rate unavailable"}
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-5 flex items-end justify-between gap-4 border-t border-[#d6d2c9] pt-5">
+                <div className="mt-5 flex flex-col gap-1 border-t border-[#d6d2c9] pt-5 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                   <div>
-                    <span className="text-lg font-bold">Total</span>
-
-                    {!summary.hasFreeShipping ? (
-                      <p className="mt-0.5 text-[0.65rem] text-[#6c6961]">
-                        Delivery charge may apply
-                      </p>
-                    ) : null}
+                    <span className="text-lg font-bold">
+                      Final payable total
+                    </span>
                   </div>
 
-                  <p className="text-right">
-                    <span className="mr-1.5 text-[0.65rem] font-semibold text-[#6c6961]">
-                      PKR
-                    </span>
-
-                    <strong className="serif text-3xl leading-none">
-                      {formatPrice(summary.subtotal).replace("Rs. ", "")}
-                    </strong>
+                  <p className="text-sm font-semibold sm:text-right">
+                    Unavailable until delivery and discount quote
                   </p>
                 </div>
+
+                <p className="mt-4 rounded-lg border border-[#c7a352] bg-[#fff9e9] p-3 text-sm">
+                  Online ordering is paused until we can show the exact delivery
+                  charge and payable total before submission.{" "}
+                  <a
+                    className="underline"
+                    href={siteConfig.contact.whatsappHref}
+                  >
+                    Ask Aylee on WhatsApp
+                  </a>{" "}
+                  for help.
+                </p>
 
                 {serverError ? (
                   <p
@@ -871,7 +896,7 @@ export function CheckoutForm() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled
                   className="button-primary mt-6 min-h-14 w-full !rounded-xl shadow-[0_12px_30px_rgb(23_22_19/0.18)]"
                 >
                   <AnimatePresence mode="wait" initial={false}>
@@ -921,18 +946,20 @@ export function CheckoutForm() {
                         className="inline-flex items-center gap-2"
                       >
                         <LockKeyhole size={16} />
-
-                        {selectedPayment === "COD"
-                          ? "Place COD order"
-                          : "Continue to secure payment"}
+                        Ordering temporarily unavailable
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </button>
 
                 <p className="mt-3 text-center text-[0.68rem] leading-5 text-[#6c6961]">
-                  By continuing, you acknowledge the currently published store
-                  policies.
+                  <Link href="/shipping-policy" className="underline">
+                    Shipping policy
+                  </Link>{" "}
+                  ·{" "}
+                  <Link href="/exchange-policy" className="underline">
+                    Exchange policy
+                  </Link>
                 </p>
 
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t border-[#d6d2c9] pt-5 text-center text-[0.6rem] font-semibold text-[#57544d]">

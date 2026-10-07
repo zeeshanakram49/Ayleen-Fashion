@@ -12,7 +12,6 @@ const shopLinks = [
 
 const helpLinks = [
   { href: "/contact", label: "Contact" },
-  { href: "/stores", label: "Stores" },
   { href: "/shipping-policy", label: "Shipping policy" },
   { href: "/exchange-policy", label: "Exchange policy" },
 ];
@@ -24,8 +23,7 @@ export function Footer() {
         <div>
           <Logo light />
           <p className="mt-6 max-w-sm text-sm leading-7 text-white/65">
-            Considered everyday clothing, available online and at Aylee stores
-            across Pakistan.
+            Considered everyday clothing, available online across Pakistan.
           </p>
         </div>
         <div>

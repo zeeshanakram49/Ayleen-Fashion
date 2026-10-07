@@ -112,7 +112,13 @@ export function ProductPurchase({ product }: { product: Product }) {
   function buyNow() {
     if (!validateSelection()) return;
 
-    add();
+    addItem(product, {
+      size,
+      color: selectedColor,
+      quantity,
+      openDrawer: false,
+    });
+    trackAddToCart();
 
     router.push("/checkout");
   }

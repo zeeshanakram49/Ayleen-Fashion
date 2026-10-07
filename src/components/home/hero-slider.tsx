@@ -18,6 +18,8 @@ type HeroSliderProps = {
   discountPercent?: number;
 };
 
+const SLIDE_INTERVAL_MS = 3500;
+
 function HeroVideo({
   src,
   poster,
@@ -62,12 +64,22 @@ function HeroVideo({
 
 export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [previousSlide, setPreviousSlide] = useState<number | null>(null);
   const [firstImageLoaded, setFirstImageLoaded] = useState(false);
+  const firstImageRef = useRef<HTMLImageElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const swipeStartRef = useRef({ x: 0, y: 0 });
   const trackpadAmountRef = useRef(0);
   const trackpadLockedRef = useRef(false);
   const trackpadEndTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (firstImageRef.current?.complete) {
+      // A cached image can finish before React attaches its load handler.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFirstImageLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (banners.length < 2 || !firstImageLoaded) return;
@@ -78,8 +90,9 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
     if (reducedMotion) return;
 
     const timer = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % banners.length);
-    }, 6000);
+      setPreviousSlide(activeSlide);
+      setActiveSlide((activeSlide + 1) % banners.length);
+    }, SLIDE_INTERVAL_MS);
 
     return () => window.clearInterval(timer);
   }, [activeSlide, banners.length, firstImageLoaded]);
@@ -94,10 +107,14 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
   );
 
   function moveSlide(direction: -1 | 1) {
-    if (banners.length < 2) return;
-    setActiveSlide(
-      (current) => (current + direction + banners.length) % banners.length,
-    );
+    if (banners.length < 2 || !firstImageLoaded) return;
+    showSlide((activeSlide + direction + banners.length) % banners.length);
+  }
+
+  function showSlide(index: number) {
+    if (index === activeSlide || !firstImageLoaded) return;
+    setPreviousSlide(activeSlide);
+    setActiveSlide(index);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLElement>) {
@@ -174,7 +191,7 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
   return (
     <section
       ref={sectionRef}
-      className="hero-shell relative h-[100svh] min-h-[600px] w-full touch-pan-y overflow-hidden overscroll-x-none bg-[#1b1b18] sm:min-h-[640px] md:min-h-[680px]"
+      className="hero-shell relative h-[100svh] min-h-[520px] w-full touch-pan-y overflow-hidden overscroll-x-none bg-[#1b1b18] sm:min-h-[640px] md:min-h-[680px]"
       aria-roledescription="carousel"
       aria-label="Aylee seasonal collection"
       onPointerDown={handlePointerDown}
@@ -192,10 +209,14 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
             return (
               <div
                 key={banner.id}
-                className={`hero-slide absolute inset-0 transition-[opacity,transform] duration-[1200ms] ease-[cubic-bezier(.22,1,.36,1)] ${
+                className={`hero-slide absolute inset-0 ${
                   index === activeSlide
-                    ? "z-[1] scale-100 opacity-100"
-                    : "scale-[1.025] opacity-0"
+                    ? previousSlide === null
+                      ? "hero-slide--initial"
+                      : "hero-slide--enter"
+                    : index === previousSlide
+                      ? "hero-slide--exit"
+                      : "hero-slide--parked"
                 }`}
                 aria-hidden={index !== activeSlide}
               >
@@ -209,15 +230,18 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
                   />
                 ) : banner.image ? (
                   <Image
+                    ref={index === 0 ? firstImageRef : undefined}
                     src={banner.image}
                     alt={banner.title || "Aylee seasonal collection"}
                     fill
+                    unoptimized
                     preload={index === 0}
                     fetchPriority={index === 0 ? "high" : "auto"}
                     quality={70}
                     draggable={false}
+                    loading={index === 0 ? undefined : "eager"}
                     sizes="100vw"
-                    className="hero-image hero-image-main object-cover object-center"
+                    className="hero-image hero-image-main object-cover object-left md:object-left"
                     onLoad={
                       index === 0 ? () => setFirstImageLoaded(true) : undefined
                     }
@@ -226,6 +250,28 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
                     }
                   />
                 ) : null}
+                <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/75 via-black/5 to-black/10 md:hidden" />
+                <div className="absolute inset-x-0 bottom-16 z-[2] px-5 pb-5 text-white md:hidden">
+                  <p className="text-[0.65rem] font-semibold tracking-[0.22em] text-white/75 uppercase">
+                    Aylee store
+                  </p>
+                  <h2 className="serif mt-2 max-w-[18rem] text-[2.6rem] leading-[0.9] tracking-[-0.04em] text-balance">
+                    {discountPercent > 0
+                      ? `Up to ${discountPercent}% off`
+                      : banner.title || "Everyday style"}
+                  </h2>
+                  <p className="mt-3 max-w-[18rem] text-xs leading-5 text-white/80">
+                    {banner.description ||
+                      "Easy essentials, made for every day."}
+                  </p>
+                  <Link
+                    href={discountPercent > 0 ? "/sale" : "/shop"}
+                    tabIndex={index === activeSlide ? 0 : -1}
+                    className="pointer-events-auto mt-5 inline-flex min-h-11 items-center bg-white px-5 text-[0.68rem] font-bold tracking-[0.16em] text-[#171613] uppercase shadow-lg"
+                  >
+                    {discountPercent > 0 ? "Shop the sale" : "Shop now"}
+                  </Link>
+                </div>
               </div>
             );
           })}
@@ -235,49 +281,11 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
       )}
       <h1 className="sr-only">Aylee seasonal collection</h1>
 
-      <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/75 via-black/5 to-black/10 md:hidden" />
-      <div className="absolute inset-x-0 bottom-20 z-[4] px-5 pb-5 text-white md:hidden">
-        <p className="text-[0.65rem] font-semibold tracking-[0.22em] text-white/75 uppercase">
-          Aylee store
-        </p>
-        <h2 className="serif mt-2 max-w-[18rem] text-[2.6rem] leading-[0.9] tracking-[-0.04em] text-balance">
-          {discountPercent > 0
-            ? `Up to ${discountPercent}% off`
-            : banners[activeSlide]?.title || "Everyday style"}
-        </h2>
-        <p className="mt-3 max-w-[18rem] text-xs leading-5 text-white/80">
-          {banners[activeSlide]?.description ||
-            "Easy essentials, made for every day."}
-        </p>
-        <Link
-          href={discountPercent > 0 ? "/sale" : "/shop"}
-          className="pointer-events-auto mt-5 inline-flex min-h-11 items-center bg-white px-5 text-[0.68rem] font-bold tracking-[0.16em] text-[#171613] uppercase shadow-lg"
-        >
-          {discountPercent > 0 ? "Shop the sale" : "Shop now"}
-        </Link>
-      </div>
-
-      {discountPercent > 0 ? (
-        <Link
-          href="/sale"
-          aria-label={`Shop sale with discounts up to ${discountPercent}% off`}
-          className="group absolute right-8 bottom-28 z-[4] hidden size-28 rotate-3 place-items-center rounded-full border border-white/45 bg-[#6f2d24] text-center text-white shadow-[0_18px_50px_rgb(0_0_0/0.28)] transition-transform duration-300 hover:scale-105 hover:rotate-0 md:grid lg:right-[max(2rem,calc((100vw-1440px)/2))]"
-        >
-          <span className="absolute inset-1.5 rounded-full border border-dashed border-white/45 transition-transform duration-700 group-hover:rotate-45" />
-          <span className="relative flex flex-col items-center uppercase">
-            <span className="text-[0.55rem] font-semibold tracking-[0.2em] text-white/75">
-              Up to
-            </span>
-            <strong className="serif mt-0.5 text-[1.45rem] leading-none tracking-[-0.04em] md:text-[2rem]">
-              {discountPercent}%
-            </strong>
-            <span className="mt-1 text-[0.58rem] font-bold tracking-[0.2em]">
-              Off · Shop
-            </span>
-          </span>
-        </Link>
-      ) : null}
-
+      <Link
+        href={discountPercent > 0 ? "/sale" : "/shop"}
+        aria-label={discountPercent > 0 ? "Shop the sale" : "Shop now"}
+        className="absolute inset-0 z-[3] hidden md:block"
+      />
       {banners.length > 1 ? (
         <div className="container-site absolute inset-x-0 top-3 z-[5] flex items-end justify-between text-white md:top-auto md:bottom-10">
           <div
@@ -292,7 +300,7 @@ export function HeroSlider({ banners, discountPercent = 0 }: HeroSliderProps) {
                 className="group/step flex-1 py-3 text-left"
                 aria-label={`Show banner ${index + 1}: ${banner.title}`}
                 aria-current={index === activeSlide ? "true" : undefined}
-                onClick={() => setActiveSlide(index)}
+                onClick={() => showSlide(index)}
               >
                 <span className="mb-2 block text-[0.62rem] tracking-[0.16em] text-white/65">
                   {String(index + 1).padStart(2, "0")}

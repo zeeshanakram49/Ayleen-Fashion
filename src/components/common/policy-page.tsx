@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { PolicyContent } from "@/config/content";
 import { siteConfig } from "@/config/site";
@@ -14,16 +13,6 @@ export function PolicyPage({ policy }: { policy: PolicyContent }) {
         <p className="eyebrow">Customer care</p>
         <h1 className="page-title mt-4">{policy.title}</h1>
         <p className="mt-5 text-[#6c6961]">{policy.description}</p>
-        {policy.status === "pending-confirmation" ? (
-          <div className="mt-8 flex gap-3 border border-[#c7a352] bg-[#fff9e9] p-4 text-sm">
-            <AlertCircle className="mt-0.5 shrink-0" size={18} />
-            <p>
-              <strong>Content pending confirmation.</strong> This page
-              distinguishes verified source statements from details that were
-              not publicly available.
-            </p>
-          </div>
-        ) : null}
         <div className="mt-12 space-y-10">
           {policy.sections.map((section) => (
             <section key={section.heading}>

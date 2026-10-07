@@ -5,14 +5,12 @@ import { CheckCircle2 } from "lucide-react";
 import { createMetadata } from "@/lib/seo/metadata";
 import { PurchaseEvent } from "@/components/analytics/purchase-event";
 
-export const metadata: Metadata =
-  createMetadata({
-    title: "Order confirmation",
-    description:
-      "Your Aylee order confirmation.",
-    path: "/order-confirmation",
-    noIndex: true,
-  });
+export const metadata: Metadata = createMetadata({
+  title: "Order confirmation",
+  description: "Your Aylee order confirmation.",
+  path: "/order-confirmation",
+  noIndex: true,
+});
 
 export default async function OrderConfirmationPage({
   params,
@@ -23,15 +21,12 @@ export default async function OrderConfirmationPage({
 }) {
   const { orderId } = await params;
 
-  const decodedOrderId =
-    decodeURIComponent(orderId);
+  const decodedOrderId = decodeURIComponent(orderId);
 
   return (
     <>
       {/* Meta Purchase Event */}
-      <PurchaseEvent
-        orderId={decodedOrderId}
-      />
+      <PurchaseEvent orderId={decodedOrderId} />
 
       <div className="container-site section-pad flex min-h-[60vh] items-center justify-center">
         <div className="max-w-2xl text-center">
@@ -41,36 +36,22 @@ export default async function OrderConfirmationPage({
             className="mx-auto text-[#28633b]"
           />
 
-          <p className="eyebrow mt-7">
-            Order received
-          </p>
+          <p className="eyebrow mt-7">Order received</p>
 
-          <h1 className="page-title mt-4">
-            Thank you.
-          </h1>
+          <h1 className="page-title mt-4">Thank you.</h1>
 
           <p className="mt-6 text-[#6c6961]">
             Your order reference is{" "}
-            <strong className="text-[#171613]">
-              {decodedOrderId}
-            </strong>
-            . Confirmation and fulfilment
-            details are provided by
-            Aylee&apos;s commerce backend.
+            <strong className="text-[#171613]">{decodedOrderId}</strong>. Aylee
+            will contact you with confirmation and delivery details.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/account/orders"
-              className="button-primary"
-            >
+            <Link href="/account/orders" className="button-primary">
               View orders
             </Link>
 
-            <Link
-              href="/shop"
-              className="button-secondary"
-            >
+            <Link href="/shop" className="button-secondary">
               Continue shopping
             </Link>
           </div>

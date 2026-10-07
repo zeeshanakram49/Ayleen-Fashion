@@ -34,9 +34,16 @@ export type Product = {
   stock: number;
   sizes: string[];
   sizeChart: string | null;
+  fabricComposition?: string | null;
+  fit?: string | null;
+  washingInstructions?: string | null;
+  modelSize?: string | null;
+  video?: string | null;
   colors: string[];
   colorOptions: ProductColor[];
-  category: Pick<Category, "id" | "slug" | "name"> | null;
+  category:
+    | (Pick<Category, "id" | "slug" | "name"> & { gender?: string | null })
+    | null;
   sku: string | null;
   brand: string;
   isFeatured: boolean;
@@ -69,6 +76,7 @@ export type CartLine = {
 export type ProductQuery = {
   query?: string;
   category?: string;
+  gender?: string;
   sort?: "featured" | "newest" | "price-asc" | "price-desc" | "best-selling";
   availability?: "in-stock" | "out-of-stock";
   sale?: boolean;

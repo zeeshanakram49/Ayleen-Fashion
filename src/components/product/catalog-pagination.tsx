@@ -25,13 +25,13 @@ export function CatalogPagination({
   currentPage: number;
   totalPages: number;
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() || "/shop";
   const searchParams = useSearchParams();
 
   if (totalPages <= 1) return null;
 
   const hrefFor = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || "");
 
     if (page === 1) {
       params.delete("page");

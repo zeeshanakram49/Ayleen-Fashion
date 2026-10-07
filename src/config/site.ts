@@ -24,29 +24,11 @@ export const siteConfig = {
     facebook: "",
     tiktok: "",
   },
-  stores: [
-    {
-      city: "Lahore",
-      locations: ["Gulberg II / Flagship", "Emporium Mall / Level 3"],
-    },
-    {
-      city: "Islamabad",
-      locations: ["F-10 Markaz / Retail Store", "Centaurus Mall / Level 2"],
-    },
-    {
-      city: "Karachi",
-      locations: [
-        "Dolmen Mall Clifton / Ground Floor",
-        "Lucky One Mall / Ground Floor",
-      ],
-    },
-  ],
   navigation: [
-    { href: "/shop", label: "Men" },
+    { href: "/shop?gender=male", label: "Men" },
     { href: "/shop", label: "Shop" },
     { href: "/collections", label: "Collections" },
     { href: "/sale", label: "Sale" },
-    { href: "/stores", label: "Stores" },
   ],
 } as const;
 

@@ -30,8 +30,8 @@ const benefits = [
   },
   {
     icon: RefreshCcw,
-    title: "Exchange support",
-    detail: "Published support for unused articles with original tags.",
+    title: "Exchange help",
+    detail: "Contact our team before sending an item back.",
   },
   {
     icon: CircleCheck,
@@ -55,6 +55,8 @@ export default async function HomePage() {
   const saleProducts = products
     .filter((product) => Boolean(product.compareAtPrice))
     .slice(0, 4);
+  const newProducts = products.slice(0, 4);
+  const featuredProducts = products.slice(4, 8);
   const highestDiscount = products.reduce(
     (highest, product) =>
       Math.max(
@@ -156,8 +158,8 @@ export default async function HomePage() {
             description="Recently added pieces from the live Aylee catalog."
             link={{ href: "/new-arrivals", label: "View new arrivals" }}
           />
-          {products.length ? (
-            <ProductGrid products={products.slice(0, 4)} />
+          {newProducts.length ? (
+            <ProductGrid products={newProducts} />
           ) : (
             <p className="py-12 text-center text-[#6c6961]">
               New arrivals are syncing. Please check back shortly.
@@ -166,20 +168,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-pad container-site">
-        <SectionHeading
-          eyebrow="Aylee selection"
-          title="Featured pieces"
-          link={{ href: "/shop", label: "Shop all" }}
-        />
-        {products.length ? (
-          <ProductGrid products={products} />
-        ) : (
-          <p className="py-12 text-center text-[#6c6961]">
-            Products are temporarily unavailable.
-          </p>
-        )}
-      </section>
+      {featuredProducts.length ? (
+        <section className="section-pad container-site">
+          <SectionHeading
+            eyebrow="Aylee selection"
+            title="Featured pieces"
+            link={{ href: "/shop", label: "Shop all" }}
+          />
+          <ProductGrid products={featuredProducts} />
+        </section>
+      ) : null}
 
       {saleProducts.length ? (
         <section className="section-pad relative overflow-hidden bg-[#28312c] text-white">
@@ -195,9 +193,9 @@ export default async function HomePage() {
               link={{ href: "/sale", label: "Shop sale" }}
               inverted
             />
-            <div className="rounded-sm bg-white p-4 text-[#171613] md:p-8">
-              <ProductGrid products={saleProducts} />
-            </div>
+            <p className="max-w-xl text-sm text-white/80">
+              Explore all current reductions in one place.
+            </p>
           </div>
         </section>
       ) : null}
@@ -230,23 +228,6 @@ export default async function HomePage() {
             </p>
             <p className="mt-3 text-xs tracking-[0.3em] uppercase">Pakistan</p>
           </Parallax>
-        </div>
-      </section>
-
-      <section className="section-pad container-site">
-        <SectionHeading
-          eyebrow="Customer feedback"
-          title="Verified reviews, when available"
-          description="The current backend does not publish verified review data. Reviews will appear here only when authentic purchase-linked feedback is available."
-        />
-        <div
-          data-reveal
-          className="quote-panel border border-[#dedbd2] bg-[#f7f5f0] p-8 md:p-12"
-        >
-          <p className="serif max-w-3xl text-3xl leading-snug md:text-5xl">
-            No fabricated ratings. No borrowed praise. Just verified customer
-            voices when the data is ready.
-          </p>
         </div>
       </section>
 
@@ -286,31 +267,6 @@ export default async function HomePage() {
               <NewsletterForm id="home-email" dark />
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="section-pad container-site">
-        <SectionHeading
-          eyebrow="Visit Aylee"
-          title="Online and in stores"
-          description="Published storefront locations across Lahore, Islamabad, and Karachi."
-          link={{ href: "/stores", label: "View all stores" }}
-        />
-        <div
-          data-reveal
-          data-stagger
-          className="stores-grid grid gap-px bg-[#dedbd2] md:grid-cols-3"
-        >
-          {siteConfig.stores.map((store) => (
-            <article key={store.city} className="bg-white p-7 md:p-9">
-              <h3 className="serif text-4xl">{store.city}</h3>
-              <ul className="mt-5 space-y-2 text-sm text-[#6c6961]">
-                {store.locations.map((location) => (
-                  <li key={location}>{location}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
         </div>
       </section>
     </>

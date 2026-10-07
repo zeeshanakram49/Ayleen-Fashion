@@ -26,7 +26,7 @@ export default function CheckoutPage() {
             <p className="eyebrow">Secure checkout</p>
             <h1 className="page-title mt-3">Complete your order</h1>
             <p className="mt-4 max-w-xl text-[#6c6961]">
-              Just a few details and your Aylee order will be on its way.
+              Review your details and order summary before placing an order.
             </p>
           </div>
           <div className="flex items-center gap-2 text-[0.68rem] font-bold tracking-[0.08em] uppercase">

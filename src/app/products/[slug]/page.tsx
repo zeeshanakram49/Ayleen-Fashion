@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { CheckCircle2, ShieldCheck, Truck } from "lucide-react";
 
@@ -66,6 +67,14 @@ export default async function ProductPage({
     getRelatedProducts(product),
     getProducts(),
   ]);
+  const otherVersions = catalog
+    .filter(
+      (item) =>
+        item.id !== product.id &&
+        item.name === product.name &&
+        item.category?.id === product.category?.id,
+    )
+    .slice(0, 8);
 
   const productUrl = `${siteConfig.url}/products/${product.slug}`;
 
@@ -124,7 +133,7 @@ export default async function ProductPage({
 
       {/* Meta Pixel - Product View Tracking */}
       <ProductViewEvent
-       contentId={String(product.id)}
+        contentId={String(product.id)}
         contentName={product.name}
         value={Number(product.price)}
         currency={product.currency || "PKR"}
@@ -160,16 +169,29 @@ export default async function ProductPage({
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.7fr)] lg:gap-16">
           {/* Product Images */}
-          <ProductGallery
-            images={product.images}
-            productName={product.name}
-          />
+          <div className="min-w-0">
+            <ProductGallery
+              images={product.images}
+              productName={product.name}
+            />
+            {product.video ? (
+              <div className="mt-5">
+                <p className="mb-2 text-sm font-semibold">Product video</p>
+                <video
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full"
+                  src={product.video}
+                  aria-label={`${product.name} product video`}
+                />
+              </div>
+            ) : null}
+          </div>
 
           {/* Product Information */}
           <div className="lg:sticky lg:top-32 lg:self-start">
-            <p className="eyebrow">
-              {product.category?.name || "Aylee"}
-            </p>
+            <p className="eyebrow">{product.category?.name || "Aylee"}</p>
 
             <h1 className="serif mt-3 text-4xl leading-none tracking-[-0.04em] md:text-6xl">
               {product.name}
@@ -195,9 +217,7 @@ export default async function ProductPage({
             {/* Stock */}
             <p
               className={`mt-4 text-sm font-medium ${
-                product.isAvailable
-                  ? "text-[#28633b]"
-                  : "text-[#8a2626]"
+                product.isAvailable ? "text-[#28633b]" : "text-[#8a2626]"
               }`}
             >
               {product.isAvailable
@@ -215,6 +235,50 @@ export default async function ProductPage({
             {/* Purchase Component */}
             <ProductPurchase product={product} />
 
+            {otherVersions.length ? (
+              <div className="mt-6">
+                <p className="mb-3 text-sm font-semibold">
+                  Explore other versions
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {otherVersions.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/products/${item.slug}`}
+                      className="block size-14 overflow-hidden border border-[#dedbd2]"
+                      aria-label={`View ${item.name} version ${item.id}`}
+                      title={`View ${item.name}`}
+                    >
+                      <span className="relative block size-full">
+                        {item.images[0] ? (
+                          <Image
+                            src={
+                              item.images[0].thumbnailUrl || item.images[0].url
+                            }
+                            alt=""
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                          />
+                        ) : null}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <p className="mt-4 text-sm text-[#57544d]">
+              Cash on Delivery available.{" "}
+              <a
+                className="underline underline-offset-4"
+                href={`${siteConfig.contact.whatsappHref}?text=${encodeURIComponent(`Hi Aylee, I need size help for ${product.name}: ${productUrl}`)}`}
+              >
+                Ask for size help on WhatsApp
+              </a>
+              .
+            </p>
+
             {/* Delivery / Exchange / Security */}
             <div className="mt-8 grid gap-3 border-y border-[#dedbd2] py-6 text-sm">
               <p className="flex items-center gap-3">
@@ -225,8 +289,8 @@ export default async function ProductPage({
 
               <p className="flex items-center gap-3">
                 <CheckCircle2 size={18} strokeWidth={1.5} />
-                Published 7-day exchange support for eligible unused
-                articles.
+                Need an exchange? Contact us before returning an unused item
+                with its tags.
               </p>
 
               <p className="flex items-center gap-3">
@@ -238,58 +302,54 @@ export default async function ProductPage({
             {/* Product Information Sections */}
             <div className="divide-y divide-[#dedbd2]">
               <details className="py-5" open>
-                <summary className="font-semibold">
-                  Product details
-                </summary>
+                <summary className="font-semibold">Product details</summary>
 
                 <p className="mt-3 text-sm leading-7 text-[#6c6961]">
                   {product.description ||
-                    "No additional product details are currently published by the commerce backend."}
+                    "Ask Aylee for more information about this item."}
                 </p>
+                {(
+                  [
+                    ["Fabric", product.fabricComposition],
+                    ["Fit", product.fit],
+                    ["Care", product.washingInstructions],
+                    ["Model wears", product.modelSize],
+                  ] as const
+                )
+                  .filter(([, value]) => Boolean(value))
+                  .map(([label, value]) => (
+                    <p key={label} className="mt-2 text-sm text-[#57544d]">
+                      <strong>{label}:</strong> {value}
+                    </p>
+                  ))}
               </details>
 
               <details className="py-5">
-                <summary className="font-semibold">
-                  Shipping
-                </summary>
+                <summary className="font-semibold">Shipping</summary>
 
                 <p className="mt-3 text-sm leading-7 text-[#6c6961]">
-                  Nationwide delivery is advertised.{" "}
+                  Nationwide delivery. Free on orders of{" "}
+                  {formatPrice(siteConfig.freeShippingThreshold)} or more.{" "}
                   <Link
                     href="/shipping-policy"
                     className="underline underline-offset-4"
                   >
-                    Read the published summary.
+                    Shipping details
                   </Link>
                 </p>
               </details>
 
               <details className="py-5">
-                <summary className="font-semibold">
-                  Exchanges
-                </summary>
+                <summary className="font-semibold">Exchanges</summary>
 
                 <p className="mt-3 text-sm leading-7 text-[#6c6961]">
-                  Exchange support is advertised for eligible unused
-                  articles with original tags.{" "}
+                  Contact Aylee before sending an item back.{" "}
                   <Link
                     href="/exchange-policy"
                     className="underline underline-offset-4"
                   >
-                    Read the published summary.
+                    Exchange information
                   </Link>
-                </p>
-              </details>
-
-              <details className="py-5">
-                <summary className="font-semibold">
-                  Reviews
-                </summary>
-
-                <p className="mt-3 text-sm leading-7 text-[#6c6961]">
-                  No verified review data is published for this product.
-                  A rating is not displayed until authentic review data
-                  is available.
                 </p>
               </details>
             </div>
@@ -309,10 +369,7 @@ export default async function ProductPage({
       ) : null}
 
       {/* Recently Viewed */}
-      <RecentlyViewed
-        currentId={product.id}
-        products={catalog}
-      />
+      <RecentlyViewed currentId={product.id} products={catalog} />
     </>
   );
 }

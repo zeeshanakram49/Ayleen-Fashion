@@ -19,11 +19,17 @@ export default async function ShopPage({
 }: {
   searchParams: Promise<CatalogSearchParams>;
 }) {
+  const params = await searchParams;
+  const men = params.gender === "male";
   return (
     <CatalogView
-      title="Shop all"
-      description="The complete current Aylee catalog, with live prices and availability."
-      searchParams={await searchParams}
+      title={men ? "Men" : "Shop all"}
+      description={
+        men
+          ? "Aylee menswear, with current prices, sizes and availability."
+          : "The complete current Aylee catalog, with live prices and availability."
+      }
+      searchParams={params}
     />
   );
 }

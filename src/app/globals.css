@@ -364,7 +364,7 @@ summary {
 }
 
 .hero-media-frame .hero-image-main {
-  object-position: center 12%;
+  object-position: left center;
 }
 
 .hero-editorial-title {
@@ -387,6 +387,51 @@ summary {
   transform-style: preserve-3d;
 }
 
+.hero-slide--initial,
+.hero-slide--enter {
+  z-index: 2;
+  transform: translate3d(0, 0, 0);
+}
+
+.hero-slide--enter {
+  animation: hero-slide-in 650ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+.hero-slide--exit {
+  z-index: 1;
+  transform: translate3d(-100%, 0, 0);
+  animation: hero-slide-out 650ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+.hero-slide--parked {
+  transform: translate3d(100%, 0, 0);
+}
+
+@keyframes hero-slide-in {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-slide-out {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide--enter,
+  .hero-slide--exit {
+    animation: none;
+  }
+}
+
 .hero-image {
   transform: none;
 }
@@ -398,8 +443,7 @@ summary {
 
   .hero-shell {
     width: 100%;
-    height: calc(100svh - 5.75rem) !important;
-    min-height: 34rem !important;
+    height: max(34rem, calc(100svh - 5.75rem)) !important;
     aspect-ratio: auto;
     background: #1b1b18;
     perspective: none;

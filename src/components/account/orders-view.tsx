@@ -78,7 +78,7 @@ export function OrdersView() {
       <div className="border border-[#dedbd2] bg-[#f7f5f0] p-8 text-center">
         <h2 className="serif text-3xl">No orders found</h2>
         <p className="mt-2 text-sm text-[#6c6961]">
-          Orders from the commerce backend will appear here.
+          Your orders will appear here.
         </p>
         <Link href="/shop" className="button-primary mt-6">
           Start shopping

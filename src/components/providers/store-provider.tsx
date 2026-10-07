@@ -12,7 +12,12 @@ import {
 import type { CartLine, Product } from "@/types/commerce";
 import { cartLineKey, cartSummary } from "@/lib/commerce/cart";
 
-type AddOptions = { size?: string; color?: string; quantity?: number };
+type AddOptions = {
+  size?: string;
+  color?: string;
+  quantity?: number;
+  openDrawer?: boolean;
+};
 
 type StoreContextValue = {
   lines: CartLine[];
@@ -163,7 +168,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           : entry,
       );
     });
-    setDrawerOpen(true);
+    if (options.openDrawer !== false) setDrawerOpen(true);
     void syncCart("POST", { productId: product.id, size, color, quantity });
   }, []);
 

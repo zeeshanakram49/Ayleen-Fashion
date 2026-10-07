@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       message:
-        "Newsletter signup is pending backend configuration. Your address was not stored.",
+        "Newsletter signup is temporarily unavailable. Please try again later.",
     },
     { status: 202 },
   );

@@ -172,12 +172,19 @@ function categoryForProduct(
   const match = categories.find(
     (category) => category.id === id || category.name === name,
   );
-  if (match) return { id: match.id, slug: match.slug, name: match.name };
+  if (match)
+    return {
+      id: match.id,
+      slug: match.slug,
+      name: match.name,
+      gender: match.gender,
+    };
   if (!id && !name) return null;
   return {
     id: id || slugify(name),
     slug: slugify(name || id),
     name: name || "Collection",
+    gender: asString(value.gender) || null,
   };
 }
 
@@ -238,6 +245,16 @@ export function normalizeProduct(
     sizes: [...new Set(sizes)],
     sizeChart:
       normalizeImageUrl(asString(value.size_chart ?? value.sizeChart)) || null,
+    fabricComposition:
+      stripHtml(asString(value.fabric_composition ?? value.fabric)) || null,
+    fit: stripHtml(asString(value.fit)) || null,
+    washingInstructions:
+      stripHtml(
+        asString(value.washing_instructions ?? value.care_instructions),
+      ) || null,
+    modelSize:
+      stripHtml(asString(value.model_size ?? value.model_wears)) || null,
+    video: asString(value.video_url ?? value.product_video) || null,
     colors: [...new Set(colors)],
     colorOptions,
     category,
@@ -354,6 +371,12 @@ export async function getProducts(
       (product) =>
         product.category?.slug === query.category ||
         product.category?.id === query.category,
+    );
+  }
+  if (query.gender) {
+    products = products.filter(
+      (product) =>
+        product.category?.gender?.toLowerCase() === query.gender!.toLowerCase(),
     );
   }
   if (query.sale)

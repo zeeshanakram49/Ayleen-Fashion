@@ -39,98 +39,98 @@ export function CartPageView() {
         </div>
         <ul className="divide-y divide-[#dedbd2] border-y border-[#dedbd2]">
           <AnimatePresence initial={false}>
-          {lines.map((line, index) => (
-            <motion.li
-              key={line.key}
-              layout
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -24, transition: { duration: 0.25 } }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.05,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="grid grid-cols-[96px_1fr] gap-4 py-6 sm:grid-cols-[132px_1fr] sm:gap-6"
-            >
-              <Link
-                href={`/products/${line.slug}`}
-                className="relative aspect-[4/5] bg-[#efede7]"
+            {lines.map((line, index) => (
+              <motion.li
+                key={line.key}
+                layout
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -24, transition: { duration: 0.25 } }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.05,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="grid grid-cols-[96px_1fr] gap-4 py-6 sm:grid-cols-[132px_1fr] sm:gap-6"
               >
-                {line.image ? (
-                  <Image
-                    src={line.image}
-                    alt={line.name}
-                    fill
-                    unoptimized
-                    sizes="132px"
-                    className="object-cover"
-                  />
-                ) : null}
-              </Link>
-              <div className="flex min-w-0 flex-col justify-between">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-medium">
-                      <Link
-                        href={`/products/${line.slug}`}
-                        className="hover:underline"
+                <Link
+                  href={`/products/${line.slug}`}
+                  className="relative aspect-[4/5] bg-[#efede7]"
+                >
+                  {line.image ? (
+                    <Image
+                      src={line.image}
+                      alt={line.name}
+                      fill
+                      unoptimized
+                      sizes="132px"
+                      className="object-cover"
+                    />
+                  ) : null}
+                </Link>
+                <div className="flex min-w-0 flex-col justify-between">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-medium">
+                        <Link
+                          href={`/products/${line.slug}`}
+                          className="hover:underline"
+                        >
+                          {line.name}
+                        </Link>
+                      </p>
+                      <p className="mt-1 text-xs text-[#6c6961]">
+                        {[line.size && `Size ${line.size}`, line.color]
+                          .filter(Boolean)
+                          .join(" · ") || "Standard"}
+                      </p>
+                    </div>
+                    <strong className="text-sm whitespace-nowrap">
+                      {formatPrice(line.price * line.quantity)}
+                    </strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-10 items-center border border-[#dedbd2]">
+                      <motion.button
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(line.key, line.quantity - 1)
+                        }
+                        whileTap={{ scale: 0.9 }}
+                        className="h-full px-3"
+                        aria-label={`Decrease ${line.name} quantity`}
                       >
-                        {line.name}
-                      </Link>
-                    </p>
-                    <p className="mt-1 text-xs text-[#6c6961]">
-                      {[line.size && `Size ${line.size}`, line.color]
-                        .filter(Boolean)
-                        .join(" · ") || "Standard"}
-                    </p>
-                  </div>
-                  <strong className="text-sm whitespace-nowrap">
-                    {formatPrice(line.price * line.quantity)}
-                  </strong>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex h-10 items-center border border-[#dedbd2]">
+                        <Minus size={14} />
+                      </motion.button>
+                      <span className="min-w-9 text-center text-sm">
+                        {line.quantity}
+                      </span>
+                      <motion.button
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(line.key, line.quantity + 1)
+                        }
+                        whileTap={{ scale: 0.9 }}
+                        className="h-full px-3"
+                        aria-label={`Increase ${line.name} quantity`}
+                        disabled={line.quantity >= line.stock}
+                      >
+                        <Plus size={14} />
+                      </motion.button>
+                    </div>
                     <motion.button
                       type="button"
-                      onClick={() =>
-                        updateQuantity(line.key, line.quantity - 1)
-                      }
+                      onClick={() => removeItem(line.key)}
                       whileTap={{ scale: 0.9 }}
-                      className="h-full px-3"
-                      aria-label={`Decrease ${line.name} quantity`}
+                      className="p-2 text-[#6c6961]"
+                      aria-label={`Remove ${line.name}`}
                     >
-                      <Minus size={14} />
-                    </motion.button>
-                    <span className="min-w-9 text-center text-sm">
-                      {line.quantity}
-                    </span>
-                    <motion.button
-                      type="button"
-                      onClick={() =>
-                        updateQuantity(line.key, line.quantity + 1)
-                      }
-                      whileTap={{ scale: 0.9 }}
-                      className="h-full px-3"
-                      aria-label={`Increase ${line.name} quantity`}
-                      disabled={line.quantity >= line.stock}
-                    >
-                      <Plus size={14} />
+                      <Trash2 size={18} />
                     </motion.button>
                   </div>
-                  <motion.button
-                    type="button"
-                    onClick={() => removeItem(line.key)}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-2 text-[#6c6961]"
-                    aria-label={`Remove ${line.name}`}
-                  >
-                    <Trash2 size={18} />
-                  </motion.button>
                 </div>
-              </div>
-            </motion.li>
-          ))}
+              </motion.li>
+            ))}
           </AnimatePresence>
         </ul>
       </div>
@@ -178,10 +178,10 @@ export function CartPageView() {
             </button>
           </div>
           <p id="coupon-help" className="mt-2 text-xs text-[#6c6961]">
-            Coupon validation will appear when enabled by the commerce backend.
+            Coupons are currently unavailable.
           </p>
         </div>
-        <MagneticButton className="block w-full mt-7" strength={0.2}>
+        <MagneticButton className="mt-7 block w-full" strength={0.2}>
           <Link href="/checkout" className="button-primary w-full">
             <ShoppingBag size={16} /> Continue to checkout
           </Link>
