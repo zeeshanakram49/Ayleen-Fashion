@@ -47,6 +47,14 @@ describe("commerce utilities", () => {
       subtotal: 4050,
       remainingForFreeShipping: 950,
       hasFreeShipping: false,
+      shippingFee: 250,
+      total: 4300,
+    }));
+  it("waives delivery above the free-shipping threshold", () =>
+    expect(cartSummary([{ ...line, quantity: 3 }])).toMatchObject({
+      subtotal: 6075,
+      shippingFee: 0,
+      total: 6075,
     }));
 });
 
@@ -68,10 +76,7 @@ describe("product availability and variants", () => {
   });
   it("accepts the only available colour without a manual choice", () => {
     expect(
-      isVariantSelectionComplete(
-        { sizes: [], colors: ["Black"] },
-        {},
-      ),
+      isVariantSelectionComplete({ sizes: [], colors: ["Black"] }, {}),
     ).toBe(true);
   });
 });

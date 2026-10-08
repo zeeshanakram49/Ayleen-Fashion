@@ -28,7 +28,6 @@ import {
 } from "@/lib/validation/schemas";
 import { formatPrice } from "@/lib/utils/format";
 import { Spinner } from "@/components/motion/spinner";
-import { siteConfig } from "@/config/site";
 
 declare global {
   interface Window {
@@ -37,12 +36,6 @@ declare global {
 }
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-// Replace only after the commerce backend provides a pre-order quote that
-// includes delivery, discounts and the final amount for the selected address.
-function hasVerifiedCheckoutQuote(): boolean {
-  return false;
-}
 
 const PAYMENT_METHODS = [
   {
@@ -262,15 +255,11 @@ export function CheckoutForm() {
   }
 
   const selectedPayment = watch("payment");
+  const shippingFee = summary.shippingFee;
+  const payableTotal = summary.total;
 
   async function submit(values: CheckoutFormInput) {
-    if (!hasVerifiedCheckoutQuote()) {
-      setServerError(
-        "Exact delivery and discount quotes are required before online ordering can resume.",
-      );
-      return;
-    }
-
+    setServerError("");
     const payload: CheckoutInput = {
       ...values,
 
@@ -309,12 +298,12 @@ export function CheckoutForm() {
 
       /*
        * Use backend order total when available.
-       * Fallback to current cart subtotal.
+       * Fallback to the displayed payable total.
        */
       const purchaseValue =
         typeof body.total === "number" && body.total > 0
           ? body.total
-          : Number(summary.subtotal);
+          : payableTotal;
 
       /*
        * Save purchase information temporarily.
@@ -413,6 +402,7 @@ export function CheckoutForm() {
   return (
     <form
       onSubmit={handleSubmit(submit)}
+      noValidate
       className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(380px,460px)] lg:items-start xl:gap-14"
     >
       <div className="space-y-5">
@@ -439,10 +429,11 @@ export function CheckoutForm() {
             </label>
 
             <label className="text-sm">
-              Email
+              Email <span className="text-[#a82020]">*</span>
               <input
                 {...register("email")}
                 type="email"
+                required
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
                 autoComplete="email"
                 placeholder="you@example.com"
@@ -452,10 +443,11 @@ export function CheckoutForm() {
             </label>
 
             <label className="text-sm">
-              Phone
+              Phone <span className="text-[#a82020]">*</span>
               <input
                 {...register("phone")}
                 type="tel"
+                required
                 className="field mt-2 !rounded-xl focus:border-[#171613] focus:outline-none"
                 autoComplete="tel"
                 placeholder="03XX XXXXXXX"
@@ -557,9 +549,7 @@ export function CheckoutForm() {
 
             <span className="flex items-center justify-end gap-1.5 text-right text-xs font-bold sm:text-sm">
               <span>
-                {summary.hasFreeShipping
-                  ? "Free above threshold"
-                  : "Rate unavailable"}
+                {summary.hasFreeShipping ? "Free" : formatPrice(shippingFee)}
               </span>
 
               {summary.hasFreeShipping ? (
@@ -838,7 +828,7 @@ export function CheckoutForm() {
 
                   <div className="flex justify-between gap-4">
                     <span className="text-[#57544d]">Discount</span>
-                    <span>Requires order quote</span>
+                    <span>{formatPrice(0)}</span>
                   </div>
 
                   <div className="flex justify-between gap-4">
@@ -855,8 +845,8 @@ export function CheckoutForm() {
                       }
                     >
                       {summary.hasFreeShipping
-                        ? "Free above threshold"
-                        : "Rate unavailable"}
+                        ? "Free"
+                        : formatPrice(shippingFee)}
                     </span>
                   </div>
                 </div>
@@ -868,22 +858,10 @@ export function CheckoutForm() {
                     </span>
                   </div>
 
-                  <p className="text-sm font-semibold sm:text-right">
-                    Unavailable until delivery and discount quote
+                  <p className="text-lg font-bold sm:text-right">
+                    {formatPrice(payableTotal)}
                   </p>
                 </div>
-
-                <p className="mt-4 rounded-lg border border-[#c7a352] bg-[#fff9e9] p-3 text-sm">
-                  Online ordering is paused until we can show the exact delivery
-                  charge and payable total before submission.{" "}
-                  <a
-                    className="underline"
-                    href={siteConfig.contact.whatsappHref}
-                  >
-                    Ask Aylee on WhatsApp
-                  </a>{" "}
-                  for help.
-                </p>
 
                 {serverError ? (
                   <p
@@ -896,7 +874,7 @@ export function CheckoutForm() {
 
                 <button
                   type="submit"
-                  disabled
+                  disabled={isSubmitting}
                   className="button-primary mt-6 min-h-14 w-full !rounded-xl shadow-[0_12px_30px_rgb(23_22_19/0.18)]"
                 >
                   <AnimatePresence mode="wait" initial={false}>
@@ -946,7 +924,7 @@ export function CheckoutForm() {
                         className="inline-flex items-center gap-2"
                       >
                         <LockKeyhole size={16} />
-                        Ordering temporarily unavailable
+                        Place order
                       </motion.span>
                     )}
                   </AnimatePresence>

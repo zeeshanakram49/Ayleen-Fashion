@@ -2,8 +2,21 @@ import { z } from "zod";
 
 export const checkoutSchema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(100),
-  email: z.email("Enter a valid email address"),
-  phone: z.string().trim().min(10, "Enter a valid phone number").max(20),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Enter your email address")
+    .pipe(z.email("Enter a valid email address")),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Enter your phone number")
+    .max(25)
+    .refine(
+      (value) =>
+        /^(?:03|\+923|00923|923)\d{9}$/.test(value.replace(/[\s()-]/g, "")),
+      "Enter a valid Pakistani mobile number (03XX XXXXXXX)",
+    ),
   address: z.string().trim().min(8, "Enter your complete address").max(250),
   address2: z.string().trim().max(250).optional(),
   city: z.string().trim().min(2, "Enter your city").max(80),

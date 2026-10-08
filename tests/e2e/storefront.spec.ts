@@ -80,6 +80,10 @@ test("product variant, cart quantity, removal, and checkout journey", async ({
   await orderSummaryToggle.click();
   await expect(page.locator("#checkout-order-summary")).toBeVisible();
   await expect(page.getByText("VISA", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Place order" })).toBeEnabled();
+  await expect(
+    page.getByText("Rs. 250", { exact: true }).first(),
+  ).toBeVisible();
 });
 
 test("mobile menu and policy pages are accessible", async ({ page }) => {
