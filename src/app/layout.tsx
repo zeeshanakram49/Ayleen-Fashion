@@ -8,7 +8,8 @@ import { SiteMotionConfig } from "@/components/motion/motion-config";
 import { siteConfig } from "@/config/site";
 import { getCategories } from "@/lib/commerce/collections";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
-import { BackToTop } from "@/components/common/back-to-top";
+import { WhatsAppButton } from "@/components/common/whatsapp-button";
+import { HelpChat } from "@/components/common/help-chat";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -78,7 +79,8 @@ export default async function RootLayout({
             <Header categories={menuCategories} />
             <main id="main-content">{children}</main>
             <Footer />
-            <BackToTop />
+            <WhatsAppButton />
+            <HelpChat />
             <CartDrawer />
             <MetaPixel />
           </SiteMotionConfig>

@@ -769,6 +769,21 @@ summary {
   }
 }
 
+.whatsapp-button-icon {
+  animation: whatsapp-nudge 4s ease-in-out infinite;
+}
+
+@keyframes whatsapp-nudge {
+  0%,
+  20%,
+  100% {
+    transform: scale(1);
+  }
+  8% {
+    transform: scale(1.15);
+  }
+}
+
 @media (min-width: 768px) {
   .container-site {
     width: min(100% - 4rem, 1440px);

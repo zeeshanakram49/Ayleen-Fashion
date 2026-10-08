@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.1.22"],
+  allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.1.22", "192.168.1.34"],
   images: {
     unoptimized: process.env.PLAYWRIGHT_TEST === "1",
     formats: ["image/avif", "image/webp"],
